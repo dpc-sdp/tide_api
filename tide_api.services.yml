@@ -1,0 +1,19 @@
+services:
+  tide_api.helper:
+    class: Drupal\tide_api\TideApiHelper
+    arguments: [ '@path.alias_manager', '@entity_type.manager', '@jsonapi.resource_type.repository', '@config.factory' ]
+  tide_api.version_subscriber:
+    class: Drupal\tide_api\EventSubscriber\TideApiVersionSubscriber
+    tags:
+      - {name: event_subscriber}
+  tide_api.route_alter_subscriber:
+    class: Drupal\tide_api\EventSubscriber\TideApiRouteAlterSubscriber
+    arguments:
+      - '@config.factory'
+    tags:
+      - {name: event_subscriber}
+  serializer.normalizer.config_entity.tide_api:
+    class: Drupal\tide_api\Normalizer\ConfigEntityNormalizer
+    arguments: ['@jsonapi.link_manager', '@jsonapi.resource_type.repository', '@entity_type.manager', '@module_handler' ]
+    tags:
+      - { name: jsonapi_normalizer_do_not_use_removal_imminent, priority: 23 }

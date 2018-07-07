@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - wysiwyg_template
+id: wysiwyg_template--wysiwyg_template
+disabled: true
+path: wysiwyg_template/wysiwyg_template
+resourceType: wysiwyg_template--wysiwyg_template
+resourceFields: ''

@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - environment_indicator
+id: environment_indicator--environment_indicator
+disabled: true
+path: environment_indicator/environment_indicator
+resourceType: environment_indicator--environment_indicator
+resourceFields: ''

@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * Install file for Tide API module.
+ */
+
+use Drupal\user\Entity\Role;
+
+/**
+ * Implements hook_install().
+ */
+function tide_api_install() {
+  // Update default configuration provided by jsonapi_extras.
+  $config_factory = \Drupal::configFactory();
+  $config_factory->getEditable('jsonapi_extras.settings')->set('path_prefix', 'api/v1')->save();
+  $config_factory->getEditable('jsonapi_extras.settings')->set('include_count', TRUE)->save();
+
+  // Allow users with Anonymous and Authenticated roles to access API.
+  Role::load('anonymous')->grantPermission('access jsonapi resource list')->save();
+  Role::load('authenticated')->grantPermission('access jsonapi resource list')->save();
+}

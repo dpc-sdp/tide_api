@@ -1,0 +1,30 @@
+{
+    "name": "dpc-sdp/tide_api",
+    "description": "Content API for Tide distribution.",
+    "type": "drupal-module",
+    "license": "GPL-2.0+",
+    "version": "0.0.1",
+    "minimum-stability": "alpha",
+    "prefer-stable": true,
+    "require": {
+        "drupal/jsonapi": "^1.15",
+        "drupal/jsonapi_extras": "2.0-rc1",
+        "drupal/schemata": "1.0-alpha2",
+        "drupal/openapi": "1.0-alpha1"
+    },
+    "extra": {
+        "enable-patching": true,
+        "composer-exit-on-patch-failure": true,
+        "patches": {
+            "drupal/core": {
+                "Menu content is not accessible via jsonapi - https://www.drupal.org/node/2915792": "https://www.drupal.org/files/issues/menu_link_content-view-permissions-2915792.patch"
+            },
+            "drupal/jsonapi": {
+                "Menu content is not accessible via jsonapi": "patches/jsonapi/jsonapi_menu_403_fix.patch"
+            },
+            "drupal/jsonapi_extras": {
+                "Field enhancer does not work with Config Entities - https://www.drupal.org/project/jsonapi_extras/issues/2975925": "https://www.drupal.org/files/issues/2018-05-30/jsonapi_extras-config_entities_enhancer-2975925-5.patch"
+            }
+        }
+    }
+}
