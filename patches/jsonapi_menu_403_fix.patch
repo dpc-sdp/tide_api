@@ -1,0 +1,35 @@
+diff --git a/src/Controller/EntityResource.php b/src/Controller/EntityResource.php
+index 8ec5290..fcaf9b5 100644
+--- a/src/Controller/EntityResource.php
++++ b/src/Controller/EntityResource.php
+@@ -122,7 +122,14 @@ class EntityResource {
+    *   The response.
+    */
+   public function getIndividual(EntityInterface $entity, Request $request, $response_code = 200) {
+-    $entity_access = $entity->access('view', NULL, TRUE);
++    $entity_type = $entity->getEntityTypeId();
++    if (($entity_type == 'menu') OR ($entity_type == 'menu_link_content')) {
++      $entity_access = $entity->access('view label', NULL, TRUE);
++    }
++    else {
++      $entity_access = $entity->access('view', NULL, TRUE);
++    }
++
+     if (!$entity_access->isAllowed()) {
+       throw new EntityAccessDeniedHttpException($entity, $entity_access, '/data', 'The current user is not allowed to GET the selected resource.');
+     }
+@@ -937,7 +944,13 @@ class EntityResource {
+     /** @var \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository */
+     $entity_repository = \Drupal::service('entity.repository');
+     $entity = $entity_repository->getTranslationFromContext($entity, NULL, ['operation' => 'entity_upcast']);
+-    $access = $entity->access('view', NULL, TRUE);
++    $entity_type = $entity->getEntityTypeId();
++    if (($entity_type == 'menu') OR ($entity_type == 'menu_link_content')) {
++      $access = $entity->access('view label', NULL, TRUE);
++    }
++    else {
++      $access = $entity->access('view', NULL, TRUE);
++    }
+     // Accumulate the cacheability metadata for the access.
+     $output = [
+       'access' => $access,
