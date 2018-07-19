@@ -3,9 +3,6 @@
     "description": "Content API for Tide distribution.",
     "type": "drupal-module",
     "license": "GPL-2.0+",
-    "version": "0.0.1",
-    "minimum-stability": "alpha",
-    "prefer-stable": true,
     "require": {
         "drupal/jsonapi": "^1.15",
         "drupal/jsonapi_extras": "2.0-rc1",
@@ -26,5 +23,20 @@
                 "Field enhancer does not work with Config Entities - https://www.drupal.org/project/jsonapi_extras/issues/2975925": "https://www.drupal.org/files/issues/2018-05-30/jsonapi_extras-config_entities_enhancer-2975925-5.patch"
             }
         }
+    },
+    "repositories": {
+        "drupal": {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "platform": {
+            "php": "7.1"
+        },
+        "process-timeout": 0,
+        "sort-packages": true
     }
 }
