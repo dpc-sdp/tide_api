@@ -1,7 +1,7 @@
 @tide @jsonapi
 Feature: Link Enhancer
 
-  @api
+  @api @nosuggest
   Scenario: Request to "test" individual endpoint with results.
     Given test content:
       | title         | path         | moderation_state | uuid                                | nid    | field_test_link             |

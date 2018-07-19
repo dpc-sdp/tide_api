@@ -1,6 +1,7 @@
 @tide @jsonapi
 Feature: API version
 
+  @api @nosuggest
   Scenario: Request to API to get version
     Given I send a GET request to "api/v1"
     Then the rest response status code should be 200

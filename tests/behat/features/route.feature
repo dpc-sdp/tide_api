@@ -1,7 +1,7 @@
 @tide @jsonapi
 Feature: Route lookup
 
-  @api
+  @api @nosuggest
   Scenario: Request to route lookup API to find a route by non-existing alias
     Given I am an anonymous user
     When I send a GET request to "api/v1/route?path=/test-non-existing-alias"
@@ -23,7 +23,7 @@ Feature: Route lookup
     And the JSON node "errors" should exist
     And the JSON array node "errors" should contain "URL query parameter "path" is required." element
 
-  @api
+  @api @nosuggest
   Scenario: Request to route lookup API to find a route by existing alias
     Given test content:
       | title                    | body | moderation_state | path                        |

@@ -1,7 +1,7 @@
 @tide @jsonapi
 Feature: Page
 
-  @api
+  @api @nosuggest
   Scenario: Request to "test" collection endpoint
     Given I am an anonymous user
     When I send a GET request to "api/v1/node/test"
@@ -13,7 +13,7 @@ Feature: Page
     And the JSON node "meta.count" should exist
     And the JSON node "data" should exist
 
-  @api
+  @api @nosuggest
   Scenario: Request to "test" individual/collection endpoint with results.
     Given test content:
       | title             | path             | moderation_state | uuid |
