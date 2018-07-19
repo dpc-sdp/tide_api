@@ -91,7 +91,7 @@ install:
 ## Install current module.
 install-module:
 	$(call title,Installing current module and dependencies)
-	# If running with suggested modules, requre them first.
+	# If running with suggested modules, require them first.
 	$(call exec,docker-compose exec cli bash -c "if [ "$(INSTALL_SUGGEST)" = "1" ] ; then cat $(COMPOSER_BUILD) | jq -r 'select(.suggest != null) | .suggest | keys[]' | xargs -i composer require {}; fi")
 	# Copy module code into local vendor directory.
 	$(call exec,docker-compose exec cli rm -Rf $(APP)/vendor-local/$(MODULE_NAME))
@@ -111,6 +111,11 @@ install-site:
 	$(call title,Installing a site)
 	$(call exec,docker-compose exec cli drush -r $(APP)/$(WEBROOT) si testing -y --db-url=mysql://drupal:drupal@$(MYSQL_HOST)/drupal --account-name=admin --account-pass=admin install_configure_form.enable_update_status_module=NULL install_configure_form.enable_update_status_emails=NULL)
 	$(call exec,docker-compose exec cli bash -c "COMPOSER=$(COMPOSER_BUILD) composer --working-dir=$(APP)/$(BUILD) drupal-post-install")
+
+## Install dev modules.
+install-dev:
+	$(call title,Installing dev modules)
+	$(call exec,docker-compose exec cli drush en -y tide_test)
 
 ## Lint code.
 lint:
