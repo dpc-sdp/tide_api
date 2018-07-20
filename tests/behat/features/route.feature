@@ -53,6 +53,7 @@ Feature: Route lookup
 
     Then the moderation state of test "[TEST] Published article" changes from "published" to "archived"
     And the moderation state of test "[TEST] Draft article" changes from "draft" to "published"
+    And the cache has been cleared
 
     Then I send a GET request to "api/v1/route?path=/test-published-article"
     Then the rest response status code should be 403
