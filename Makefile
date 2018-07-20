@@ -136,7 +136,7 @@ rebuild-full: clean-full build
 ## Run Behat tests.
 test-behat:
 	$(call title,Creating screenshots directory)
-	$(call exec,docker-compose exec cli -- mkdir -p /app/screenshots
+	$(call exec,docker-compose exec cli -- mkdir -p /app/screenshots)
 	$(call title,Running behat tests)
 	$(call exec,docker-compose exec cli vendor/bin/behat --format=progress_fail --strict --colors $(BEHAT_PROFILE) $(filter-out $@,$(MAKECMDGOALS)))
 
