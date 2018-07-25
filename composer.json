@@ -4,8 +4,8 @@
     "type": "drupal-module",
     "license": "GPL-2.0+",
     "require": {
-        "drupal/jsonapi": "^1.15",
-        "drupal/jsonapi_extras": "2.0-rc1",
+        "drupal/jsonapi": "^1.16",
+        "drupal/jsonapi_extras": "^2.3",
         "drupal/schemata": "1.0-alpha2",
         "drupal/openapi": "1.0-alpha1",
         "dpc-sdp/tide_core": "@dev"
@@ -22,9 +22,6 @@
             },
             "drupal/jsonapi": {
                 "Menu content is not accessible via jsonapi - https://www.drupal.org/project/jsonapi/issues/2967986": "https://www.drupal.org/files/issues/2018-07-09/jsonapi_menu_403_fix-2967986-4.patch"
-            },
-            "drupal/jsonapi_extras": {
-                "Field enhancer does not work with Config Entities - https://www.drupal.org/project/jsonapi_extras/issues/2975925": "https://www.drupal.org/files/issues/2018-05-30/jsonapi_extras-config_entities_enhancer-2975925-5.patch"
             }
         }
     },
