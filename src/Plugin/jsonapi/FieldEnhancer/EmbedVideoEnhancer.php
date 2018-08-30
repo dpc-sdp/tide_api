@@ -122,7 +122,7 @@ class EmbedVideoEnhancer extends ResourceFieldEnhancerBase implements ContainerF
 
         if ($videoIdRegex !== NULL) {
           if (preg_match($videoIdRegex, $link, $results)) {
-            $video_str = 'http://www.youtube.com/embed/%s?autoplay=0&start=0&rel=0';
+            $video_str = '//www.youtube.com/embed/%s?autoplay=0&start=0&rel=0';
             $video_id = $results[1];
           }
         }
@@ -146,9 +146,9 @@ class EmbedVideoEnhancer extends ResourceFieldEnhancerBase implements ContainerF
               $video_id = $results[1];
 
               try {
-                $hash = unserialize(file_get_contents("http://vimeo.com/api/v2/video/$video_id.php"));
+                $hash = unserialize(file_get_contents("//vimeo.com/api/v2/video/$video_id.php"));
                 if (!empty($hash) && is_array($hash)) {
-                  $video_str = 'http://vimeo.com/moogaloop.swf?clip_id=%s';
+                  $video_str = '//vimeo.com/moogaloop.swf?clip_id=%s';
                 }
                 else {
                   // Don't use, couldn't find what we need.
