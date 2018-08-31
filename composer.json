@@ -29,58 +29,6 @@
         "drupal": {
             "type": "composer",
             "url": "https://packages.drupal.org/8"
-        },
-        "dpc-sdp/tide_core": {
-            "type": "vcs",
-            "no-api": true,
-            "url": "git@github.com:dpc-sdp/tide_core.git"
-        },
-        "dpc-sdp/tide_test": {
-            "type": "vcs",
-            "no-api": true,
-            "url": "git@github.com:dpc-sdp/tide_test.git"
-        },
-        "ckeditor/iframe": {
-            "type": "package",
-            "package": {
-                "name": "ckeditor/iframe",
-                "type": "drupal-library",
-                "version": "4.5.11",
-                "dist": {
-                    "type": "zip",
-                    "url": "https://download.ckeditor.com/iframe/releases/iframe_4.5.11.zip"
-                },
-                "require": {
-                    "composer/installers": "~1.0"
-                }
-            }
-        },
-        "ckeditor/fakeobjects": {
-            "type": "package",
-            "package": {
-                "name": "ckeditor/fakeobjects",
-                "type": "drupal-library",
-                "version": "4.5.11",
-                "dist": {
-                    "type": "zip",
-                    "url": "https://download.ckeditor.com/fakeobjects/releases/fakeobjects_4.5.11.zip"
-                },
-                "require": {
-                    "composer/installers": "~1.0"
-                }
-            }
-        },
-        "ckeditor/templates": {
-            "type": "package",
-            "package": {
-                "name": "ckeditor/templates",
-                "type": "drupal-library",
-                "version": "4.5.7",
-                "dist": {
-                    "type": "zip",
-                    "url": "https://download.ckeditor.com/templates/releases/templates_4.5.7.zip"
-                }
-            }
         }
     },
     "minimum-stability": "dev",
