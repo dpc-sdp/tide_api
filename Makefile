@@ -104,6 +104,8 @@ install-module:
 	$(call exec,docker-compose exec cli bash -c "if [ "$(INSTALL_SUGGEST)" = "1" ] ; then cat $(COMPOSER_BUILD) | jq -r 'select(.suggest != null) | .suggest | keys[]' |  sed 's/dpc-sdp\///' | xargs -i drush -r $(APP)/$(WEBROOT) en -y {}; fi")
 	# Enable current module.
 	$(call exec,docker-compose exec cli drush -r $(APP)/$(WEBROOT) en -y $(MODULE_NAME))
+	# Clear Caches.
+	$(call exec,docker-compose exec cli drush cr)
 
 ## Install site.
 install-site:
