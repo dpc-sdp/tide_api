@@ -25,6 +25,7 @@ This module is required in case you want to use your site in a headless manner.
 
 # INSTALLATION
 Include the Tide API module in your composer.json file
+
 ```bash
 composer require dpc-sdp/tide_api
 ```
