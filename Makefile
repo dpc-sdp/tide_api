@@ -116,6 +116,8 @@ install-site:
 install-dev:
 	$(call title,Installing dev modules)
 	$(call exec,docker-compose exec cli drush en -y tide_test)
+	$(call title,Clearing caches)
+	$(call exec,docker-compose exec cli drush cr)
 
 ## Lint code.
 lint:
