@@ -27,8 +27,6 @@ aliases:
           command: |
             printenv
             echo "COMPOSE_FILE=$COMPOSE_FILE" >> .env.local
-            echo "GITHUB_TOKEN=$GITHUB_TOKEN" >> .env.local
-            echo "GITHUB_PRIVATE_TOKEN=$GITHUB_PRIVATE_TOKEN" >> .env.local
             echo "BEHAT_PROFILE=$BEHAT_PROFILE" >> .env.local
             make docker-start
       - run:
