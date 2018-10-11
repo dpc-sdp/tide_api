@@ -4,3 +4,53 @@
  * @file
  * Tide API module functionality.
  */
+
+use Drupal\Core\Access\CsrfTokenGenerator;
+use Drupal\Core\Access\CsrfRequestHeaderAccessCheck;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
+use Drupal\node\Entity\Node;
+
+/**
+ * Implements hook_form_alter() on behalf of tide_api.module.
+ */
+function tide_api_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+    // Change form id here
+    if ($form_id == 'revision_overview_form') {
+      // Get token generator to fetch token for current user
+      $tokenGenerator = \Drupal::service('csrf_token');
+
+      // Load services helpers to calculate node url to be used in Front End Preview
+      $aliasManager = \Drupal::service('path.alias_manager');
+      $siteHelper = \Drupal::service('tide_site.helper');
+      $siteAliasStorage = \Drupal::service('tide_site.alias_storage_helper');
+
+      foreach ($form['node_revisions_table'] as $key => $row) {
+        if(is_numeric($key) && isset($row['operations']['#links'])) {
+          // Get current node revision details and token
+          $route_params = $form['node_revisions_table'][$key]['operations']['#links']['delete']['url']->getRouteParameters();
+          $route_params['token'] = $tokenGenerator->get(CsrfRequestHeaderAccessCheck::TOKEN_KEY);
+
+          $node = Node::load($route_params['node']);
+
+          $alias = $aliasManager->getAliasByPath('/node/' . $route_params['node']);
+          $uri = $siteHelper->getEntityPrimarySiteBaseUrl($node) . $siteAliasStorage->getPathAliasWithoutSitePrefix([ 'alias' => $alias]);
+
+          // Unset some route parameters not required
+          unset($route_params['langcode']);
+          unset($route_params['node']);
+
+          // Rename node_revision by id, to be used in JSON API call
+          $route_params['resource_version'] = 'id:' . $route_params['node_revision'];
+          unset($route_params['node_revision']);
+
+          // Add new operation to preview revisions different that default revision published.
+          $form['node_revisions_table'][$key]['operations']['#links']['preview'] = array(
+            'title' => t('Preview'),
+            'url' => Url::fromUri($uri, array('query' => $route_params, 'attributes' => array('target' => '_blank')))
+          );
+        }
+      }
+    }
+}
