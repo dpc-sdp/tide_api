@@ -69,19 +69,18 @@
    */
   function tide_api_form_node_form_alter(&$form, $form_state) {
 
-    //dpm($form['actions']);
+    // Hide Drupal Preview button
+    unset($form['actions']['preview']);
 
     // Replace preview action to save and generate preview link
-    $form['actions']['preview']['#value'] = t('Save & Preview');
-    $form['actions']['preview']['#submit']  = $form['actions']['submit']['#submit'];
-    $form['actions']['preview']['#submit'][] = 'tide_api_preview_redirect';
+    $form['actions']['submit']['#submit'][] = 'tide_api_generate_preview_link';
   }
 
   /**
    * Create link to preview latest chantes
    */
 
-  function tide_api_preview_redirect(&$form, $form_state) {
+  function tide_api_generate_preview_link(&$form, $form_state) {
 
     $route_params = [];
 
@@ -116,7 +115,7 @@
 
     // Set url and link
     $url = Url::fromUri($uri, array('query' => $route_params, 'attributes' => array('target' => '_blank')));
-    $link = Link::fromTextAndUrl(t('Click here to Preview using Front End'), $url);
+    $link = Link::fromTextAndUrl(t('Click here to Preview Content'), $url);
 
     $messenger->addMessage($link);
 
