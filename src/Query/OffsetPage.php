@@ -42,7 +42,7 @@ class OffsetPage {
    *
    * @var int
    */
-  const SIZE_MAX = 50;
+  const SIZE_MAX = 3;
 
   /**
    * The offset for the query.
