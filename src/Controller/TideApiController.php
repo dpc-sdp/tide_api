@@ -14,6 +14,7 @@ use Drupal\redirect\RedirectRepository;
 use Drupal\tide_api\Event\GetRouteEvent;
 use Drupal\tide_api\TideApiEvents;
 use Drupal\tide_api\TideApiHelper;
+use Drupal\tide_site\TideSiteHelper;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -62,7 +63,7 @@ class TideApiController extends ControllerBase {
    */
   protected $apiHelper;
 
-  /** 
+  /**
    * @var  \Drupal\redirect\RedirectRepository
    */
   protected $redirectRepository;
@@ -71,6 +72,11 @@ class TideApiController extends ControllerBase {
    * @var \Drupal\Core\Language\LanguageManagerInterface
    */
   protected $languageManager;
+
+  /**
+   * @var \Drupal\tide_site\TideSiteHelper
+   */
+  protected $siteHelper;
 
   /**
    * Constructs a new PathController.
@@ -89,8 +95,10 @@ class TideApiController extends ControllerBase {
    *   The redirect entity repository.
    * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
    *   The language manager service.
+   * @param Drupal\tide_site\TideSiteHelper
+   *   The Tide Site Helper.
    */
-  public function __construct(AliasManagerInterface $alias_manager, EntityTypeManagerInterface $entity_type_manager, ResourceTypeRepository $resource_type_repository, EventDispatcherInterface $event_dispatcher, TideApiHelper $api_helper, RedirectRepository $redirect_repository, LanguageManagerInterface $language_manager) {
+  public function __construct(AliasManagerInterface $alias_manager, EntityTypeManagerInterface $entity_type_manager, ResourceTypeRepository $resource_type_repository, EventDispatcherInterface $event_dispatcher, TideApiHelper $api_helper, RedirectRepository $redirect_repository, LanguageManagerInterface $language_manager, TideSiteHelper $site_helper = null) {
     $this->aliasManager = $alias_manager;
     $this->entityTypeManager = $entity_type_manager;
     $this->resourceTypeRepository = $resource_type_repository;
@@ -98,21 +106,36 @@ class TideApiController extends ControllerBase {
     $this->apiHelper = $api_helper;
     $this->redirectRepository = $redirect_repository;
     $this->languageManager = $language_manager;
+    $this->siteHelper = $site_helper;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('path.alias_manager'),
-      $container->get('entity_type.manager'),
-      $container->get('jsonapi.resource_type.repository'),
-      $container->get('event_dispatcher'),
-      $container->get('tide_api.helper'),
-      $container->get('redirect.repository'),
-      $container->get('language_manager')
-    );
+    if (\Drupal::moduleHandler()->moduleExists('tide_site')) {
+      return new static(
+        $container->get('path.alias_manager'),
+        $container->get('entity_type.manager'),
+        $container->get('jsonapi.resource_type.repository'),
+        $container->get('event_dispatcher'),
+        $container->get('tide_api.helper'),
+        $container->get('redirect.repository'),
+        $container->get('language_manager'),
+        $container->get('tide_site.helper')
+      );
+    }
+    else {
+      return new static(
+        $container->get('path.alias_manager'),
+        $container->get('entity_type.manager'),
+        $container->get('jsonapi.resource_type.repository'),
+        $container->get('event_dispatcher'),
+        $container->get('tide_api.helper'),
+        $container->get('redirect.repository'),
+        $container->get('language_manager')
+      );
+    }
   }
 
   /**
@@ -125,6 +148,7 @@ class TideApiController extends ControllerBase {
    *   JSON response.
    */
   public function getRoute(Request $request) {
+
     $code = Response::HTTP_NOT_FOUND;
     $json_response = [
       'links' => [
@@ -135,7 +159,6 @@ class TideApiController extends ControllerBase {
     $entity = NULL;
 
     $path = $request->query->get('path');
-    $site = $request->query->get('site');
 
     try {
       if ($path) {
@@ -159,17 +182,32 @@ class TideApiController extends ControllerBase {
         // Cache miss.
         else {
 
-          if ($redirect = $this->redirectRepository->findMatchingRedirect($path, [], $this->languageManager->getCurrentLanguage()->getId())) {
+          if ($path !== '/' && $redirect = $this->redirectRepository->findMatchingRedirect($path, [], $this->languageManager->getCurrentLanguage()->getId())) {
             // Handle internal path.
             $url = $redirect->getRedirectUrl();
             $redirect_url = $url->toString();
-            $type = substr($redirect_url, 1, strpos($redirect_url, '/', 1) - 1) == 'site-' . $site ? 'internal' : 'external';
-            if ($type == 'external') {
-              $redirect_url = $url->setAbsolute()->toString();
+            if (!is_null($this->siteHelper)) {
+              $site = $request->query->get('site');
+              $type = substr($redirect_url, 1, strpos($redirect_url, '/', 1) - 1) == 'site-' . $site ? 'internal' : 'external-site';
+
+              if (strpos($redirect_url, '/site-' . $site) === 0) {
+                $redirect_url = str_replace('/site-' . $site, '', $redirect_url);
+              }
+
+              if (strpos($redirect_url, 'http') === 0) {
+                $type = 'external';
+              }
+
+              if ($type == 'external-site') {
+                $new_site_id = substr($redirect_url, strpos($redirect_url, '-', 1) + 1);
+                $new_site_id = substr($new_site_id, 0, strpos($new_site_id, '/', 1));
+                $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($new_site_id);
+                $base_url = $this->siteHelper->getSiteBaseUrl($term);
+                $redirect_url = $base_url . substr($redirect_url, strpos($redirect_url, '/', 1));
+                $type = 'external';
+              }
             }
-            else {
-              $redirect_url = str_replace('/site-' . $site, '', $redirect_url);
-            }
+
             $json_response['data'] = [
               'status_code' => $redirect->getStatusCode(),
               'type' => $type,
@@ -178,7 +216,7 @@ class TideApiController extends ControllerBase {
             $code = Response::HTTP_OK;
             unset($json_response['errors']);
           }
-          else {
+          if (!$redirect) {
 
             $source = $this->aliasManager->getPathByAlias($path);
 
