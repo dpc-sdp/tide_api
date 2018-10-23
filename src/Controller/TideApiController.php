@@ -215,8 +215,7 @@ class TideApiController extends ControllerBase {
             ];
             $code = Response::HTTP_OK;
             unset($json_response['errors']);
-          }
-          if (!$redirect) {
+          } else {
 
             $source = $this->aliasManager->getPathByAlias($path);
 
@@ -263,7 +262,17 @@ class TideApiController extends ControllerBase {
               // Update the response.
               $code = $event->getCode();
               $json_response = $event->getJsonResponse();
-              if (!$event->isOk()) {
+              if ($event->isOk()) {
+                $url = Url::fromRoute('entity.node.canonical', ['node' => $json_response["data"]["entity_id"]]);
+                // Cache the response with the same tags with the entity.
+                $cached_route_data = [
+                  'json_response' => $json_response['data'],
+                  'uri' => $url->toUriString(),
+                ];
+                $this->cache('data')
+                  ->set($cid, $cached_route_data, Cache::PERMANENT, $entity->getCacheTags());
+              }
+              else {
                 unset($json_response['data']);
               }
             }
