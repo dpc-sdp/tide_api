@@ -159,10 +159,11 @@ class TideApiController extends ControllerBase {
     $entity = NULL;
 
     $path = $request->query->get('path');
+    $site = $request->query->get('site');
 
     try {
       if ($path) {
-        $cid = 'tide_api:route:path:' . hash('sha256', $path);
+        $cid = 'tide_api:route:path:' . hash('sha256', $path . $site);
 
         // First load from cache_data.
         $cached_route_data = $this->cache('data')->get($cid);
@@ -187,7 +188,6 @@ class TideApiController extends ControllerBase {
             $url = $redirect->getRedirectUrl();
             $redirect_url = $url->toString();
             if (!is_null($this->siteHelper)) {
-              $site = $request->query->get('site');
               $type = substr($redirect_url, 1, strpos($redirect_url, '/', 1) - 1) == 'site-' . $site ? 'internal' : 'external-site';
 
               if (strpos($redirect_url, '/site-' . $site) === 0) {
