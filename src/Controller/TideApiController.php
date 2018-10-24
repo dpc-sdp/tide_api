@@ -201,20 +201,31 @@ class TideApiController extends ControllerBase {
               if ($type == 'external-site') {
                 $new_site_id = substr($redirect_url, strpos($redirect_url, '-', 1) + 1);
                 $new_site_id = substr($new_site_id, 0, strpos($new_site_id, '/', 1));
-                $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($new_site_id);
-                $base_url = $this->siteHelper->getSiteBaseUrl($term);
-                $redirect_url = $base_url . substr($redirect_url, strpos($redirect_url, '/', 1));
-                $type = 'external';
+                if (!is_numeric($new_site_id)) {
+                  $code = Response::HTTP_BAD_REQUEST;
+                  $json_response['errors'] = [$this->t('You must include a site id in the To url.')];
+                }
+                else {
+                  $term = \Drupal::entityTypeManager()
+                    ->getStorage('taxonomy_term')
+                    ->load($new_site_id);
+                  $base_url = $this->siteHelper->getSiteBaseUrl($term);
+                  $redirect_url = $base_url . substr($redirect_url,
+                      strpos($redirect_url, '/', 1));
+                  $type = 'external';
+                }
               }
             }
 
-            $json_response['data'] = [
-              'status_code' => $redirect->getStatusCode(),
-              'type' => $type,
-              'redirect_url' => $redirect_url,
-            ];
-            $code = Response::HTTP_OK;
-            unset($json_response['errors']);
+            if ($code != Response::HTTP_BAD_REQUEST) {
+              $json_response['data'] = [
+                'status_code' => $redirect->getStatusCode(),
+                'type' => $type,
+                'redirect_url' => $redirect_url,
+              ];
+              $code = Response::HTTP_OK;
+              unset($json_response['errors']);
+            }
           } else {
 
             $source = $this->aliasManager->getPathByAlias($path);
@@ -265,12 +276,13 @@ class TideApiController extends ControllerBase {
               if ($event->isOk()) {
                 $url = Url::fromRoute('entity.node.canonical', ['node' => $json_response["data"]["entity_id"]]);
                 // Cache the response with the same tags with the entity.
+                $cache_entity = $this->apiHelper->findEntityFromUrl($url);
                 $cached_route_data = [
                   'json_response' => $json_response['data'],
                   'uri' => $url->toUriString(),
                 ];
                 $this->cache('data')
-                  ->set($cid, $cached_route_data, Cache::PERMANENT, $entity->getCacheTags());
+                  ->set($cid, $cached_route_data, Cache::PERMANENT, $cache_entity->getCacheTags());
               }
               else {
                 unset($json_response['data']);
