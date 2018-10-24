@@ -112,7 +112,7 @@
     $uri = $siteHelper->getEntityPrimarySiteBaseUrl($node) . $siteAliasStorage->getPathAliasWithoutSitePrefix([ 'alias' => $alias]);
 
     // Get current user token
-    //$route_params['token'] = $tokenGenerator->get(CsrfRequestHeaderAccessCheck::TOKEN_KEY);
+    $route_params['token'] = $tokenGenerator->get(CsrfRequestHeaderAccessCheck::TOKEN_KEY);
 
     // Rename node_revision by id, to be used in JSON API call
     $route_params['resource_version'] = 'rel:working-copy';
