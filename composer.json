@@ -17,11 +17,7 @@
         "enable-patching": true,
         "composer-exit-on-patch-failure": true,
         "patches": {
-            "drupal/core": {
-                "Menu content is not accessible via jsonapi - https://www.drupal.org/node/2915792": "https://www.drupal.org/files/issues/menu_link_content-view-permissions-2915792.patch"
-            },
             "drupal/jsonapi": {
-                "Menu content is not accessible via jsonapi - https://www.drupal.org/project/jsonapi/issues/2967986": "https://www.drupal.org/files/issues/2018-07-09/jsonapi_menu_403_fix-2967986-4.patch",
                 "Add a revision id negotiation plugin to support entity revisions - https://www.drupal.org/project/jsonapi/issues/2992833": "https://www.drupal.org/files/issues/2018-08-26/2992833--revision-id-negotiation--52.patch"
             },
             "drupal/jsonapi_extras": {
