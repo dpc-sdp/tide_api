@@ -14,7 +14,7 @@ services:
       - {name: event_subscriber}
   serializer.normalizer.config_entity.tide_api:
     class: Drupal\tide_api\Normalizer\ConfigEntityNormalizer
-    arguments: ['@jsonapi.link_manager', '@jsonapi.resource_type.repository', '@entity_type.manager', '@module_handler' ]
+      arguments: ['@jsonapi.link_manager', '@jsonapi.resource_type.repository', '@entity_type.manager', '@entity_field.manager', '@plugin.manager.field.field_type', '@module_handler' ]
     tags:
       - { name: jsonapi_normalizer_do_not_use_removal_imminent, priority: 23 }
   tide_api.params.enhancer:

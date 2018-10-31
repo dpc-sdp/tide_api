@@ -2,8 +2,10 @@
 
 namespace Drupal\tide_api\Normalizer;
 
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\jsonapi\LinkManager\LinkManager;
 use Drupal\jsonapi\Normalizer\Value\EntityNormalizerValue;
 use Drupal\jsonapi\Normalizer\Value\FieldNormalizerValueInterface;
@@ -25,8 +27,8 @@ class ConfigEntityNormalizer extends JsonapiExtrasConfigEntityNormalizer {
   /**
    * {@inheritdoc}
    */
-  public function __construct(LinkManager $link_manager, ResourceTypeRepositoryInterface $resource_type_repository, EntityTypeManagerInterface $entity_type_manager, ModuleHandlerInterface $module_handler) {
-    parent::__construct($link_manager, $resource_type_repository, $entity_type_manager);
+  public function __construct(LinkManager $link_manager, ResourceTypeRepositoryInterface $resource_type_repository, EntityTypeManagerInterface $entity_type_manager, EntityFieldManagerInterface $field_manager, FieldTypePluginManagerInterface $plugin_manager, ModuleHandlerInterface $module_handler) {
+    parent::__construct($link_manager, $resource_type_repository, $entity_type_manager, $field_manager, $plugin_manager);
     $this->moduleHandler = $module_handler;
   }
 
