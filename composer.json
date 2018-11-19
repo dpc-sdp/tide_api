@@ -5,7 +5,7 @@
     "license": "GPL-2.0+",
     "require": {
         "drupal/jsonapi": "1.16",
-        "drupal/jsonapi_extras": "2.9",
+        "drupal/jsonapi_extras": "2.6",
         "drupal/schemata": "1.0-alpha2",
         "drupal/openapi": "1.0-alpha1",
         "dpc-sdp/tide_core": "@dev"
