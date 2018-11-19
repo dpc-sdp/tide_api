@@ -4,8 +4,8 @@
     "type": "drupal-module",
     "license": "GPL-2.0+",
     "require": {
-        "drupal/jsonapi": "1.16",
-        "drupal/jsonapi_extras": "2.5",
+        "drupal/jsonapi": "^1.16",
+        "drupal/jsonapi_extras": "2.10",
         "drupal/schemata": "1.0-alpha2",
         "drupal/openapi": "1.0-alpha1",
         "dpc-sdp/tide_core": "@dev"
