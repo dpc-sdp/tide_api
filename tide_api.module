@@ -1,6 +1,133 @@
 <?php
 
-/**
- * @file
- * Tide API module functionality.
- */
+  /**
+   * @file
+   * Tide API module functionality.
+   */
+
+  use Drupal\Core\Access\CsrfRequestHeaderAccessCheck;
+  use Drupal\Core\Form\FormStateInterface;
+  use Drupal\Core\Link;
+  use Drupal\Core\Url;
+  use Drupal\Component\Utility\Random;
+  use Drupal\node\Entity\Node;
+
+  /**
+   * Implements hook_form_alter() on behalf of tide_api.module.
+   */
+  function tide_api_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+
+    // Add preview link to revisions form
+    if ($form_id == 'revision_overview_form') {
+      // Get token generator to fetch token for current user
+      $tokenGenerator = \Drupal::service('csrf_token');
+
+      $randomiser = new Random();
+
+      // Load services helpers to calculate node url to be used in Front End Preview
+      $aliasManager = \Drupal::service('path.alias_manager');
+      $siteHelper = \Drupal::service('tide_site.helper');
+      $siteAliasStorage = \Drupal::service('tide_site.alias_storage_helper');
+      $requestStack = \Drupal::service('request_stack');
+      $sessionConfiguration = \Drupal::service('session_configuration');
+
+      // Get session options
+      $sessionOptions = $sessionConfiguration->getOptions($requestStack->getCurrentRequest());
+
+      foreach ($form['node_revisions_table'] as $key => $row) {
+        if(is_numeric($key) && isset($row['operations']['#links'])) {
+          // Get current node revision details and token
+          $route_params = $form['node_revisions_table'][$key]['operations']['#links']['delete']['url']->getRouteParameters();
+          $route_params['token'] = $tokenGenerator->get(CsrfRequestHeaderAccessCheck::TOKEN_KEY);
+
+          $node = Node::load($route_params['node']);
+
+          $alias = $aliasManager->getAliasByPath('/node/' . $route_params['node']);
+          $uri = $siteHelper->getEntityPrimarySiteBaseUrl($node) . $siteAliasStorage->getPathAliasWithoutSitePrefix([ 'alias' => $alias]);
+
+          // Unset some route parameters not required
+          unset($route_params['langcode']);
+          unset($route_params['node']);
+
+          // Rename node_revision by id, to be used in JSON API call
+          $route_params['resource_version'] = 'id:' . $route_params['node_revision'];
+          unset($route_params['node_revision']);
+
+          // Set session name and session value to be used as cookie from client request
+          $route_params['session_name'] = $sessionOptions['name'];
+          $route_params['session_value'] = $requestStack->getCurrentRequest()->cookies->get($sessionOptions['name']);
+
+          // Set random parameter to avoid CDN cache between changes in preview
+          $route_params['randomiser']=$randomiser->string(32);
+
+          // Add new operation to preview revisions different that default revision published.
+          $form['node_revisions_table'][$key]['operations']['#links']['preview'] = array(
+            'title' => t('Preview'),
+            'url' => Url::fromUri($uri, array('query' => $route_params, 'attributes' => array('target' => '_blank')))
+          );
+        }
+      }
+    }
+  }
+
+  /**
+   * Implements hook_form_ID_alter() for form_node_form
+   */
+  function tide_api_form_node_form_alter(&$form, $form_state) {
+
+    // Hide Drupal Preview button
+    unset($form['actions']['preview']);
+
+    // Replace preview action to save and generate preview link
+    $form['actions']['submit']['#submit'][] = 'tide_api_generate_preview_link';
+  }
+
+  /**
+   * Create link to preview latest changes
+   */
+
+  function tide_api_generate_preview_link(&$form, $form_state) {
+
+    $route_params = [];
+
+    $node = $form_state->getFormObject()->getEntity();
+
+    // Get token generator to fetch token for current user
+    $tokenGenerator = \Drupal::service('csrf_token');
+
+    $randomiser = new Random();
+
+    // Load services helpers to calculate node url to be used in Front End Preview
+    $aliasManager = \Drupal::service('path.alias_manager');
+    $siteHelper = \Drupal::service('tide_site.helper');
+    $siteAliasStorage = \Drupal::service('tide_site.alias_storage_helper');
+    $requestStack = \Drupal::service('request_stack');
+    $sessionConfiguration = \Drupal::service('session_configuration');
+    $messenger = \Drupal::service('messenger');
+
+    // Get session options
+    $sessionOptions = $sessionConfiguration->getOptions($requestStack->getCurrentRequest());
+
+    $alias = $aliasManager->getAliasByPath('/node/' . $node->id());
+    $uri = $siteHelper->getEntityPrimarySiteBaseUrl($node) . $siteAliasStorage->getPathAliasWithoutSitePrefix([ 'alias' => $alias]);
+
+    // Get current user token
+    $route_params['token'] = $tokenGenerator->get(CsrfRequestHeaderAccessCheck::TOKEN_KEY);
+
+    // Rename node_revision by id, to be used in JSON API call
+    $route_params['resource_version'] = 'rel:working-copy';
+
+    // Set session name and session value to be used as cookie from client request
+    $route_params['session_name'] = $sessionOptions['name'];
+    $route_params['session_value'] = $requestStack->getCurrentRequest()->cookies->get($sessionOptions['name']);
+
+    // Set random parameter to avoid CDN cache between changes in preview
+    $route_params['randomiser']=$randomiser->string(32);
+
+    // Set url and link
+    $url = Url::fromUri($uri, array('query' => $route_params, 'attributes' => array('target' => '_blank')));
+    $link = Link::fromTextAndUrl(t('Click here to Preview Content'), $url);
+
+    $messenger->addMessage($link);
+
+  }
