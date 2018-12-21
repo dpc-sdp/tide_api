@@ -4,7 +4,7 @@
     "type": "drupal-module",
     "license": "GPL-2.0+",
     "require": {
-        "drupal/jsonapi": "^1.16",
+        "drupal/jsonapi": "1.23",
         "drupal/jsonapi_extras": "^2.5",
         "drupal/schemata": "1.0-alpha2",
         "drupal/openapi": "1.0-alpha1",
@@ -21,7 +21,8 @@
                 "Menu content is not accessible via jsonapi - https://www.drupal.org/node/2915792": "https://www.drupal.org/files/issues/menu_link_content-view-permissions-2915792.patch"
             },
             "drupal/jsonapi": {
-                "Menu content is not accessible via jsonapi - https://www.drupal.org/project/jsonapi/issues/2967986": "https://www.drupal.org/files/issues/2018-07-09/jsonapi_menu_403_fix-2967986-4.patch"
+                "Menu content is not accessible via jsonapi - https://www.drupal.org/project/jsonapi/issues/2967986": "https://www.drupal.org/files/issues/2018-07-09/jsonapi_menu_403_fix-2967986-4.patch",
+                "Add a revision id negotiation plugin to support entity revisions - https://www.drupal.org/project/jsonapi/issues/2992833": "https://www.drupal.org/files/issues/2018-08-26/2992833--revision-id-negotiation--52.patch"
             },
             "drupal/jsonapi_extras": {
                 "Date Time enhancer does not work with Date range fields - https://www.drupal.org/project/jsonapi_extras/issues/2953227": "https://www.drupal.org/files/issues/2018-07-17/jsonapi_extras-date-range-fields-support-2953227-d8-11.patch"
