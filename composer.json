@@ -8,10 +8,7 @@
         "drupal/jsonapi_extras": "2.5",
         "drupal/schemata": "1.0-alpha2",
         "drupal/openapi": "1.0-alpha1",
-        "dpc-sdp/tide_core": "@dev"
-    },
-    "require-dev": {
-        "dpc-sdp/tide_test": "@dev"
+        "dpc-sdp/tide_core": "dev-ci"
     },
     "extra": {
         "enable-patching": true,
