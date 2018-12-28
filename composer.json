@@ -2,13 +2,18 @@
     "name": "dpc-sdp/tide_api",
     "description": "Content API for Tide distribution.",
     "type": "drupal-module",
-    "license": "GPL-2.0+",
+    "license": "GPL-2.0-or-later",
     "require": {
         "drupal/jsonapi": "1.24",
         "drupal/jsonapi_extras": "2.5",
         "drupal/schemata": "1.0-alpha2",
         "drupal/openapi": "1.0-alpha1",
         "dpc-sdp/tide_core": "dev-ci"
+    },
+    "suggest": {
+        "dpc-sdp/tide_page:dev-ci": "Page content type and related configuration for Tide Drupal 8 distribution",
+        "dpc-sdp/tide_news:dev-ci": "News content type and related configuration for Tide Drupal 8 distribution",
+        "dpc-sdp/tide_landing_page:dev-ci": "Landing Page content type and related configuration for Tide Drupal 8 distribution"
     },
     "extra": {
         "enable-patching": true,
@@ -30,14 +35,5 @@
             "type": "composer",
             "url": "https://packages.drupal.org/8"
         }
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "config": {
-        "platform": {
-            "php": "7.1"
-        },
-        "process-timeout": 0,
-        "sort-packages": true
     }
 }

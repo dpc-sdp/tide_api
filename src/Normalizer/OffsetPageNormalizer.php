@@ -3,8 +3,8 @@
 namespace Drupal\tide_api\Normalizer;
 
 use Drupal\tide_api\Query\OffsetPage;
-use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
 /**
  * The normalizer used for JSON API pagination.
@@ -32,6 +32,7 @@ class OffsetPageNormalizer implements DenormalizerInterface {
    */
   public function denormalize($data, $class, $format = NULL, array $context = []) {
     $expanded = $this->expand($data);
+
     return new OffsetPage($expanded[OffsetPage::OFFSET_KEY], $expanded[OffsetPage::SIZE_KEY]);
   }
 
