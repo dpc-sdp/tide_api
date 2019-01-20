@@ -63,16 +63,22 @@ class TideApiController extends ControllerBase {
   protected $apiHelper;
 
   /**
-   * @var  \Drupal\redirect\RedirectRepository
+   * The redirect repository.
+   *
+   * @var \Drupal\redirect\RedirectRepository
    */
   protected $redirectRepository;
 
   /**
+   * The language manager.
+   *
    * @var \Drupal\Core\Language\LanguageManagerInterface
    */
   protected $languageManager;
 
   /**
+   * The site helper.
+   *
    * @var \Drupal\tide_site\TideSiteHelper
    */
   protected $siteHelper;
