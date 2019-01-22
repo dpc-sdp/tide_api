@@ -101,7 +101,7 @@ class EmbedVideoEnhancer extends ResourceFieldEnhancerBase implements ContainerF
           if ($array_url['path'] == "/watch") {
             // Works on:
             // http://www.youtube.com/watch/?v=VIDEOID
-            $videoIdRegex = '/youtube.com\/(?:watch\?v=){1}([a-zA-Z0-9_]+)/';
+            $videoIdRegex = '/youtube.com\/(?:watch\?v=){1}([a-zA-Z0-9_-]+)/';
 
           }
           else {
@@ -109,7 +109,7 @@ class EmbedVideoEnhancer extends ResourceFieldEnhancerBase implements ContainerF
             // http://www.youtube.com/embed/VIDEOID
             // http://www.youtube.com/embed/VIDEOID?modestbranding=1&amp;rel=0
             // http://www.youtube.com/v/VIDEO-ID?fs=1&amp;hl=en_US
-            $videoIdRegex = '/youtube.com\/(?:embed|v){1}\/([a-zA-Z0-9_]+)\??/i';
+            $videoIdRegex = '/youtube.com\/(?:embed|v){1}\/([a-zA-Z0-9_-]+)\??/i';
           }
 
         }
@@ -117,7 +117,7 @@ class EmbedVideoEnhancer extends ResourceFieldEnhancerBase implements ContainerF
           if (strpos($link, 'youtu.be') !== FALSE) {
             // Works on:
             // http://youtu.be/daro6K6mym8
-            $videoIdRegex = '/youtu.be\/([a-zA-Z0-9_]+)\??/i';
+            $videoIdRegex = '/youtu.be\/([a-zA-Z0-9_-]+)\??/i';
           }
         }
 
