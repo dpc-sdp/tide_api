@@ -71,6 +71,7 @@ class PathEnhancer extends ResourceFieldEnhancerBase implements ContainerFactory
         // Malformed URL, does nothing.
       }
     }
+
     return $data;
   }
 
@@ -80,6 +81,7 @@ class PathEnhancer extends ResourceFieldEnhancerBase implements ContainerFactory
   protected function doTransform($value, Context $context) {
     unset($value['url']);
     $this->moduleHandler->alter('tide_path_enhancer_transform', $value, $context);
+
     return $value;
   }
 

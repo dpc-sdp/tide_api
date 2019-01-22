@@ -112,6 +112,7 @@ class TideApiHelper {
       $entity_type = key($params);
       $entity = $this->entityTypeManager->getStorage($entity_type)
         ->load($params[$entity_type]);
+
       return $entity;
     }
     catch (\Exception $exception) {
@@ -176,6 +177,7 @@ class TideApiHelper {
       $this->frontPage = $this->configFactory->get('system.site')
         ->get('page.front');
     }
+
     return $this->frontPage;
   }
 

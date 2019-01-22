@@ -9,7 +9,6 @@ use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Path\AliasManagerInterface;
 use Drupal\Core\Url;
 use Drupal\jsonapi\ResourceType\ResourceTypeRepository;
-use Drupal\redirect\Exception\RedirectLoopException;
 use Drupal\redirect\RedirectRepository;
 use Drupal\tide_api\Event\GetRouteEvent;
 use Drupal\tide_api\TideApiEvents;
@@ -64,16 +63,22 @@ class TideApiController extends ControllerBase {
   protected $apiHelper;
 
   /**
-   * @var  \Drupal\redirect\RedirectRepository
+   * The redirect repository.
+   *
+   * @var \Drupal\redirect\RedirectRepository
    */
   protected $redirectRepository;
 
   /**
+   * The language manager.
+   *
    * @var \Drupal\Core\Language\LanguageManagerInterface
    */
   protected $languageManager;
 
   /**
+   * The site helper.
+   *
    * @var \Drupal\tide_site\TideSiteHelper
    */
   protected $siteHelper;
@@ -95,10 +100,10 @@ class TideApiController extends ControllerBase {
    *   The redirect entity repository.
    * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
    *   The language manager service.
-   * @param Drupal\tide_site\TideSiteHelper
+   * @param Drupal\tide_site\TideSiteHelper $site_helper
    *   The Tide Site Helper.
    */
-  public function __construct(AliasManagerInterface $alias_manager, EntityTypeManagerInterface $entity_type_manager, ResourceTypeRepository $resource_type_repository, EventDispatcherInterface $event_dispatcher, TideApiHelper $api_helper, RedirectRepository $redirect_repository, LanguageManagerInterface $language_manager, TideSiteHelper $site_helper = null) {
+  public function __construct(AliasManagerInterface $alias_manager, EntityTypeManagerInterface $entity_type_manager, ResourceTypeRepository $resource_type_repository, EventDispatcherInterface $event_dispatcher, TideApiHelper $api_helper, RedirectRepository $redirect_repository, LanguageManagerInterface $language_manager, TideSiteHelper $site_helper = NULL) {
     $this->aliasManager = $alias_manager;
     $this->entityTypeManager = $entity_type_manager;
     $this->resourceTypeRepository = $resource_type_repository;
@@ -226,7 +231,8 @@ class TideApiController extends ControllerBase {
               $code = Response::HTTP_OK;
               unset($json_response['errors']);
             }
-          } else {
+          }
+          else {
 
             $source = $this->aliasManager->getPathByAlias($path);
 
@@ -257,7 +263,8 @@ class TideApiController extends ControllerBase {
                   $code = Response::HTTP_OK;
                   unset($json_response['errors']);
                 }
-              } else {
+              }
+              else {
                 $code = Response::HTTP_FORBIDDEN;
                 $json_response['errors'] = [$this->t('Permission denied.')];
               }

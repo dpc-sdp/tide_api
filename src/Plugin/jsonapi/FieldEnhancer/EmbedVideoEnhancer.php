@@ -43,6 +43,7 @@ class EmbedVideoEnhancer extends ResourceFieldEnhancerBase implements ContainerF
         // Malformed URL, does nothing.
       }
     }
+
     return $data;
   }
 

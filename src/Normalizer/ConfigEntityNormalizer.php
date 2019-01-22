@@ -69,6 +69,7 @@ class ConfigEntityNormalizer extends JsonapiExtrasConfigEntityNormalizer {
     $this->moduleHandler->alter('config_entity_normalizer_values', $normalizer_values, $context, $context2);
 
     $link_context = ['link_manager' => $this->linkManager];
+
     return new EntityNormalizerValue($normalizer_values, $context, $entity, $link_context);
   }
 
