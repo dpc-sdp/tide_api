@@ -100,7 +100,7 @@ class TideApiController extends ControllerBase {
    *   The redirect entity repository.
    * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
    *   The language manager service.
-   * @param Drupal\tide_site\TideSiteHelper $site_helper
+   * @param \Drupal\tide_site\TideSiteHelper $site_helper
    *   The Tide Site Helper.
    */
   public function __construct(AliasManagerInterface $alias_manager, EntityTypeManagerInterface $entity_type_manager, ResourceTypeRepository $resource_type_repository, EventDispatcherInterface $event_dispatcher, TideApiHelper $api_helper, RedirectRepository $redirect_repository, LanguageManagerInterface $language_manager, TideSiteHelper $site_helper = NULL) {
@@ -211,7 +211,7 @@ class TideApiController extends ControllerBase {
                   $json_response['errors'] = [$this->t('You must include a site id in the To url.')];
                 }
                 else {
-                  $term = \Drupal::entityTypeManager()
+                  $term = $this->entityTypeManager
                     ->getStorage('taxonomy_term')
                     ->load($new_site_id);
                   $base_url = $this->siteHelper->getSiteBaseUrl($term);
