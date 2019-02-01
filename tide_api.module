@@ -5,11 +5,16 @@
  * Tide API module functionality.
  */
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\CsrfRequestHeaderAccessCheck;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\Component\Utility\Random;
+use Drupal\jsonapi\Routing\Routes;
 use Drupal\node\Entity\Node;
 
 /**
@@ -45,16 +50,16 @@ function tide_api_form_alter(&$form, FormStateInterface $form_state, $form_id) {
         $alias = $aliasManager->getAliasByPath('/node/' . $route_params['node']);
         $uri = $siteHelper->getEntityPrimarySiteBaseUrl($node) . $siteAliasStorage->getPathAliasWithoutSitePrefix(['alias' => $alias]);
 
-        // Unset obsolete route parameters.
+        // Unset some route parameters not required.
         unset($route_params['langcode']);
         unset($route_params['node']);
 
-        // Rename 'node_revision by id' to be used in JSON API call.
+        // Rename node_revision by id, to be used in JSON API call.
         $route_params['resource_version'] = 'id:' . $route_params['node_revision'];
         unset($route_params['node_revision']);
 
         // Set session name and session value to be used as cookie from
-        // the client request.
+        // client request.
         $route_params['session_name'] = $sessionOptions['name'];
         $route_params['session_value'] = $requestStack->getCurrentRequest()->cookies->get($sessionOptions['name']);
 
@@ -87,7 +92,7 @@ function tide_api_form_node_form_alter(&$form, $form_state) {
 }
 
 /**
- * Create link to preview latest changes.
+ * Create link to preview latest change.
  *
  * @param array $form
  *   Form.
@@ -122,11 +127,11 @@ function tide_api_generate_preview_link(array &$form, FormStateInterface $form_s
   // Get current user token.
   $route_params['token'] = $tokenGenerator->get(CsrfRequestHeaderAccessCheck::TOKEN_KEY);
 
-  // Rename 'node_revision by id' to be used in JSON API call.
+  // Rename node_revision by id, to be used in JSON API call.
   $route_params['resource_version'] = 'rel:working-copy';
 
   // Set session name and session value to be used as cookie from
-  // the client request.
+  // client request.
   $route_params['session_name'] = $sessionOptions['name'];
   $route_params['session_value'] = $requestStack->getCurrentRequest()->cookies->get($sessionOptions['name']);
 
@@ -141,4 +146,36 @@ function tide_api_generate_preview_link(array &$form, FormStateInterface $form_s
   $link = Link::fromTextAndUrl(t('Click here to Preview Content'), $url);
 
   $messenger->addMessage($link);
+}
+
+/**
+ * Implements hook_entity_access().
+ */
+function tide_api_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  if ($entity->getEntityTypeId() == 'menu' || $entity->getEntityTypeId() == 'menu_link_content') {
+    if ($operation == 'view') {
+      if (Routes::isJsonApiRequest(\Drupal::request()->attributes->all())) {
+        return AccessResult::allowed()->cachePerUser();
+      }
+    }
+  }
+  return AccessResult::neutral();
+}
+
+/**
+ * Implements hook_jsonapi_ENTITY_TYPE_filter_access().
+ */
+function tide_api_jsonapi_menu_link_content_filter_access(EntityTypeInterface $entity_type, AccountInterface $account) {
+  return [
+    JSONAPI_FILTER_AMONG_ALL => AccessResult::allowed()->cachePerPermissions(),
+  ];
+}
+
+/**
+ * Implements hook_jsonapi_ENTITY_TYPE_filter_access().
+ */
+function tide_api_jsonapi_menu_filter_access(EntityTypeInterface $entity_type, AccountInterface $account) {
+  return [
+    JSONAPI_FILTER_AMONG_ALL => AccessResult::allowed()->cachePerPermissions(),
+  ];
 }
