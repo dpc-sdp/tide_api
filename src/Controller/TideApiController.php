@@ -297,7 +297,8 @@ class TideApiController extends ControllerBase {
                   ->set($cid, $cached_route_data, Cache::PERMANENT, $cache_entity->getCacheTags());
               }
               else {
-                unset($json_response['data']);
+                unset($json_response['data']['type']);
+                unset($json_response['data']['id']);
               }
             }
           }

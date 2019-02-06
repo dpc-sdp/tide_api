@@ -7,8 +7,8 @@ Feature: Route lookup
     When I send a GET request to "api/v1/route?path=/test-non-existing-alias"
     Then the rest response status code should be 404
     And the response should be in JSON
-    And the JSON node "links" should exist
-    And the JSON node "links.self" should contain "api/v1/route"
+    And the JSON node "data.links" should exist
+    And the JSON node "data.links.self" should contain "api/v1/route"
     And the JSON node "data" should not exist
     And the JSON node "errors" should exist
     And the JSON array node "errors" should contain "Path not found." element
@@ -17,8 +17,8 @@ Feature: Route lookup
     Given I am an anonymous user
     When I send a GET request to "api/v1/route"
     Then the rest response status code should be 400
-    And the JSON node "links" should exist
-    And the JSON node "links.self" should contain "api/v1/route"
+    And the JSON node "data.links" should exist
+    And the JSON node "data.links.self" should contain "api/v1/route"
     And the JSON node "data" should not exist
     And the JSON node "errors" should exist
     And the JSON array node "errors" should contain "URL query parameter "path" is required." element
@@ -35,8 +35,8 @@ Feature: Route lookup
     When I send a GET request to "api/v1/route?path=/test-draft-article"
     Then the rest response status code should be 403
     And the response should be in JSON
-    And the JSON node "links" should exist
-    And the JSON node "links.self" should contain "api/v1/route"
+    And the JSON node "data.links" should exist
+    And the JSON node "data.links.self" should contain "api/v1/route"
     And the JSON node "data" should not exist
     And the JSON node "errors" should exist
     And the JSON array node "errors" should contain "Permission denied." element
