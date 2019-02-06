@@ -170,10 +170,9 @@ class TideApiController extends ControllerBase {
             "id" => $cid,
             'links' => [
               'self' => Url::fromRoute('tide_api.jsonapi.alias')->setAbsolute()->toString(),
-            ]
+            ],
           ],
           'errors' => [$this->t('Path not found.')],
-          'meta' => []
         ];
 
         // First load from cache_data.
@@ -229,7 +228,7 @@ class TideApiController extends ControllerBase {
             }
 
             if ($code != Response::HTTP_BAD_REQUEST) {
-              $json_response['data']['attributes']  = [
+              $json_response['data']['attributes'] = [
                 'status_code' => $redirect->getStatusCode(),
                 'type' => $type,
                 'redirect_url' => $redirect_url,

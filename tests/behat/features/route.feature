@@ -45,10 +45,10 @@ Feature: Route lookup
     When I send a GET request to "api/v1/route?path=/test-published-article"
     Then the rest response status code should be 200
     And the response should be in JSON
-    And the JSON node "links" should exist
-    And the JSON node "links.self" should contain "api/v1/route"
-    And the JSON node "data.bundle" should contain "test"
-    And the JSON node "data.endpoint" should contain "api/v1/node/test/"
+    And the JSON node "data.links" should exist
+    And the JSON node "data.links.self" should contain "api/v1/route"
+    And the JSON node "data.attributes.bundle" should contain "test"
+    And the JSON node "data.attributes.endpoint" should contain "api/v1/node/test/"
     And the JSON node "errors" should not exist
 
     Then the moderation state of test "[TEST] Published article" changes from "published" to "archived"
