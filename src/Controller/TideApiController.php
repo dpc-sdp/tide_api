@@ -155,12 +155,6 @@ class TideApiController extends ControllerBase {
   public function getRoute(Request $request) {
 
     $code = Response::HTTP_NOT_FOUND;
-    $json_response = [
-      'links' => [
-        'self' => Url::fromRoute('tide_api.jsonapi.alias')->setAbsolute()->toString(),
-      ],
-    ];
-    $json_response['errors'] = [$this->t('Path not found.')];
     $entity = NULL;
 
     $path = $request->query->get('path');
@@ -170,6 +164,18 @@ class TideApiController extends ControllerBase {
       if ($path) {
         $cid = 'tide_api:route:path:' . hash('sha256', $path . $site);
 
+        $json_response = [
+          'data' => [
+            "type" => 'route',
+            "id" => $cid,
+            'links' => [
+              'self' => Url::fromRoute('tide_api.jsonapi.alias')->setAbsolute()->toString(),
+            ]
+          ],
+          'errors' => [$this->t('Path not found.')],
+          'meta' => []
+        ];
+
         // First load from cache_data.
         $cached_route_data = $this->cache('data')->get($cid);
         if ($cached_route_data) {
@@ -177,7 +183,7 @@ class TideApiController extends ControllerBase {
           $url = Url::fromUri($cached_route_data->data['uri']);
           if ($url->access()) {
             $code = Response::HTTP_OK;
-            $json_response['data'] = $cached_route_data->data['json_response'];
+            $json_response['data']['attributes'] = $cached_route_data->data['json_response'];
             unset($json_response['errors']);
           }
           else {
@@ -223,7 +229,7 @@ class TideApiController extends ControllerBase {
             }
 
             if ($code != Response::HTTP_BAD_REQUEST) {
-              $json_response['data'] = [
+              $json_response['data']['attributes']  = [
                 'status_code' => $redirect->getStatusCode(),
                 'type' => $type,
                 'redirect_url' => $redirect_url,
@@ -244,7 +250,7 @@ class TideApiController extends ControllerBase {
                 if ($entity) {
                   $endpoint = $this->apiHelper->findEndpointFromEntity($entity);
                   $entity_type = $entity->getEntityTypeId();
-                  $json_response['data'] = [
+                  $json_response['data']['attributes'] = [
                     'entity_type' => $entity_type,
                     'entity_id' => $entity->id(),
                     'bundle' => $entity->bundle(),
@@ -254,7 +260,7 @@ class TideApiController extends ControllerBase {
 
                   // Cache the response with the same tags with the entity.
                   $cached_route_data = [
-                    'json_response' => $json_response['data'],
+                    'json_response' => $json_response['data']['attributes'],
                     'uri' => $url->toUriString(),
                   ];
                   $this->cache('data')
@@ -285,7 +291,7 @@ class TideApiController extends ControllerBase {
                 // Cache the response with the same tags with the entity.
                 $cache_entity = $this->apiHelper->findEntityFromUrl($url);
                 $cached_route_data = [
-                  'json_response' => $json_response['data'],
+                  'json_response' => $json_response['data']['attributes'],
                   'uri' => $url->toUriString(),
                 ];
                 $this->cache('data')
