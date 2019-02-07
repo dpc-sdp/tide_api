@@ -294,8 +294,11 @@ class TideApiController extends ControllerBase {
                   'json_response' => $json_response['data']['attributes'],
                   'uri' => $url->toUriString(),
                 ];
-                $this->cache('data')
-                  ->set($cid, $cached_route_data, Cache::PERMANENT, $cache_entity->getCacheTags());
+                // Validate if $cache_entity is not null
+                if($cache_entity) {
+                  $this->cache('data')
+                    ->set($cid, $cached_route_data, Cache::PERMANENT, $cache_entity->getCacheTags());
+                }
               }
               else {
                 unset($json_response['data']['type']);
