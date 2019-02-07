@@ -160,20 +160,21 @@ class TideApiController extends ControllerBase {
     $path = $request->query->get('path');
     $site = $request->query->get('site');
 
+    $json_response = [
+      'data' => [
+        "type" => 'route',
+        'links' => [
+          'self' => Url::fromRoute('tide_api.jsonapi.alias')->setAbsolute()->toString(),
+        ],
+      ],
+      'errors' => [$this->t('Path not found.')],
+    ];
+
     try {
       if ($path) {
         $cid = 'tide_api:route:path:' . hash('sha256', $path . $site);
 
-        $json_response = [
-          'data' => [
-            "type" => 'route',
-            "id" => $cid,
-            'links' => [
-              'self' => Url::fromRoute('tide_api.jsonapi.alias')->setAbsolute()->toString(),
-            ],
-          ],
-          'errors' => [$this->t('Path not found.')],
-        ];
+        $json_response['data']['id'] = $cid;
 
         // First load from cache_data.
         $cached_route_data = $this->cache('data')->get($cid);

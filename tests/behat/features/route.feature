@@ -9,7 +9,6 @@ Feature: Route lookup
     And the response should be in JSON
     And the JSON node "data.links" should exist
     And the JSON node "data.links.self" should contain "api/v1/route"
-    And the JSON node "data" should not exist
     And the JSON node "errors" should exist
     And the JSON array node "errors" should contain "Path not found." element
 
@@ -19,7 +18,6 @@ Feature: Route lookup
     Then the rest response status code should be 400
     And the JSON node "data.links" should exist
     And the JSON node "data.links.self" should contain "api/v1/route"
-    And the JSON node "data" should not exist
     And the JSON node "errors" should exist
     And the JSON array node "errors" should contain "URL query parameter "path" is required." element
 
@@ -37,7 +35,6 @@ Feature: Route lookup
     And the response should be in JSON
     And the JSON node "data.links" should exist
     And the JSON node "data.links.self" should contain "api/v1/route"
-    And the JSON node "data" should not exist
     And the JSON node "errors" should exist
     And the JSON array node "errors" should contain "Permission denied." element
 
