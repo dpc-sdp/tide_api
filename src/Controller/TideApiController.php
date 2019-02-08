@@ -227,12 +227,10 @@ class TideApiController extends ControllerBase {
             }
 
             if ($code != Response::HTTP_BAD_REQUEST) {
-              $json_response['data']['attributes'] = [
-                'status_code' => $redirect->getStatusCode(),
-                'type' => $type,
-                'redirect_url' => $redirect_url,
-                'id' => $redirect->uuid(),
-              ];
+              $json_response['data']['status_code'] = $redirect->getStatusCode();
+              $json_response['data']['type'] = $type;
+              $json_response['data']['redirect_url'] = redirect_url;
+              $json_response['data']['id'] = $redirect->uuid();
               $code = Response::HTTP_OK;
               unset($json_response['errors']);
             }
@@ -286,7 +284,7 @@ class TideApiController extends ControllerBase {
               $this->eventDispatcher->dispatch(TideApiEvents::GET_ROUTE, $event);
               // Update the response.
               $code = $event->getCode();
-              $json_response['data']['attributes'] = $event->getJsonResponse()['data'];
+              $json_response['data']['attributes'] = $event->getJsonResponse()['data']['attributes'];
               if ($event->isOk()) {
                 $url = Url::fromRoute('entity.node.canonical', ['node' => $json_response["data"]["entity_id"]]);
                 // Cache the response with the same tags with the entity.
