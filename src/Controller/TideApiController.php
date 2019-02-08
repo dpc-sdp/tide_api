@@ -231,7 +231,7 @@ class TideApiController extends ControllerBase {
                 'status_code' => $redirect->getStatusCode(),
                 'type' => $type,
                 'redirect_url' => $redirect_url,
-                'id' => $redirect->uuid()
+                'id' => $redirect->uuid(),
               ];
               $code = Response::HTTP_OK;
               unset($json_response['errors']);
@@ -262,7 +262,7 @@ class TideApiController extends ControllerBase {
                   $cached_route_data = [
                     'json_response' => $json_response['data']['attributes'],
                     'uri' => $url->toUriString(),
-                    'id' => $entity->uuid()
+                    'id' => $entity->uuid(),
                   ];
                   $this->cache('data')
                     ->set($cid, $cached_route_data, Cache::PERMANENT, $entity->getCacheTags());
@@ -294,7 +294,7 @@ class TideApiController extends ControllerBase {
                 $cached_route_data = [
                   'json_response' => $json_response['data']['attributes'],
                   'uri' => $url->toUriString(),
-                  'id' => $entity->uuid()
+                  'id' => $entity->uuid(),
                 ];
                 // Validate if $cache_entity is not null.
                 if ($cache_entity) {
