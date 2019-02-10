@@ -284,9 +284,9 @@ class TideApiController extends ControllerBase {
               $this->eventDispatcher->dispatch(TideApiEvents::GET_ROUTE, $event);
               // Update the response.
               $code = $event->getCode();
-              $json_response['data']['attributes'] = $event->getJsonResponse()['data']['attributes'];
+              $json_response['data']['attributes'] = $event->getJsonResponse()['data'];
               if ($event->isOk()) {
-                $url = Url::fromRoute('entity.node.canonical', ['node' => $json_response["data"]["entity_id"]]);
+                $url = Url::fromRoute('entity.node.canonical', ['node' => $json_response["data"]['attributes']["entity_id"]]);
                 // Cache the response with the same tags with the entity.
                 $cache_entity = $this->apiHelper->findEntityFromUrl($url);
                 $cached_route_data = [
