@@ -153,7 +153,6 @@ class TideApiController extends ControllerBase {
    *   JSON response.
    */
   public function getRoute(Request $request) {
-
     $code = Response::HTTP_NOT_FOUND;
     $entity = NULL;
 
@@ -162,12 +161,24 @@ class TideApiController extends ControllerBase {
 
     $json_response = [
       'data' => [
-        "type" => 'route',
+        'type' => 'route',
         'links' => [
-          'self' => Url::fromRoute('tide_api.jsonapi.alias')->setAbsolute()->toString(),
+          'self' => [
+            'href' => Url::fromRoute('tide_api.jsonapi.alias')->setAbsolute()->toString(),
+          ],
         ],
       ],
-      'errors' => [$this->t('Path not found.')],
+      'errors' => [
+        [
+          'status' => $code,
+          'title' => $this->t('Path not found.'),
+        ],
+      ],
+      'links' => [
+        'self' => [
+          'href' => Url::fromRoute('tide_api.jsonapi.alias')->setAbsolute()->toString(),
+        ],
+      ],
     ];
 
     try {
@@ -187,7 +198,13 @@ class TideApiController extends ControllerBase {
           }
           else {
             $code = Response::HTTP_FORBIDDEN;
-            $json_response['errors'] = [$this->t('Permission denied.')];
+            $json_response['errors'] = [
+              [
+                'status' => $code,
+                'title' => $this->t('Permission denied.'),
+              ],
+            ];
+            unset($json_response['data']);
           }
         }
         // Cache miss.
@@ -212,7 +229,13 @@ class TideApiController extends ControllerBase {
                 $new_site_id = substr($new_site_id, 0, strpos($new_site_id, '/', 1));
                 if (!is_numeric($new_site_id)) {
                   $code = Response::HTTP_BAD_REQUEST;
-                  $json_response['errors'] = [$this->t('You must include a site id in the To url.')];
+                  $json_response['errors'] = [
+                    [
+                      'status' => $code,
+                      'title' => $this->t('You must include a site id in the To url.'),
+                    ],
+                  ];
+                  unset($json_response['data']);
                 }
                 else {
                   $term = $this->entityTypeManager
@@ -229,14 +252,13 @@ class TideApiController extends ControllerBase {
             if ($code != Response::HTTP_BAD_REQUEST) {
               $json_response['data']['status_code'] = $redirect->getStatusCode();
               $json_response['data']['type'] = $type;
-              $json_response['data']['redirect_url'] = redirect_url;
+              $json_response['data']['redirect_url'] = $redirect_url;
               $json_response['data']['id'] = $redirect->uuid();
               $code = Response::HTTP_OK;
               unset($json_response['errors']);
             }
           }
           else {
-
             $source = $this->aliasManager->getPathByAlias($path);
 
             $url = $this->apiHelper->findUrlFromPath($source);
@@ -271,7 +293,13 @@ class TideApiController extends ControllerBase {
               }
               else {
                 $code = Response::HTTP_FORBIDDEN;
-                $json_response['errors'] = [$this->t('Permission denied.')];
+                $json_response['errors'] = [
+                  [
+                    'status' => $code,
+                    'title' => $this->t('Permission denied.'),
+                  ],
+                ];
+                unset($json_response['data']);
               }
             }
             // Dispatch a GET_ROUTE event so that other modules can modify it.
@@ -284,9 +312,9 @@ class TideApiController extends ControllerBase {
               $this->eventDispatcher->dispatch(TideApiEvents::GET_ROUTE, $event);
               // Update the response.
               $code = $event->getCode();
-              $json_response['data']['attributes'] = (isset($event->getJsonResponse()['data']['attributes'])) ? $event->getJsonResponse()['data']['attributes'] : $event->getJsonResponse()['data'];
+              $json_response = $event->getJsonResponse();
               if ($event->isOk()) {
-                $url = Url::fromRoute('entity.node.canonical', ['node' => $json_response["data"]['attributes']["entity_id"]]);
+                $url = Url::fromRoute('entity.node.canonical', ['node' => $json_response['data']['attributes']['entity_id']]);
                 // Cache the response with the same tags with the entity.
                 $cache_entity = $this->apiHelper->findEntityFromUrl($url);
                 $cached_route_data = [
@@ -294,15 +322,15 @@ class TideApiController extends ControllerBase {
                   'uri' => $url->toUriString(),
                   'id' => $entity->uuid(),
                 ];
-                // Validate if $cache_entity is not null.
+                // Cache the response.
                 if ($cache_entity) {
                   $this->cache('data')
                     ->set($cid, $cached_route_data, Cache::PERMANENT, $cache_entity->getCacheTags());
                 }
               }
+              // Something set the Event to failure.
               else {
-                unset($json_response['data']['type']);
-                unset($json_response['data']['id']);
+                unset($json_response['data']);
               }
             }
           }
@@ -311,12 +339,24 @@ class TideApiController extends ControllerBase {
       }
       else {
         $code = Response::HTTP_BAD_REQUEST;
-        $json_response['errors'] = [$this->t('URL query parameter "path" is required.')];
+        $json_response['errors'] = [
+          [
+            'status' => $code,
+            'title' => $this->t("URL query parameter 'path' is required."),
+          ],
+        ];
+        unset($json_response['data']);
       }
     }
     catch (\Exception $exception) {
       $code = Response::HTTP_BAD_REQUEST;
-      $json_response['errors'] = [$exception->getMessage()];
+      $json_response['errors'] = [
+        [
+          'status' => $code,
+          'title' => $exception->getMessage(),
+        ],
+      ];
+      unset($json_response['data']);
     }
 
     return new JsonResponse($json_response, $code);
