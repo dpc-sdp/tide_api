@@ -4,7 +4,7 @@
     "type": "drupal-module",
     "license": "GPL-2.0-or-later",
     "require": {
-        "drupal/jsonapi": "^1.24",
+        "drupal/jsonapi": "^1.25",
         "drupal/jsonapi_extras": "^2.5",
         "drupal/schemata": "^1.0-alpha2",
         "drupal/openapi": "^1.0-alpha1",
