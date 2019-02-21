@@ -43,6 +43,7 @@ class EmbedVideoEnhancer extends ResourceFieldEnhancerBase implements ContainerF
         // Malformed URL, does nothing.
       }
     }
+
     return $data;
   }
 
@@ -100,7 +101,7 @@ class EmbedVideoEnhancer extends ResourceFieldEnhancerBase implements ContainerF
           if ($array_url['path'] == "/watch") {
             // Works on:
             // http://www.youtube.com/watch/?v=VIDEOID
-            $videoIdRegex = '/youtube.com\/(?:watch\?v=){1}([a-zA-Z0-9_]+)/';
+            $videoIdRegex = '/youtube.com\/(?:watch\?v=){1}([a-zA-Z0-9_-]+)/';
 
           }
           else {
@@ -108,7 +109,7 @@ class EmbedVideoEnhancer extends ResourceFieldEnhancerBase implements ContainerF
             // http://www.youtube.com/embed/VIDEOID
             // http://www.youtube.com/embed/VIDEOID?modestbranding=1&amp;rel=0
             // http://www.youtube.com/v/VIDEO-ID?fs=1&amp;hl=en_US
-            $videoIdRegex = '/youtube.com\/(?:embed|v){1}\/([a-zA-Z0-9_]+)\??/i';
+            $videoIdRegex = '/youtube.com\/(?:embed|v){1}\/([a-zA-Z0-9_-]+)\??/i';
           }
 
         }
@@ -116,13 +117,13 @@ class EmbedVideoEnhancer extends ResourceFieldEnhancerBase implements ContainerF
           if (strpos($link, 'youtu.be') !== FALSE) {
             // Works on:
             // http://youtu.be/daro6K6mym8
-            $videoIdRegex = '/youtu.be\/([a-zA-Z0-9_]+)\??/i';
+            $videoIdRegex = '/youtu.be\/([a-zA-Z0-9_-]+)\??/i';
           }
         }
 
         if ($videoIdRegex !== NULL) {
           if (preg_match($videoIdRegex, $link, $results)) {
-            $video_str = 'http://www.youtube.com/embed/%s?autoplay=0&start=0&rel=0';
+            $video_str = '//www.youtube.com/embed/%s?autoplay=0&start=0&rel=0';
             $video_id = $results[1];
           }
         }
@@ -146,9 +147,9 @@ class EmbedVideoEnhancer extends ResourceFieldEnhancerBase implements ContainerF
               $video_id = $results[1];
 
               try {
-                $hash = unserialize(file_get_contents("http://vimeo.com/api/v2/video/$video_id.php"));
+                $hash = unserialize(file_get_contents("//vimeo.com/api/v2/video/$video_id.php"));
                 if (!empty($hash) && is_array($hash)) {
-                  $video_str = 'http://vimeo.com/moogaloop.swf?clip_id=%s';
+                  $video_str = '//vimeo.com/moogaloop.swf?clip_id=%s';
                 }
                 else {
                   // Don't use, couldn't find what we need.

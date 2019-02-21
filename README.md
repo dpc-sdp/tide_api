@@ -1,7 +1,10 @@
-# tide_api
-Content API
+# Tide API
+Content API functionality of [Tide](https://github.com/dpc-sdp/tide) distribution
 
-[![CircleCI](https://circleci.com/gh/dpc-sdp/tide_api.svg?style=svg&circle-token=c7fadb8ee3bb2a3264fba75e0f56ff309082eba7)](https://circleci.com/gh/dpc-sdp/tide_api)
+[![CircleCI](https://circleci.com/gh/dpc-sdp/tide_api.svg?style=svg)](https://circleci.com/gh/dpc-sdp/tide_api)
+
+## Tide
+Tide is a Drupal 8 distribution focused on delivering an API first, headless Drupal content administration site.
 
 # CONTENTS OF THIS FILE
 
@@ -25,4 +28,3 @@ Include the Tide API module in your composer.json file
 ```bash
 composer require dpc-sdp/tide_api
 ```
-

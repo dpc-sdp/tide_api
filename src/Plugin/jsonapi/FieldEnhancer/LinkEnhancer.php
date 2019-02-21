@@ -4,9 +4,9 @@ namespace Drupal\tide_api\Plugin\jsonapi\FieldEnhancer;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\jsonapi_extras\Plugin\jsonapi\FieldEnhancer\UuidLinkEnhancer;
 use Drupal\tide_api\TideApiHelper;
 use Shaper\Util\Context;
-use Drupal\jsonapi_extras\Plugin\jsonapi\FieldEnhancer\UuidLinkEnhancer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
