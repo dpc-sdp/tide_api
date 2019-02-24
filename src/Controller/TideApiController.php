@@ -172,7 +172,6 @@ class TideApiController extends ControllerBase {
 
         // First load from cache_data.
         $cached_route_data = $this->cache('data')->get($cid);
-        $cached_route_data = false;
         if ($cached_route_data) {
           // Check if the current has permission to access the path.
           $url = Url::fromUri($cached_route_data->data['uri']);
@@ -229,15 +228,12 @@ class TideApiController extends ControllerBase {
     if ($path !== '/' && $redirect = $this->redirectRepository->findMatchingRedirect($path, [], $this->languageManager->getCurrentLanguage()->getId())) {
       $this->resolveRedirectPath($redirect, $site, $json_response, $code);
     }
-    elseif ($path !== '/' && $redirect = $this->redirectRepository->findMatchingWildcardRedirect($path, [], $this->languageManager->getCurrentLanguage()->getId())) {
-      $this->resolveRedirectPath($redirect, $site, $json_response, $code);
-    }
     else {
-      $this->resolveAliasPath($request, $path, $cid, $json_response, $code);
+      $this->resolveAliasPath($request, $path, $site, $cid, $json_response, $code);
     }
   }
 
-  private function resolveAliasPath(Request $request, $path, $cid, &$json_response, &$code) {
+  private function resolveAliasPath(Request $request, $path, $site, $cid, &$json_response, &$code) {
     $source = $this->aliasManager->getPathByAlias($path);
 
     $url = $this->apiHelper->findUrlFromPath($source);
@@ -273,30 +269,38 @@ class TideApiController extends ControllerBase {
         $json_response['errors'] = [$this->t('Permission denied.')];
       }
     }
-    // Dispatch a GET_ROUTE event so that other modules can modify it.
-    if ($code != Response::HTTP_BAD_REQUEST) {
-      $event_entity = NULL;
-      if ($entity) {
-        $event_entity = clone $entity;
-      }
-      $event = new GetRouteEvent(clone $request, $json_response, $event_entity, $code);
-      $this->eventDispatcher->dispatch(TideApiEvents::GET_ROUTE, $event);
-      // Update the response.
-      $code = $event->getCode();
-      $json_response = $event->getJsonResponse();
-      if ($event->isOk()) {
-        $url = Url::fromRoute('entity.node.canonical', ['node' => $json_response["data"]["entity_id"]]);
-        // Cache the response with the same tags with the entity.
-        $cache_entity = $this->apiHelper->findEntityFromUrl($url);
-        $cached_route_data = [
-          'json_response' => $json_response['data'],
-          'uri' => $url->toUriString(),
-        ];
-        $this->cache('data')
-          ->set($cid, $cached_route_data, Cache::PERMANENT, $cache_entity->getCacheTags());
+    // If it's 404 Path Not Found, look for a wildcard redirect.
+    if ($code == 404) {
+      if ($path !== '/' && $redirect = $this->redirectRepository->findMatchingWildcardRedirect($path, [], $this->languageManager->getCurrentLanguage()->getId())) {
+        $this->resolveRedirectPath($redirect, $site, $json_response, $code);
       }
       else {
-        unset($json_response['data']);
+        // Dispatch a GET_ROUTE event so that other modules can modify it.
+        if ($code != Response::HTTP_BAD_REQUEST) {
+          $event_entity = NULL;
+          if ($entity) {
+            $event_entity = clone $entity;
+          }
+          $event = new GetRouteEvent(clone $request, $json_response, $event_entity, $code);
+          $this->eventDispatcher->dispatch(TideApiEvents::GET_ROUTE, $event);
+          // Update the response.
+          $code = $event->getCode();
+          $json_response = $event->getJsonResponse();
+          if ($event->isOk()) {
+            $url = Url::fromRoute('entity.node.canonical', ['node' => $json_response["data"]["entity_id"]]);
+            // Cache the response with the same tags with the entity.
+            $cache_entity = $this->apiHelper->findEntityFromUrl($url);
+            $cached_route_data = [
+              'json_response' => $json_response['data'],
+              'uri' => $url->toUriString(),
+            ];
+            $this->cache('data')
+              ->set($cid, $cached_route_data, Cache::PERMANENT, $cache_entity->getCacheTags());
+          }
+          else {
+            unset($json_response['data']);
+          }
+        }
       }
     }
   }
