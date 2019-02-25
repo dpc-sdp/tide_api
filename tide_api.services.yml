@@ -26,3 +26,8 @@ services:
     class: Drupal\tide_api\Normalizer\OffsetPageNormalizer
     tags:
     - { name: jsonapi_normalizer_do_not_use_removal_imminent }
+  tide_api.repository:
+    class: Drupal\tide_api\TideApiRedirectRepository
+    arguments: ['@entity.manager', '@database', '@config.factory']
+    tags:
+      - { name: backend_overridable }
