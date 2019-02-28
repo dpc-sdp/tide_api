@@ -73,8 +73,6 @@ class EmbedVideoEnhancer extends ResourceFieldEnhancerBase implements ContainerF
    *   The embeddable url.
    */
   public function parseVideos($video = NULL) {
-    /** @var \Symfony\Component\HttpFoundation\Request $request */
-    $request = \Drupal::requestStack()->getCurrentRequest();
 
     // Check for iframe to get the video url.
     if (strpos($video, 'iframe') !== FALSE) {
@@ -149,9 +147,9 @@ class EmbedVideoEnhancer extends ResourceFieldEnhancerBase implements ContainerF
               $video_id = $results[1];
 
               try {
-                $hash = unserialize(file_get_contents($request->getScheme() . "://vimeo.com/api/v2/video/$video_id.php"));
+                $hash = unserialize(file_get_contents("https://vimeo.com/api/v2/video/$video_id.php"));
                 if (!empty($hash) && is_array($hash)) {
-                  $video_str = $request->getScheme() . '://player.vimeo.com/video/%s';
+                  $video_str = 'https://player.vimeo.com/video/%s';
                 }
                 else {
                   // Don't use, couldn't find what we need.
