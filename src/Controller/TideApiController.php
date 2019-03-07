@@ -213,9 +213,8 @@ class TideApiController extends ControllerBase {
             // Handle internal path.
             $url = $redirect->getRedirectUrl();
             $redirect_url = $url->toString();
+            $type = substr($redirect_url, 1, strpos($redirect_url, '/', 1) - 1) == 'site-' . $site ? 'internal' : 'external-site';
             if (!is_null($this->siteHelper)) {
-              $type = substr($redirect_url, 1, strpos($redirect_url, '/', 1) - 1) == 'site-' . $site ? 'internal' : 'external-site';
-
               if (strpos($redirect_url, '/site-' . $site) === 0) {
                 $redirect_url = str_replace('/site-' . $site, '', $redirect_url);
               }
@@ -238,6 +237,7 @@ class TideApiController extends ControllerBase {
                   unset($json_response['data']);
                 }
                 else {
+                  /** @var \Drupal\taxonomy\TermInterface $term */
                   $term = $this->entityTypeManager
                     ->getStorage('taxonomy_term')
                     ->load($new_site_id);
@@ -250,10 +250,10 @@ class TideApiController extends ControllerBase {
             }
 
             if ($code != Response::HTTP_BAD_REQUEST) {
-              $json_response['data']['status_code'] = $redirect->getStatusCode();
-              $json_response['data']['type'] = $type;
-              $json_response['data']['redirect_url'] = $redirect_url;
               $json_response['data']['id'] = $redirect->uuid();
+              $json_response['data']['type'] = $type;
+              $json_response['data']['attributes']['status_code'] = $redirect->getStatusCode();
+              $json_response['data']['attributes']['redirect_url'] = $redirect_url;
               $code = Response::HTTP_OK;
               unset($json_response['errors']);
             }
