@@ -1,5 +1,7 @@
 # Tide API
-Page content type for [Tide](https://github.com/dpc-sdp/tide) distribution for [Drupal 8](https://github.com/dpc-sdp)
+Content API configuration for [Tide](https://github.com/dpc-sdp/tide) distribution for [Drupal 8](https://github.com/dpc-sdp)
+
+Use this module to enable headless features.
 
 Tide is a Drupal 8 distribution focused on delivering an API first, headless Drupal content administration site.
 
@@ -10,11 +12,11 @@ Tide is a Drupal 8 distribution focused on delivering an API first, headless Dru
 [![Pull Requests](https://img.shields.io/github/issues-pr/dpc-sdp/tide_page.svg)](https://github.com/dpc-sdp/tide_api/pulls)
 
 ## What is in this package
-- content type
-- fields
-- blocks
-- views
-- JSONAPI module integration
+- configuration for JSONAPI endpoint
+- redirects support
+
+## Redirects
+This module introduces a wildcard redirect feature. Redirects using the Redirects module can be added with a % at the end in order to create wildcard redirects. E.g. `/my-path%` will match `/my-path-title`, `my-path/sub-folder/path` and `/my-path-other-title`.
 
 ## Installation
 To install this package, add this custom repository to `repositories` section of
@@ -23,10 +25,10 @@ your `composer.json`:
 ```json
 {
   "repositories": {        
-      "dpc-sdp/tide_page": {
+      "dpc-sdp/tide_api": {
           "type": "vcs",
           "no-api": true,
-          "url": "https://github.com/dpc-sdp/tide_page.git"
+          "url": "https://github.com/dpc-sdp/tide_api.git"
       }
   }
 }
@@ -34,7 +36,7 @@ your `composer.json`:
 
 Require this package as any other Composer package:
 ```bash
-composer require dpc/tide_page 
+composer require dpc/tide_api 
 ``` 
 
 ## Support
@@ -55,7 +57,6 @@ To start local development stack:
  
 ## Related projects
 - [tide](https://github.com/dpc-sdp/tide)       
-- [tide_api](https://github.com/dpc-sdp/tide_api)         
 - [tide_core](https://github.com/dpc-sdp/tide_core)
 - [tide_event](https://github.com/dpc-sdp/tide_event)
 - [tide_landing_page](https://github.com/dpc-sdp/tide_landing_page)
