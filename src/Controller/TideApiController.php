@@ -153,6 +153,7 @@ class TideApiController extends ControllerBase {
    *   JSON response.
    */
   public function getRoute(Request $request) {
+    global $base_url;
     $code = Response::HTTP_NOT_FOUND;
     $entity = NULL;
 
