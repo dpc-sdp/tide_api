@@ -153,10 +153,16 @@ class TideApiController extends ControllerBase {
    *   JSON response.
    */
   public function getRoute(Request $request) {
+    global $base_url;
     $code = Response::HTTP_NOT_FOUND;
     $entity = NULL;
 
     $path = $request->query->get('path');
+    $query = [];
+    if ($url = parse_url($base_url . $path)) {
+      $path = $url['path'];
+      parse_str($url['query'], $query);
+    }
     $site = $request->query->get('site');
 
     $json_response = [
@@ -209,7 +215,7 @@ class TideApiController extends ControllerBase {
         }
         // Cache miss.
         else {
-          if ($path !== '/' && $redirect = $this->redirectRepository->findMatchingRedirect($path, [], $this->languageManager->getCurrentLanguage()->getId())) {
+          if ($path !== '/' && $redirect = $this->redirectRepository->findMatchingRedirect($path, $query, $this->languageManager->getCurrentLanguage()->getId())) {
             // Handle internal path.
             $url = $redirect->getRedirectUrl();
             $redirect_url = $url->toString();
