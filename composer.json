@@ -7,7 +7,7 @@
         "drupal/jsonapi": "^2.2",
         "drupal/jsonapi_extras": "^3.4",
         "drupal/schemata": "^1.0-alpha2",
-        "dpc-sdp/tide_core": "dev-develop as 1.0"
+        "dpc-sdp/tide_core": "dev-feature/SDPA-1213_metatag_upgrade as 1.0"
     },
     "suggest": {
         "dpc-sdp/tide_page:dev-feature/SDPA-1213_jsonapi_upgrade": "Page content type and related configuration for Tide Drupal 8 distribution",
