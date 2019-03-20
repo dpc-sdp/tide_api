@@ -255,15 +255,13 @@ class TideApiController extends ControllerBase {
    *   The passed in site.
    * @param int $cid
    *   The id of the cached response.
-   * @param \Symfony\Component\HttpFoundation\JsonResponse $json_response
+   * @param array $json_response
    *   The current json response array.
-   * @param int $code
-   *   The current HTTP Status code.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  private function resolvePath(Request $request, $path, $site, $cid, JsonResponse &$json_response, &$code) {
+  private function resolvePath(Request $request, $path, $site, $cid, array &$json_response) {
 
     if ($path !== '/' && $redirect = $this->redirectRepository->findMatchingRedirect($path, [], $this->languageManager->getCurrentLanguage()->getId())) {
       $this->resolveRedirectPath($redirect, $site, $json_response, $code);
@@ -291,12 +289,12 @@ class TideApiController extends ControllerBase {
    *   The passed in site.
    * @param int $cid
    *   The id of the cached response.
-   * @param \Symfony\Component\HttpFoundation\JsonResponse $json_response
+   * @param array $json_response
    *   The current json response array.
    * @param int $code
    *   The current HTTP Status code.
    */
-  private function resolveAliasPath(Request $request, $path, $site, $cid, JsonResponse &$json_response, &$code) {
+  private function resolveAliasPath(Request $request, $path, $site, $cid, array &$json_response, &$code) {
     $source = $this->aliasManager->getPathByAlias($path);
 
     $url = $this->apiHelper->findUrlFromPath($source);
@@ -382,7 +380,7 @@ class TideApiController extends ControllerBase {
    *   The resolved redirect.
    * @param string $site
    *   The passed in site.
-   * @param \Symfony\Component\HttpFoundation\JsonResponse $json_response
+   * @param array $json_response
    *   The current json response array.
    * @param int $code
    *   The current HTTP Status code.
@@ -390,7 +388,7 @@ class TideApiController extends ControllerBase {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  private function resolveRedirectPath(Redirect $redirect, $site, JsonResponse &$json_response, &$code) {
+  private function resolveRedirectPath(Redirect $redirect, $site, array &$json_response, &$code) {
     // Handle internal path.
     $url = $redirect->getRedirectUrl();
     $redirect_url = $url->toString();
