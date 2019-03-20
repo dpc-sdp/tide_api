@@ -248,22 +248,22 @@ class TideApiController extends ControllerBase {
    * Find the current entity based on the path if no entity is defined in cache.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
-   *  A Request object.
-   * @param $path
-   *  The passed in path.
-   * @param $site
-   *  The passed in site.
-   * @param $cid
-   *  The id of the cached response.
-   * @param $json_response
-   *  The current json response array.
-   * @param $code
-   *  The current HTTP Status code.
+   *   A Request object.
+   * @param string $path
+   *   The passed in path.
+   * @param string $site
+   *   The passed in site.
+   * @param int $cid
+   *   The id of the cached response.
+   * @param \Symfony\Component\HttpFoundation\JsonResponse $json_response
+   *   The current json response array.
+   * @param int $code
+   *   The current HTTP Status code.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  private function resolvePath(Request $request, $path, $site, $cid, &$json_response, &$code) {
+  private function resolvePath(Request $request, $path, $site, $cid, JsonResponse &$json_response, &$code) {
 
     if ($path !== '/' && $redirect = $this->redirectRepository->findMatchingRedirect($path, [], $this->languageManager->getCurrentLanguage()->getId())) {
       $this->resolveRedirectPath($redirect, $site, $json_response, $code);
@@ -280,7 +280,23 @@ class TideApiController extends ControllerBase {
     }
   }
 
-  private function resolveAliasPath(Request $request, $path, $site, $cid, &$json_response, &$code) {
+  /**
+   * Find the current entity based on the path if no entity is defined in cache.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   A Request object.
+   * @param string $path
+   *   The passed in path.
+   * @param string $site
+   *   The passed in site.
+   * @param int $cid
+   *   The id of the cached response.
+   * @param \Symfony\Component\HttpFoundation\JsonResponse $json_response
+   *   The current json response array.
+   * @param int $code
+   *   The current HTTP Status code.
+   */
+  private function resolveAliasPath(Request $request, $path, $site, $cid, JsonResponse &$json_response, &$code) {
     $source = $this->aliasManager->getPathByAlias($path);
 
     $url = $this->apiHelper->findUrlFromPath($source);
@@ -359,7 +375,22 @@ class TideApiController extends ControllerBase {
     }
   }
 
-  private function resolveRedirectPath($redirect, $site, &$json_response, &$code) {
+  /**
+   * Work out a redirect path based on site and any redirects defined.
+   *
+   * @param \Drupal\redirect\Entity\Redirect $redirect
+   *   The resolved redirect.
+   * @param string $site
+   *   The passed in site.
+   * @param \Symfony\Component\HttpFoundation\JsonResponse $json_response
+   *   The current json response array.
+   * @param int $code
+   *   The current HTTP Status code.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  private function resolveRedirectPath(Redirect $redirect, $site, JsonResponse &$json_response, &$code) {
     // Handle internal path.
     $url = $redirect->getRedirectUrl();
     $redirect_url = $url->toString();
@@ -409,4 +440,5 @@ class TideApiController extends ControllerBase {
       unset($json_response['errors']);
     }
   }
+
 }
