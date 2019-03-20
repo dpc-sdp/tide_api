@@ -257,11 +257,13 @@ class TideApiController extends ControllerBase {
    *   The id of the cached response.
    * @param array $json_response
    *   The current json response array.
+   * @param int $code
+   *   The current HTTP Status code.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  private function resolvePath(Request $request, $path, $site, $cid, array &$json_response) {
+  private function resolvePath(Request $request, $path, $site, $cid, array &$json_response, &$code) {
 
     if ($path !== '/' && $redirect = $this->redirectRepository->findMatchingRedirect($path, [], $this->languageManager->getCurrentLanguage()->getId())) {
       $this->resolveRedirectPath($redirect, $site, $json_response, $code);
