@@ -20,7 +20,7 @@ class TideApiRedirectRepository extends RedirectRepository {
    *   The redirect source path.
    * @param array $query
    *   The redirect source path query.
-   * @param $language
+   * @param string $language
    *   The language for which is the redirect.
    *
    * @return \Drupal\redirect\Entity\Redirect
