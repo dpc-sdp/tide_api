@@ -4,16 +4,16 @@
     "type": "drupal-module",
     "license": "GPL-2.0-or-later",
     "require": {
-        "drupal/jsonapi": "^1.24",
-        "drupal/jsonapi_extras": "^2.5",
+        "drupal/jsonapi": "^2.2",
+        "drupal/jsonapi_extras": "^3.4",
         "drupal/schemata": "^1.0-alpha2",
-        "drupal/openapi": "^1.0-alpha1",
-        "dpc-sdp/tide_core": "^1.0"
+        "dpc-sdp/tide_core": "dev-develop"
     },
     "suggest": {
-        "dpc-sdp/tide_page:^1.0": "Page content type and related configuration for Tide Drupal 8 distribution",
-        "dpc-sdp/tide_news:^1.0": "News content type and related configuration for Tide Drupal 8 distribution",
-        "dpc-sdp/tide_landing_page:^1.0": "Landing Page content type and related configuration for Tide Drupal 8 distribution"
+        "dpc-sdp/tide_page:dev-feature/SDPA-1213_jsonapi_upgrade": "Page content type and related configuration for Tide Drupal 8 distribution",
+        "dpc-sdp/tide_news:dev-feature/SDPA-1213_jsonapi_upgrade": "News content type and related configuration for Tide Drupal 8 distribution",
+        "dpc-sdp/tide_landing_page:dev-feature/SDPA-1213_jsonapi_upgrade": "Landing Page content type and related configuration for Tide Drupal 8 distribution",
+        "dpc-sdp/tide_site:dev-feature/SDPA-1213_jsonapi_upgrade": "TODO - Remove it later when we fix the incorrect dependency"
     },
     "extra": {
         "enable-patching": true,
@@ -22,11 +22,8 @@
             "drupal/core": {
                 "Menu content is not accessible via jsonapi - https://www.drupal.org/node/2915792": "https://www.drupal.org/files/issues/menu_link_content-view-permissions-2915792.patch"
             },
-            "drupal/jsonapi": {
-                "Menu content is not accessible via jsonapi - https://www.drupal.org/project/jsonapi/issues/2967986": "https://www.drupal.org/files/issues/2018-07-09/jsonapi_menu_403_fix-2967986-4.patch"
-            },
             "drupal/jsonapi_extras": {
-                "Date Time enhancer does not work with Date range fields - https://www.drupal.org/project/jsonapi_extras/issues/2953227": "https://www.drupal.org/files/issues/2018-07-17/jsonapi_extras-date-range-fields-support-2953227-d8-11.patch"
+                "JSON:API Extras 3.4 adds enhanced field values outside of attributes for Config Entities - https://www.drupal.org/project/jsonapi_extras/issues/3037833": "https://www.drupal.org/files/issues/2019-03-06/jsonapi_extras-config_entities_enhancer-3037833-4.patch"
             }
         }
     },
