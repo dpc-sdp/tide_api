@@ -199,7 +199,7 @@ class TideApiController extends ControllerBase {
           if ($url->access()) {
             $code = Response::HTTP_OK;
             $json_response['data']['id'] = $cached_route_data->data['id'];
-            $json_response['data']['attributes'] = $cached_route_data->data['json_response'];
+            $json_response['data']['attributes'] = $cached_route_data->data['json_response']['attributes'];
             unset($json_response['errors']);
           }
           else {
