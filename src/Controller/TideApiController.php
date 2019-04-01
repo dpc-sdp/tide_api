@@ -189,7 +189,7 @@ class TideApiController extends ControllerBase {
 
     try {
       if ($path) {
-        $cid = 'tide_api:route:path:' . hash('sha256', $path . $site);
+        $cid = 'tide_api:route:path:' . hash('sha256', $path) . ':site:' . $site;
 
         // First load from cache_data.
         $cached_route_data = $this->cache('data')->get($cid);
@@ -264,7 +264,6 @@ class TideApiController extends ControllerBase {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   private function resolvePath(Request $request, $path, $site, $cid, array &$json_response, &$code) {
-
     if ($path !== '/' && $redirect = $this->redirectRepository->findMatchingRedirect($path, [], $this->languageManager->getCurrentLanguage()->getId())) {
       $this->resolveRedirectPath($redirect, $site, $json_response, $code);
     }
@@ -340,6 +339,7 @@ class TideApiController extends ControllerBase {
         unset($json_response['data']);
       }
     }
+
     // Dispatch a GET_ROUTE event so that other modules can modify it.
     if ($code != Response::HTTP_BAD_REQUEST) {
       $event_entity = NULL;
@@ -353,7 +353,7 @@ class TideApiController extends ControllerBase {
       $json_response = $event->getJsonResponse();
       if ($event->isOk()) {
         // @TODO: Entity is not always a node.
-        $url = Url::fromRoute('entity.node.canonical', ['node' => $json_response["data"]["entity_id"]]);
+        $url = Url::fromRoute('entity.node.canonical', ['node' => $json_response['data']['attributes']]['entity_id']);
         // Cache the response with the same tags with the entity.
         $cache_entity = $this->apiHelper->findEntityFromUrl($url);
         $cached_route_data = [
