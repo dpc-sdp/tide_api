@@ -8,6 +8,7 @@
         "drupal/jsonapi_extras": "^2.5",
         "drupal/schemata": "^1.0-alpha2",
         "drupal/openapi": "^1.0-alpha1",
+        "drupal/metatag": "~1.7.0",
         "dpc-sdp/tide_core": "^1.0"
     },
     "suggest": {
