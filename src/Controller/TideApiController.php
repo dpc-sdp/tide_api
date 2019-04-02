@@ -353,7 +353,7 @@ class TideApiController extends ControllerBase {
       $json_response = $event->getJsonResponse();
       if ($event->isOk()) {
         // @TODO: Entity is not always a node.
-        $url = Url::fromRoute('entity.node.canonical', ['node' => $json_response['data']['attributes']]['entity_id']);
+        $url = Url::fromRoute('entity.node.canonical', ['node' => $json_response['data']['attributes']['entity_id']]);
         // Cache the response with the same tags with the entity.
         $cache_entity = $this->apiHelper->findEntityFromUrl($url);
         $cached_route_data = [
