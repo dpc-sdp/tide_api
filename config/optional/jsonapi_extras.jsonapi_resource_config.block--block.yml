@@ -10,7 +10,7 @@ resourceType: block--block
 resourceFields:
   id:
     fieldName: id
-    publicName: entity_id
+    publicName: id
     enhancer:
       id: ''
     disabled: false
