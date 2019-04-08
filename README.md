@@ -4,7 +4,8 @@ Content API functionality of [Tide](https://github.com/dpc-sdp/tide) distributio
 [![CircleCI](https://circleci.com/gh/dpc-sdp/tide_api.svg?style=svg)](https://circleci.com/gh/dpc-sdp/tide_api)
 
 ## Tide
-Tide is a Drupal 8 distribution focused on delivering an API first, headless Drupal content administration site.
+Tide is a Drupal 8 distribution focused on delivering an API first, headless 
+Drupal content administration site.
 
 # CONTENTS OF THIS FILE
 
@@ -14,12 +15,17 @@ Tide is a Drupal 8 distribution focused on delivering an API first, headless Dru
 * Installation
 
 # INTRODUCTION
-The Tide API module provides the content API functionality and related configurations.
-This module is required in case you want to use your site in a headless manner.
+The Tide API module provides the content API functionality and related 
+configurations. This module is required in case you want to use your site in a 
+headless manner.
+
+## Redirects
+This module introduces a wildcard redirect feature. Redirects using the Redirects module can be added with a `%` at the end in order to create wildcard redirects. E.g. `/my-path%` will match `/my-path-title`, `my-path/sub-folder/path` and `/my-path-other-title`.
 
 # REQUIREMENTS
 * [Tide Core](https://github.com/dpc-sdp/tide_core)
-* [JsonAPI Extras](https://drupal.org/project/jsonapi_extras)
+* [JSON:API](https://drupal.org/project/jsonapi)
+* [JSON:API Extras](https://drupal.org/project/jsonapi_extras)
 * [Open API](https://drupal.org/project/openapi)
 * [Schemata](https://drupal.org/project/schemata)
 
@@ -28,3 +34,9 @@ Include the Tide API module in your composer.json file
 ```bash
 composer require dpc-sdp/tide_api
 ```
+
+# Caveats
+
+Tide API is on the alpha release, use with caution. APIs are likely to change 
+before the stable version, that there will be breaking changes and that we're 
+not supporting it for external production sites at the moment.

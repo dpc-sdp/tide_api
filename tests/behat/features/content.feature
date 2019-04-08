@@ -8,8 +8,8 @@ Feature: Page
     Then the rest response status code should be 200
     And the response should be in JSON
     And the JSON node "jsonapi.version" should be equal to "1.0"
-    And the JSON node "links" should exist
-    And the JSON node "links.self" should contain "api/v1/node/test"
+    And the JSON node "links.self" should exist
+    And the JSON node "links.self.href" should contain "api/v1/node/test"
     And the JSON node "meta.count" should exist
     And the JSON node "data" should exist
 
@@ -24,8 +24,8 @@ Feature: Page
     When I send a GET request to "api/v1/node/test/99999999-aaaa-bbbb-ccc-000000000000"
     Then the rest response status code should be 200
     And the response should be in JSON
-    And the JSON node "links" should exist
-    And the JSON node "links.self" should contain "api/v1/node/test"
+    And the JSON node "links.self" should exist
+    And the JSON node "links.self.href" should contain "api/v1/node/test"
     And the JSON node "data" should exist
     And the JSON node "data.type" should be equal to "node--test"
     And the JSON node "data.id" should be equal to "99999999-aaaa-bbbb-ccc-000000000000"
@@ -34,8 +34,8 @@ Feature: Page
     Then the rest response status code should be 200
     And the response should be in JSON
     And the JSON node "jsonapi.version" should be equal to "1.0"
-    And the JSON node "links" should exist
-    And the JSON node "links.self" should contain "api/v1/node/test"
+    And the JSON node "links.self" should exist
+    And the JSON node "links.self.href" should contain "api/v1/node/test"
     And the JSON node "meta.count" should exist
     And the JSON node "data" should exist
     And the JSON node "data[0].type" should be equal to "node--test"
