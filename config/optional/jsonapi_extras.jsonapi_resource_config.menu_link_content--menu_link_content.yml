@@ -10,7 +10,7 @@ resourceType: menu_link_content--menu_link_content
 resourceFields:
   id:
     fieldName: id
-    publicName: entity_id
+    publicName: id
     enhancer:
       id: ''
     disabled: false
