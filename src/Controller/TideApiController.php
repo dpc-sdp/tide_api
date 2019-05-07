@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Path\AliasManagerInterface;
 use Drupal\Core\Url;
+use Drupal\redirect\Entity\Redirect;
 use Drupal\jsonapi\ResourceType\ResourceTypeRepository;
 use Drupal\tide_api\TideApiRedirectRepository;
 use Drupal\tide_api\Event\GetRouteEvent;

@@ -7,13 +7,13 @@
         "drupal/jsonapi": "~2.3.0",
         "drupal/jsonapi_extras": "~3.4.0",
         "drupal/schemata": "^1.0-alpha2",
-        "dpc-sdp/tide_core": "dev-develop"
+        "dpc-sdp/tide_core": "dev-release/1.1.0"
     },
     "suggest": {
-        "dpc-sdp/tide_page:dev-develop": "Page content type and related configuration for Tide Drupal 8 distribution",
-        "dpc-sdp/tide_news:dev-develop": "News content type and related configuration for Tide Drupal 8 distribution",
-        "dpc-sdp/tide_landing_page:dev-develop": "Landing Page content type and related configuration for Tide Drupal 8 distribution",
-        "dpc-sdp/tide_site:dev-develop": "TODO - Remove it later when we fix the incorrect dependency"
+        "dpc-sdp/tide_page:dev-release/1.2.0": "Page content type and related configuration for Tide Drupal 8 distribution",
+        "dpc-sdp/tide_news:dev-release/1.1.0": "News content type and related configuration for Tide Drupal 8 distribution",
+        "dpc-sdp/tide_landing_page:dev-release/1.1.0": "Landing Page content type and related configuration for Tide Drupal 8 distribution",
+        "dpc-sdp/tide_site:dev-release/1.1.0": "TODO - Remove it later when we fix the incorrect dependency"
     },
     "extra": {
         "enable-patching": true,
