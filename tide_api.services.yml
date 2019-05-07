@@ -12,20 +12,6 @@ services:
       - '@config.factory'
     tags:
       - {name: event_subscriber}
-  serializer.normalizer.config_entity.tide_api:
-    class: Drupal\tide_api\Normalizer\ConfigEntityNormalizer
-    arguments: ['@jsonapi.link_manager', '@jsonapi.resource_type.repository', '@entity_type.manager', '@module_handler' ]
-    tags:
-      - { name: jsonapi_normalizer_do_not_use_removal_imminent, priority: 23 }
-  tide_api.params.enhancer:
-    class: Drupal\tide_api\Routing\TideApiParamEnhancer
-    arguments: ['@serializer.normalizer.filter.jsonapi', '@serializer.normalizer.sort.jsonapi', '@serializer.normalizer.offset_page.tide_api']
-    tags:
-    - { name: route_enhancer }
-  serializer.normalizer.offset_page.tide_api:
-    class: Drupal\tide_api\Normalizer\OffsetPageNormalizer
-    tags:
-    - { name: jsonapi_normalizer_do_not_use_removal_imminent }
   tide_api.repository:
     class: Drupal\tide_api\TideApiRedirectRepository
     arguments: ['@entity.manager', '@database', '@config.factory']

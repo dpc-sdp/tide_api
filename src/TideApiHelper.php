@@ -136,7 +136,7 @@ class TideApiHelper {
       $jsonapi_entity_path = $this->getEntityJsonapiPath($entity);
       if ($jsonapi_entity_path) {
         // Build an endpoint as an absolute URL.
-        $endpoint = Url::fromRoute('jsonapi.' . $jsonapi_entity_path . '.individual', [$entity->getEntityTypeId() => $entity->uuid()])
+        $endpoint = Url::fromRoute('jsonapi.' . $jsonapi_entity_path . '.individual', ['entity' => $entity->uuid()])
           ->setAbsolute()
           ->toString();
       }
