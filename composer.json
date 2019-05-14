@@ -4,10 +4,10 @@
     "type": "drupal-module",
     "license": "GPL-2.0-or-later",
     "require": {
+        "dpc-sdp/tide_core": "1.2.0",
         "drupal/jsonapi": "~2.3.0",
         "drupal/jsonapi_extras": "~3.4.0",
-        "drupal/schemata": "^1.0-alpha2",
-        "dpc-sdp/tide_core": "1.1.0"
+        "drupal/schemata": "^1.0-alpha2"
     },
     "suggest": {
         "dpc-sdp/tide_page:1.2.0": "Page content type and related configuration for Tide Drupal 8 distribution",
