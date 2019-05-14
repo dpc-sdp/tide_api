@@ -4,7 +4,7 @@
     "type": "drupal-module",
     "license": "GPL-2.0-or-later",
     "require": {
-        "dpc-sdp/tide_core": "dev-hotfix/1.2.0",
+        "dpc-sdp/tide_core": "1.2.0",
         "drupal/jsonapi": "~2.3.0",
         "drupal/jsonapi_extras": "~3.4.0",
         "drupal/schemata": "^1.0-alpha2"
