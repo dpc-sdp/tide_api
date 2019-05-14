@@ -10,10 +10,10 @@
         "drupal/schemata": "^1.0-alpha2"
     },
     "suggest": {
-        "dpc-sdp/tide_page:dev-hotfix/1.2.2": "Page content type and related configuration for Tide Drupal 8 distribution",
-        "dpc-sdp/tide_news:dev-hotfix/1.1.2": "News content type and related configuration for Tide Drupal 8 distribution",
-        "dpc-sdp/tide_landing_page:dev-hotfix/1.1.2": "Landing Page content type and related configuration for Tide Drupal 8 distribution",
-        "dpc-sdp/tide_site:dev-hotfix/1.1.2": "TODO - Remove it later when we fix the incorrect dependency"
+        "dpc-sdp/tide_page:1.2.2": "Page content type and related configuration for Tide Drupal 8 distribution",
+        "dpc-sdp/tide_news:1.1.2": "News content type and related configuration for Tide Drupal 8 distribution",
+        "dpc-sdp/tide_landing_page:1.1.2": "Landing Page content type and related configuration for Tide Drupal 8 distribution",
+        "dpc-sdp/tide_site:1.1.2": "TODO - Remove it later when we fix the incorrect dependency"
     },
     "extra": {
         "enable-patching": true,
