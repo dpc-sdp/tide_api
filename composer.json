@@ -7,7 +7,7 @@
         "drupal/jsonapi": "~2.3.0",
         "drupal/jsonapi_extras": "~3.4.0",
         "drupal/schemata": "^1.0-alpha2",
-        "dpc-sdp/tide_core": "1.1.0"
+        "dpc-sdp/tide_core": "dev-feature/SDPA-2523_redo_SDPA-309-updated-group-patch"
     },
     "suggest": {
         "dpc-sdp/tide_page:1.2.0": "Page content type and related configuration for Tide Drupal 8 distribution",
