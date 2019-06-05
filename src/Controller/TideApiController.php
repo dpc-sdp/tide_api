@@ -343,29 +343,29 @@ class TideApiController extends ControllerBase {
 
     // Dispatch a GET_ROUTE event so that other modules can modify it.
     if ($code != Response::HTTP_BAD_REQUEST) {
-      $event_entity = NULL;
-      if ($entity) {
-        $event_entity = clone $entity;
-      }
-      $event = new GetRouteEvent(clone $request, $json_response, $event_entity, $code);
+      $entity = $entity ?? NULL;
+      $event = new GetRouteEvent(clone $request, $json_response, (!empty($entity) ? clone $entity : NULL), $code);
       $this->eventDispatcher->dispatch(TideApiEvents::GET_ROUTE, $event);
       // Update the response.
       $code = $event->getCode();
       $json_response = $event->getJsonResponse();
-      if ($event->isOk() && $event_entity) {
-        $url = Url::fromRoute('entity.' . $event_entity->getEntityTypeId() . '.canonical', [$event_entity->getEntityTypeId() => $json_response["data"]["entity_id"]]);
-        // Cache the response with the same tags with the entity.
-        $cache_entity = $this->apiHelper->findEntityFromUrl($url);
-        $cached_route_data = [
-          'json_response' => $json_response['data'],
-          'uri' => $url->toUriString(),
-          'id' => $entity ? $entity->uuid() : NULL,
-        ];
+      if ($event->isOk()) {
+        if (!$entity) {
+          // Re-retrieve the entity from the event.
+          if (!empty($json_response['data']['attributes']['entity_id'])) {
+            $entity = $this->entityTypeManager->getStorage($json_response['data']['attributes']['entity_type'])
+              ->load($json_response['data']['attributes']['entity_id']);
+          }
+        }
 
-        // Cache the response.
-        if ($cache_entity) {
-          $this->cache('data')
-            ->set($cid, $cached_route_data, Cache::PERMANENT, $cache_entity->getCacheTags());
+        if ($entity) {
+          // Cache the response with the same tags with the entity.
+          $cached_route_data = [
+            'json_response' => $json_response['data'],
+            'uri' => $entity->toUrl()->toUriString(),
+            'id' => $entity->uuid(),
+          ];
+          $this->cache('data')->set($cid, $cached_route_data, Cache::PERMANENT, $entity->getCacheTags());
         }
       }
       // Something set the Event to failure.
