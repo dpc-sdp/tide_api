@@ -10,7 +10,7 @@ resourceType: user_role--user_role
 resourceFields:
   id:
     fieldName: id
-    publicName: entity_id
+    publicName: id
     enhancer:
       id: ''
     disabled: false

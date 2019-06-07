@@ -12,3 +12,8 @@ services:
       - '@config.factory'
     tags:
       - {name: event_subscriber}
+  tide_api.repository:
+    class: Drupal\tide_api\TideApiRedirectRepository
+    arguments: ['@entity.manager', '@database', '@config.factory']
+    tags:
+      - { name: backend_overridable }

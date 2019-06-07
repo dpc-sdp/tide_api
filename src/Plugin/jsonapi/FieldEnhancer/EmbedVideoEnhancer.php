@@ -147,9 +147,9 @@ class EmbedVideoEnhancer extends ResourceFieldEnhancerBase implements ContainerF
               $video_id = $results[1];
 
               try {
-                $hash = unserialize(file_get_contents("//vimeo.com/api/v2/video/$video_id.php"));
+                $hash = unserialize(file_get_contents("https://vimeo.com/api/v2/video/$video_id.php"));
                 if (!empty($hash) && is_array($hash)) {
-                  $video_str = '//vimeo.com/moogaloop.swf?clip_id=%s';
+                  $video_str = 'https://player.vimeo.com/video/%s';
                 }
                 else {
                   // Don't use, couldn't find what we need.

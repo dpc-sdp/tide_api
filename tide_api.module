@@ -26,19 +26,24 @@ function tide_api_entity_access(EntityInterface $entity, $operation, AccountInte
 }
 
 /**
- * Implements hook_jsonapi_ENTITY_TYPE_filter_access().
+ * Implements hook_jsonapi_entity_filter_access().
  */
-function tide_api_jsonapi_menu_link_content_filter_access(EntityTypeInterface $entity_type, AccountInterface $account) {
-  return [
-    JSONAPI_FILTER_AMONG_ALL => AccessResult::allowed()->cachePerPermissions(),
-  ];
-}
+function tide_api_jsonapi_entity_filter_access(EntityTypeInterface $entity_type, AccountInterface $account) {
+  if (in_array($entity_type->id(), ['node', 'paragraph'])) {
+    return [
+      JSONAPI_FILTER_AMONG_PUBLISHED => AccessResult::allowedIfHasPermission($account, 'access content')->cachePerPermissions(),
+    ];
+  }
+  elseif ($entity_type->id() == 'media') {
+    return [
+      JSONAPI_FILTER_AMONG_PUBLISHED => AccessResult::allowedIfHasPermission($account, 'view media')->cachePerPermissions(),
+    ];
+  }
+  elseif (in_array($entity_type->id(), ['menu', 'menu_link_content'])) {
+    return [
+      JSONAPI_FILTER_AMONG_ALL => AccessResult::allowed()->cachePerPermissions(),
+    ];
+  }
 
-/**
- * Implements hook_jsonapi_ENTITY_TYPE_filter_access().
- */
-function tide_api_jsonapi_menu_filter_access(EntityTypeInterface $entity_type, AccountInterface $account) {
-  return [
-    JSONAPI_FILTER_AMONG_ALL => AccessResult::allowed()->cachePerPermissions(),
-  ];
+  return [JSONAPI_FILTER_AMONG_ALL => AccessResult::neutral()];
 }

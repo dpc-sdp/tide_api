@@ -19,6 +19,12 @@ The Tide API module provides the content API functionality and related
 configurations. This module is required in case you want to use your site in a 
 headless manner.
 
+## Redirects
+This module introduces a wildcard redirect feature. Redirects using the 
+Redirects module can be added with a `%` at the end in order to create wildcard 
+redirects. E.g. `/my-path%` will match `/my-path-title`, 
+`my-path/sub-folder/path` and `/my-path-other-title`.
+
 # REQUIREMENTS
 * [Tide Core](https://github.com/dpc-sdp/tide_core)
 * [JSON:API](https://drupal.org/project/jsonapi)
