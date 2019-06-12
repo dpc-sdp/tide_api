@@ -160,10 +160,16 @@ class TideApiController extends ControllerBase {
 
     $path = $request->query->get('path');
     $query = [];
-    if ($url = parse_url($base_url . $path)) {
-      $path = $url['path'];
-      parse_str($url['query'], $query);
+    $url = parse_url($base_url . $path);
+    if (is_array($url)) {
+      if (!empty($url['path'])) {
+        $path = $url['path'];
+      }
+      if (!empty($url['query'])) {
+        parse_str($url['query'], $query);
+      }
     }
+
     $site = $request->query->get('site');
 
     $json_response = [
@@ -216,7 +222,7 @@ class TideApiController extends ControllerBase {
         }
         // Cache miss.
         else {
-          $this->resolvePath($request, $path, $site, $cid, $json_response, $code);
+          $this->resolvePath($request, $path, $query, $site, $cid, $json_response, $code);
         }
 
       }
@@ -252,6 +258,8 @@ class TideApiController extends ControllerBase {
    *   A Request object.
    * @param string $path
    *   The passed in path.
+   * @param array $query
+   *   The query parameters.
    * @param string $site
    *   The passed in site.
    * @param int $cid
@@ -264,8 +272,8 @@ class TideApiController extends ControllerBase {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  private function resolvePath(Request $request, $path, $site, $cid, array &$json_response, &$code) {
-    if ($path !== '/' && $redirect = $this->redirectRepository->findMatchingRedirect($path, [], $this->languageManager->getCurrentLanguage()->getId())) {
+  private function resolvePath(Request $request, $path, array $query, $site, $cid, array &$json_response, &$code) {
+    if ($path !== '/' && $redirect = $this->redirectRepository->findMatchingRedirect($path, $query, $this->languageManager->getCurrentLanguage()->getId())) {
       $this->resolveRedirectPath($redirect, $site, $json_response, $code);
     }
     else {
@@ -274,7 +282,7 @@ class TideApiController extends ControllerBase {
     // If it's 404 Path Not Found, look for a wildcard redirect.
     if ($code == 404) {
       if ($path !== '/' && $redirect = $this->redirectRepository->findMatchingWildcardRedirect($path,
-          [], $this->languageManager->getCurrentLanguage()->getId())) {
+          $query, $this->languageManager->getCurrentLanguage()->getId())) {
         $this->resolveRedirectPath($redirect, $site, $json_response, $code);
       }
     }

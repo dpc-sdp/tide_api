@@ -156,7 +156,7 @@ class EmbedVideoEnhancer extends ResourceFieldEnhancerBase implements ContainerF
                   unset($video_id);
                 }
               }
-              catch (Exception $e) {
+              catch (\Exception $e) {
                 unset($video_id);
               }
             }
