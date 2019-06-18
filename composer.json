@@ -4,13 +4,13 @@
     "type": "drupal-module",
     "license": "GPL-2.0-or-later",
     "require": {
-        "dpc-sdp/tide_core": "^1.2.3",
+        "dpc-sdp/tide_core": "^1.2.5",
         "drupal/jsonapi": "~2.3.0",
         "drupal/jsonapi_extras": "~3.4.0",
         "drupal/schemata": "^1.0-alpha2"
     },
     "suggest": {
-        "dpc-sdp/tide_site:^1.1.4": "TODO - Remove it later when we fix the incorrect dependency"
+        "dpc-sdp/tide_site:^1.1.6": "TODO - Remove it later when we fix the incorrect dependency"
     },
     "extra": {
         "enable-patching": true,
