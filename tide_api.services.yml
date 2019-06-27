@@ -12,7 +12,7 @@ services:
       - '@config.factory'
     tags:
       - {name: event_subscriber}
-  tide_api.repository:
+  tide_api.redirect_repository:
     class: Drupal\tide_api\TideApiRedirectRepository
     arguments: ['@entity.manager', '@database', '@config.factory']
     tags:

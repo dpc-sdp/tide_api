@@ -2,6 +2,7 @@
 
 namespace Drupal\tide_api\Event;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityInterface;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\HttpFoundation\Request;
@@ -43,6 +44,13 @@ class GetRouteEvent extends Event {
   protected $entity = NULL;
 
   /**
+   * The cacheable metadata.
+   *
+   * @var \Drupal\Core\Cache\CacheableMetadata
+   */
+  protected $cacheableMetadata;
+
+  /**
    * GetRouteEvent constructor.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
@@ -53,12 +61,15 @@ class GetRouteEvent extends Event {
    *   The Entity object.
    * @param int $code
    *   The status code.
+   * @param \Drupal\Core\Cache\CacheableMetadata $cacheable_metadata
+   *   The cache metadata.
    */
-  public function __construct(Request $request, array $json_response, EntityInterface $entity = NULL, $code = Response::HTTP_OK) {
+  public function __construct(Request $request, array $json_response, EntityInterface $entity = NULL, $code = Response::HTTP_OK, CacheableMetadata $cacheable_metadata = NULL) {
     $this->request = $request;
     $this->setJsonResponse($json_response);
     $this->entity = $entity;
     $this->setCode($code);
+    $this->cacheableMetadata = $cacheable_metadata ?? new CacheableMetadata();
   }
 
   /**
@@ -146,6 +157,16 @@ class GetRouteEvent extends Event {
    */
   public function getEntity() {
     return $this->entity;
+  }
+
+  /**
+   * Returns the cacheable metadata.
+   *
+   * @return \Drupal\Core\Cache\CacheableMetadata $cacheable_metadata
+   *   The metadata.
+   */
+  public function getCacheableMetadata() {
+    return $this->cacheableMetadata;
   }
 
 }

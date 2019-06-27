@@ -9,9 +9,6 @@
         "drupal/jsonapi_extras": "~3.4.0",
         "drupal/schemata": "^1.0-alpha2"
     },
-    "suggest": {
-        "dpc-sdp/tide_site:^1.1.6": "TODO - Remove it later when we fix the incorrect dependency"
-    },
     "extra": {
         "enable-patching": true,
         "composer-exit-on-patch-failure": true,

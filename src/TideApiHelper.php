@@ -2,12 +2,17 @@
 
 namespace Drupal\tide_api;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Path\AliasManagerInterface;
 use Drupal\Core\Url;
 use Drupal\jsonapi\ResourceType\ResourceTypeRepository;
+use Drupal\jsonapi\Routing\Routes;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class TideApiHelper.
@@ -132,14 +137,10 @@ class TideApiHelper {
   public function findEndpointFromEntity(EntityInterface $entity) {
     $endpoint = NULL;
     try {
-      // Get JSONAPI configured path for this entity.
-      $jsonapi_entity_path = $this->getEntityJsonapiPath($entity);
-      if ($jsonapi_entity_path) {
-        // Build an endpoint as an absolute URL.
-        $endpoint = Url::fromRoute('jsonapi.' . $jsonapi_entity_path . '.individual', ['entity' => $entity->uuid()])
-          ->setAbsolute()
-          ->toString();
-      }
+      /** @var \Drupal\jsonapi_extras\ResourceType\ConfigurableResourceType $resource_type */
+      $resource_type = $this->resourceTypeRepository->get($entity->getEntityTypeId(), $entity->bundle());
+      $route_name = Routes::getRouteName($resource_type, 'individual');
+      $endpoint = Url::fromRoute($route_name, ['entity' => $entity->uuid()])->setAbsolute()->toString(TRUE)->getGeneratedUrl();
     }
     catch (\Exception $exception) {
       return NULL;
@@ -156,6 +157,8 @@ class TideApiHelper {
    *
    * @return string|null
    *   JSONAPI path for provided entity or NULL if no path was found.
+   *
+   * @deprecated
    */
   public function getEntityJsonapiPath(EntityInterface $entity) {
     /** @var \Drupal\jsonapi_extras\ResourceType\ConfigurableResourceType $resource_type */
@@ -179,6 +182,151 @@ class TideApiHelper {
     }
 
     return $this->frontPage;
+  }
+
+  /**
+   * Get the path query parameter.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The Symfony request object.
+   *
+   * @return string|null
+   *   The path query param.
+   */
+  public function getRequestedPath(Request $request) {
+    if ($request->attributes->has('_tide_api_path')) {
+      return $request->attributes->get('_tide_api_path');
+    }
+
+    return $request->query->get('path');
+  }
+
+  /**
+   * Override the path query parameter.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The Symfony request object.
+   * @param string $path
+   *   The overridden value.
+   */
+  public function overrideRequestedPath(Request $request, $path) {
+    $request->attributes->set('_tide_api_path', $path);
+  }
+
+  /**
+   * Get the full URL for a given request object.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request object.
+   * @param array|null $query
+   *   The query parameters to use. Leave it empty to get the query from the
+   *   request object.
+   *
+   * @return \Drupal\Core\Url
+   *   The full URL.
+   */
+  public function getRequestLink(Request $request, $query = NULL) {
+    if ($query === NULL) {
+      return Url::fromUri($request->getUri());
+    }
+
+    $uri_without_query_string = $request->getSchemeAndHttpHost() . $request->getBaseUrl() . $request->getPathInfo();
+    return Url::fromUri($uri_without_query_string)->setOption('query', $query);
+  }
+
+  /**
+   * Gets the default JSON:API response for routing API.
+   *
+   * @param \Drupal\Core\Cache\CacheableMetadata $cache_metadata
+   *   The cache metadata.
+   *
+   * @return array
+   *   The default response.
+   */
+  public function getDefaultJsonResponse(CacheableMetadata $cache_metadata = NULL) {
+    $self_url = static::getRequestLink(\Drupal::request(), \Drupal::request()->query)->setAbsolute()->toString(TRUE);
+    if ($cache_metadata) {
+      $cache_metadata->addCacheableDependency($self_url);
+    }
+    $json_response = [
+      'data' => [
+        'type' => 'route',
+        'links' => [
+          'self' => [
+            'href' => $self_url->getGeneratedUrl(),
+          ],
+        ],
+      ],
+      'errors' => [
+        [
+          'status' => Response::HTTP_NOT_FOUND,
+          'title' => Response::$statusTexts[Response::HTTP_NOT_FOUND],
+        ],
+      ],
+      'links' => [
+        'self' => [
+          'href' => $self_url->getGeneratedUrl(),
+        ],
+      ],
+    ];
+
+    return $json_response;
+  }
+
+  /**
+   * Set Json response to return errors.
+   *
+   * @param array $json_response
+   *   The Json Response array.
+   * @param int $error_code
+   *   The error code.
+   * @param string|null $message
+   *   The translated error message.
+   * @param bool $append
+   *   Whether to append the error to the response.
+   *
+   * @return int
+   *   The error code.
+   */
+  public function setJsonResponseError(array &$json_response, $error_code, $message = NULL, $append = FALSE) {
+    unset($json_response['data']);
+
+    $error = [
+      'status' => $error_code,
+      'title' => $message ?? Response::$statusTexts[$error_code],
+    ];
+
+    if ($append) {
+      $json_response['errors'][] = $error;
+    }
+    else {
+      $json_response['errors'] = $error;
+    }
+
+    return $error_code;
+  }
+
+  /**
+   * @param array $json_response
+   *   The Json Response array.
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity.
+   * @param \Drupal\Core\Cache\CacheableMetadata $cache_metadata
+   *   The cache metadata.
+   */
+  public function setJsonResponseDataAttributesFromEntity(array &$json_response, EntityInterface $entity, CacheableMetadata $cache_metadata = NULL) {
+    $endpoint = $this->findEndpointFromEntity($entity);
+    $entity_type = $entity->getEntityTypeId();
+    $json_response['data']['attributes'] = [
+      'entity_type' => $entity_type,
+      'entity_id' => $entity->id(),
+      'bundle' => $entity->bundle(),
+      'uuid' => $entity->uuid(),
+      'endpoint' => $endpoint,
+    ];
+    if ($cache_metadata) {
+      $cache_metadata->addCacheableDependency($entity);
+    }
   }
 
 }

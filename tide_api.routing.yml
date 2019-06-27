@@ -1,4 +1,4 @@
-tide_api.jsonapi.alias:
+jsonapi.tide_api.route:
   path: 'jsonapi/route'
   defaults:
     _controller: '\Drupal\tide_api\Controller\TideApiController::getRoute'
@@ -6,3 +6,5 @@ tide_api.jsonapi.alias:
     _method: 'GET'
     # Public route lookup is always accessible.
     _access: 'TRUE'
+    _format: api_json
+    _content_type_format: api_json
