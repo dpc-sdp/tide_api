@@ -6,7 +6,6 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Path\AliasManagerInterface;
 use Drupal\Core\Url;
 use Drupal\jsonapi\ResourceType\ResourceTypeRepository;
@@ -157,8 +156,6 @@ class TideApiHelper {
    *
    * @return string|null
    *   JSONAPI path for provided entity or NULL if no path was found.
-   *
-   * @deprecated
    */
   public function getEntityJsonapiPath(EntityInterface $entity) {
     /** @var \Drupal\jsonapi_extras\ResourceType\ConfigurableResourceType $resource_type */
@@ -260,7 +257,7 @@ class TideApiHelper {
       'errors' => [
         [
           'status' => Response::HTTP_NOT_FOUND,
-          'title' => Response::$statusTexts[Response::HTTP_NOT_FOUND],
+          'title' => static::getApiResponseStatusText(Response::HTTP_NOT_FOUND),
         ],
       ],
       'links' => [
@@ -293,20 +290,22 @@ class TideApiHelper {
 
     $error = [
       'status' => $error_code,
-      'title' => $message ?? Response::$statusTexts[$error_code],
+      'title' => $message ?? static::getApiResponseStatusText($error_code),
     ];
 
     if ($append) {
       $json_response['errors'][] = $error;
     }
     else {
-      $json_response['errors'] = $error;
+      $json_response['errors'] = [$error];
     }
 
     return $error_code;
   }
 
   /**
+   * Set the JSON response with Entity data.
+   *
    * @param array $json_response
    *   The Json Response array.
    * @param \Drupal\Core\Entity\EntityInterface $entity
@@ -326,6 +325,28 @@ class TideApiHelper {
     ];
     if ($cache_metadata) {
       $cache_metadata->addCacheableDependency($entity);
+    }
+  }
+
+  /**
+   * Return the default status text for API response.
+   *
+   * @param int $code
+   *   The status code.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|string
+   *   The status text.
+   */
+  public static function getApiResponseStatusText($code) {
+    switch ($code) {
+      case Response::HTTP_NOT_FOUND:
+        return t('Path not found.');
+
+      case Response::HTTP_FORBIDDEN:
+        return t('Permission denied.');
+
+      default:
+        return Response::$statusTexts[$code];
     }
   }
 

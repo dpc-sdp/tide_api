@@ -214,8 +214,6 @@ class TideApiController extends ControllerBase {
    *   The current json response array.
    * @param int $code
    *   The current HTTP Status code.
-   * @param \Drupal\Core\Cache\CacheableMetadata $cache_metadata
-   *   The cache metadata.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
@@ -244,13 +242,14 @@ class TideApiController extends ControllerBase {
         }
 
         if ($entity) {
+          $this->cacheMetadata->addCacheableDependency($entity);
           // Cache the response with the same tags with the entity.
           $cached_route_data = [
             'json_response' => $json_response['data'],
             'uri' => ($entity->getEntityTypeId() != 'redirect') ? $entity->toUrl()->toUriString() : NULL,
             'id' => $entity->uuid(),
           ];
-          $this->cache('data')->set($this->cacheId, $cached_route_data, Cache::PERMANENT, $entity->getCacheTags());
+          $this->cache('data')->set($this->cacheId, $cached_route_data, Cache::PERMANENT, $this->cacheMetadata->getCacheTags());
         }
       }
       // Something set the Event to failure.
@@ -313,7 +312,7 @@ class TideApiController extends ControllerBase {
    *   The request path.
    * @param array $json_response
    *   The current JSON response.
-   * @param $code
+   * @param int $code
    *   The return code.
    *
    * @return bool
@@ -378,7 +377,7 @@ class TideApiController extends ControllerBase {
    *   The cache ID.
    */
   protected function initializeCacheId($path) {
-    $this->cacheId = 'tide_api:route:path:' . substr($path, 0, 128) .  hash('sha256', $path);
+    $this->cacheId = 'tide_api:route:path:' . substr($path, 0, 128) . hash('sha256', $path);
     return $this->cacheId;
   }
 

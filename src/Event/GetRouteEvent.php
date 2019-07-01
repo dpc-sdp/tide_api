@@ -162,7 +162,7 @@ class GetRouteEvent extends Event {
   /**
    * Returns the cacheable metadata.
    *
-   * @return \Drupal\Core\Cache\CacheableMetadata $cacheable_metadata
+   * @return \Drupal\Core\Cache\CacheableMetadata
    *   The metadata.
    */
   public function getCacheableMetadata() {

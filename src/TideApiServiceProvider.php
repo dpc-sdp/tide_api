@@ -22,6 +22,16 @@ class TideApiServiceProvider extends ServiceProviderBase {
       $definition->setClass('\Drupal\tide_api\EventSubscriber\TideApiJsonApiRequestValidator');
       $definition->setArguments([new Reference('module_handler')]);
     }
+
+    if ($container->hasDefinition('jsonapi.include_resolver')) {
+      $definition = $container->getDefinition('jsonapi.include_resolver');
+      $definition->setClass('\Drupal\tide_api\IncludeResolver');
+    }
+
+    if ($container->hasDefinition('jsonapi.entity_access_checker')) {
+      $definition = $container->getDefinition('jsonapi.entity_access_checker');
+      $definition->setClass('\Drupal\tide_api\Access\EntityAccessChecker');
+    }
   }
 
 }
