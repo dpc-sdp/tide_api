@@ -5,8 +5,8 @@
     "license": "GPL-2.0-or-later",
     "require": {
         "dpc-sdp/tide_core": "^1.2.5",
-        "drupal/jsonapi": "~2.3.0",
-        "drupal/jsonapi_extras": "~3.4.0",
+        "drupal/jsonapi": "^2.4",
+        "drupal/jsonapi_extras": "^3.8",
         "drupal/schemata": "^1.0-alpha2"
     },
     "suggest": {
@@ -18,9 +18,6 @@
         "patches": {
             "drupal/core": {
                 "Menu content is not accessible via jsonapi - https://www.drupal.org/node/2915792": "https://www.drupal.org/files/issues/menu_link_content-view-permissions-2915792.patch"
-            },
-            "drupal/jsonapi_extras": {
-                "JSON:API Extras 3.4 adds enhanced field values outside of attributes for Config Entities - https://www.drupal.org/project/jsonapi_extras/issues/3037833": "https://www.drupal.org/files/issues/2019-03-06/jsonapi_extras-config_entities_enhancer-3037833-4.patch"
             }
         }
     },
