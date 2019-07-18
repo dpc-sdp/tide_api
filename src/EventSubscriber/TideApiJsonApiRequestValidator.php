@@ -40,7 +40,7 @@ class TideApiJsonApiRequestValidator extends JsonApiRequestValidator {
    *   The custom params.
    */
   protected function getCustomQueryParameters() {
-    $custom_params = [];
+    $custom_params = ['path'];
     $this->moduleHandler->alter('tide_api_jsonapi_custom_query_parameters', $custom_params);
     return $custom_params;
   }
