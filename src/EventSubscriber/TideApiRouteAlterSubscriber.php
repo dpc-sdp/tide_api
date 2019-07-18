@@ -60,7 +60,7 @@ class TideApiRouteAlterSubscriber implements EventSubscriberInterface {
 
       $collection = $event->getRouteCollection();
       foreach ($collection->getIterator() as $name => $route) {
-        if (strpos($name, '.' . $default_prefix . '.') !== FALSE) {
+        if (strpos($name, 'jsonapi.tide_api') === 0) {
           $path = str_replace('/' . $default_prefix . '/', $prefix, $route->getPath());
           $collection->get($name)->setPath($path);
         }
