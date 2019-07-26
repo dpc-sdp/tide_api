@@ -20,3 +20,22 @@ function tide_api_install() {
   Role::load('anonymous')->grantPermission('access jsonapi resource list')->save();
   Role::load('authenticated')->grantPermission('access jsonapi resource list')->save();
 }
+
+/**
+ * Implements hook_update_dependencies().
+ */
+function tide_api_update_dependencies() {
+  $dependencies['tide_api'][8001] = [
+    'jsonapi' => 8701,
+  ];
+}
+
+/**
+ * Disable jsonapi read_only setting.
+ */
+function tide_api_update_8001() {
+  $config_factory = \Drupal::configFactory();
+  $jsonapi_settings = $config_factory->getEditable('jsonapi.settings');
+  $jsonapi_settings->set('read_only', FALSE)
+    ->save(TRUE);
+}
