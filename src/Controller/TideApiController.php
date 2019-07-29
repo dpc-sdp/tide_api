@@ -160,7 +160,7 @@ class TideApiController extends ControllerBase {
     try {
       if ($path) {
         $this->initializeCacheId($path);
-        $this->cacheMetadata->addCacheContexts(['url.query_args:path']);
+        $this->cacheMetadata->addCacheContexts(['url.query_args:path', 'user']);
 
         // First load from cache_data.
         $cached_route_data = $this->cache('data')->get($this->cacheId);
