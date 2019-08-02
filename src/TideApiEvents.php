@@ -14,4 +14,11 @@ class TideApiEvents {
    */
   const GET_ROUTE = 'tide_api.get_route';
 
+  /**
+   * The event dispatched when Tide API generates its cache id.
+   *
+   * @Event("Drupal\tide_api\Event\GetCacheIdEvent")
+   */
+  const GET_CACHE_ID = 'tide_api.get_cache_id';
+
 }
