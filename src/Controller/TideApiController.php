@@ -375,9 +375,6 @@ class TideApiController extends ControllerBase {
    *   The requested path.
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The Request object.
-   *
-   * @return string
-   *   The cache ID.
    */
   protected function initializeCacheId($path, Request $request) {
     // Create a GetCacheIdEvent preparing for dispatching the Event.
@@ -385,7 +382,7 @@ class TideApiController extends ControllerBase {
     // Dispatching GetCacheIdEvent event to give other modules an opportunity to
     // alter it.
     $event = $this->eventDispatcher->dispatch(TideApiEvents::GET_CACHE_ID, $event);
-    return $event->getCacheId();
+    $this->cacheId = $event->getCacheId();
   }
 
 }
