@@ -102,6 +102,41 @@ class LinkEnhancer extends UuidLinkEnhancer {
           }
         }
       }
+
+      // Process internal links.
+      preg_match('/internal:\/(.*)/', $data['uri'], $processed_uri);
+      if (!empty($processed_uri)) {
+        // Separating if there is an anchor.
+        $parts = explode("#", $processed_uri[1]);
+        if (!empty($parts)) {
+          // Getting node from the alias.
+          $path = \Drupal::service('path.alias_manager')->getPathByAlias('/' . $parts[0]);
+          if (!empty($path) && preg_match('/(node)\/(\d+)/', $path, $entity_info)) {
+            $anchor = array_key_exists(1, $parts) ? '#' . $parts[1] : '';
+            $entity_type = $entity_info[1];
+            $entity_id = $entity_info[2];
+            // Add entity info to the link field.
+            $data['entity'] = [
+              'uri' => $data['uri'],
+              'entity_type' => $entity_type,
+              'entity_id' => $entity_id,
+            ];
+            $entity = $this->entityTypeManager->getStorage($entity_type)->load($entity_id);
+            if (!is_null($entity)) {
+              $data['entity']['bundle'] = $entity->bundle();
+              $data['entity']['uuid'] = $entity->uuid();
+              // And URL to the entity.
+              try {
+                $data['url'] = $entity->toUrl('canonical')->toString() . $anchor;
+              }
+              catch (\Exception $exception) {
+                watchdog_exception('tide_api', $exception);
+                $data['url'] = '/' . $entity_type . '/' . $entity_id;
+              }
+            }
+          }
+        }
+      }
     }
 
     $data = parent::doUndoTransform($data, $context);

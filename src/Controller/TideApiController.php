@@ -11,6 +11,7 @@ use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Path\AliasManagerInterface;
 use Drupal\Core\Url;
 use Drupal\jsonapi\ResourceType\ResourceTypeRepository;
+use Drupal\tide_api\Event\GetCacheIdEvent;
 use Drupal\tide_api\TideApiRedirectRepository;
 use Drupal\tide_api\Event\GetRouteEvent;
 use Drupal\tide_api\TideApiEvents;
@@ -159,7 +160,7 @@ class TideApiController extends ControllerBase {
 
     try {
       if ($path) {
-        $this->initializeCacheId($path);
+        $this->initializeCacheId($path, $request);
         $this->cacheMetadata->addCacheContexts(['url.query_args:path', 'user']);
 
         // First load from cache_data.
@@ -372,13 +373,16 @@ class TideApiController extends ControllerBase {
    *
    * @param string $path
    *   The requested path.
-   *
-   * @return string
-   *   The cache ID.
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The Request object.
    */
-  protected function initializeCacheId($path) {
-    $this->cacheId = 'tide_api:route:path:' . substr($path, 0, 128) . hash('sha256', $path);
-    return $this->cacheId;
+  protected function initializeCacheId($path, Request $request) {
+    // Create a GetCacheIdEvent preparing for dispatching the Event.
+    $event = new GetCacheIdEvent($request, 'tide_api:route:path:' . substr($path, 0, 128) . hash('sha256', $path));
+    // Dispatching GetCacheIdEvent event to give other modules an opportunity to
+    // alter it.
+    $event = $this->eventDispatcher->dispatch(TideApiEvents::GET_CACHE_ID, $event);
+    $this->cacheId = $event->getCacheId();
   }
 
 }
