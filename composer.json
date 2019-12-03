@@ -4,7 +4,7 @@
     "type": "drupal-module",
     "license": "GPL-2.0-or-later",
     "require": {
-        "dpc-sdp/tide_core": "dev-feature/SDPA-3272-update-drupal-8-7 as ^1.2.5",
+        "dpc-sdp/tide_core": "dev-feature/fixing-building-failing as 1.2.5",
         "drupal/jsonapi_extras": "^3.8",
         "drupal/schemata": "^1.0-alpha2"
     },
