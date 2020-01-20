@@ -18,7 +18,7 @@ function tide_api_entity_access(EntityInterface $entity, $operation, AccountInte
   if ($entity->getEntityTypeId() == 'menu' || $entity->getEntityTypeId() == 'menu_link_content') {
     if ($operation == 'view') {
       if (Routes::isJsonApiRequest(\Drupal::request()->attributes->all())) {
-        return AccessResult::allowed()->cachePerUser();
+        return AccessResult::allowed()->addCacheableDependency($entity);
       }
     }
   }
