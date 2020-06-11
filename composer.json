@@ -4,7 +4,7 @@
     "type": "drupal-module",
     "license": "GPL-2.0-or-later",
     "require": {
-        "dpc-sdp/tide_core": "dev-feature/SDPA-4225-Update-SDP-core-to-Drupal-8-8-5",
+        "dpc-sdp/tide_core": "^2.0.0",
         "drupal/jsonapi_extras": "^3.8",
         "drupal/schemata": "^1.0-alpha2"
     },
