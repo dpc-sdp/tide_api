@@ -93,4 +93,5 @@ class YamlEnhancer extends ResourceFieldEnhancerBase {
     }
     return $result;
   }
+
 }
