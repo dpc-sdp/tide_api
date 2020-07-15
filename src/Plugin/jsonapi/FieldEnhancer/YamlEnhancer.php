@@ -22,7 +22,16 @@ class YamlEnhancer extends ResourceFieldEnhancerBase {
    * {@inheritdoc}
    */
   protected function doUndoTransform($data, Context $context) {
-    $data = $this->processText($data);
+    $data = Yaml::decode($data);
+    $markup_text = $data['markup']['#markup'];
+    $processed_text = $data['processed_text']['#text'];
+
+    if (!empty($processed_text)) {
+      $data['processed_text']['#text'] = $this->processText($processed_text);
+    }
+    if (!empty($markup_text)) {
+      $data['markup']['#markup'] = $this->processText($markup_text);
+    }
 
     return $data;
   }
@@ -53,16 +62,15 @@ class YamlEnhancer extends ResourceFieldEnhancerBase {
   /**
    * Helper function to convert node urls to path alias.
    *
-   * @param string $data
-   *   Data from a webform.
+   * @param string $text
+   *   The string value of the field.
    *
-   * @return formattted data
+   * @return string
    */
-  public function processText($data) {
-    $formatted_data = Yaml::decode($data);
-    $processed_text = $formatted_data['processed_text']['#text'];
-    if (strpos($processed_text, 'data-entity-type') !== FALSE && strpos($processed_text, 'data-entity-uuid') !== FALSE) {
-      $dom = Html::load($processed_text);
+  public function processText($text) {
+    $result = $text;
+    if (strpos($text, 'data-entity-type') !== FALSE && strpos($text, 'data-entity-uuid') !== FALSE) {
+      $dom = Html::load($text);
       $xpath = new \DOMXPath($dom);
       foreach ($xpath->query('//a[@data-entity-type and @data-entity-uuid]') as $element) {
         /** @var \DOMElement $element */
@@ -80,9 +88,8 @@ class YamlEnhancer extends ResourceFieldEnhancerBase {
           watchdog_exception('YamlEnhancer_processText', $e);
         }
       }
-      $formatted_data['processed_text']['#text'] = Html::serialize($dom);
+      $result = Html::serialize($dom);
     }
-    return $formatted_data;
+    return $result;
   }
-
 }
