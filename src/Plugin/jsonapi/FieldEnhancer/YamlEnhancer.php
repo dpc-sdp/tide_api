@@ -66,6 +66,7 @@ class YamlEnhancer extends ResourceFieldEnhancerBase {
    *   The string value of the field.
    *
    * @return string
+   *   The processed text.
    */
   public function processText($text) {
     $result = $text;
