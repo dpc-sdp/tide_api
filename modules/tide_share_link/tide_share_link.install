@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * @file
+ * Tide Share Link installation.
+ */
+
+use Drupal\user\Entity\Role;
+use Drupal\user\RoleInterface;
+
+/**
+ * Implements hook_install().
+ */
+function tide_share_link_install() {
+  $admin_permission = 'administer share link token entities';
+  /** @var \Drupal\user\RoleInterface $admin_role */
+  $admin_role = Role::load('site_admin');
+  if ($admin_role) {
+    $admin_role->grantPermission($admin_permission)->save();
+  }
+
+  $editorial_permissions = [
+    'add share link token entities',
+    'delete share link token entities',
+    'view unpublished share link token entities',
+    'access share link token entities listing',
+  ];
+  foreach (['approver', 'editor', 'site_admin'] as $role_id) {
+    /** @var \Drupal\user\RoleInterface $editorial_role */
+    $editorial_role = Role::load($role_id);
+    if ($editorial_role) {
+      foreach ($editorial_permissions as $permission) {
+        $editorial_role->grantPermission($permission);
+      }
+      $editorial_role->save();
+    }
+  }
+
+  $public_permission = 'view published share link token entities';
+  $public_roles = [
+    RoleInterface::ANONYMOUS_ID,
+    RoleInterface::AUTHENTICATED_ID,
+  ];
+  foreach ($public_roles as $role_id) {
+    /** @var \Drupal\user\RoleInterface $public_role */
+    $public_role = Role::load($role_id);
+    if ($public_role) {
+      $public_role->grantPermission($public_permission)->save();
+    }
+  }
+}

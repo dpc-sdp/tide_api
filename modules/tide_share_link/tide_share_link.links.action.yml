@@ -1,0 +1,12 @@
+# Share Link Token actions definition
+share_link_token.share_node:
+  route_name: share_link_token.share_node
+  title: 'Share'
+  appears_on:
+    - entity.node.canonical
+
+share_link_token.share_node_revision:
+  route_name: share_link_token.share_node_revision
+  title: 'Share'
+  appears_on:
+    - entity.node.revision

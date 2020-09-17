@@ -1,0 +1,247 @@
+<?php
+
+/**
+ * @file
+ * Tide Share Link module.
+ */
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Url;
+use Drupal\node\Entity\Node;
+use Drupal\node\NodeInterface;
+use Drupal\tide_share_link\Entity\ShareLinkTokenInterface;
+use Drupal\tide_share_link\ShareLinkTokenSharedNodeFieldItemList;
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function tide_share_link_entity_extra_field_info() {
+  $extra = [];
+  $extra['share_link_token']['share_link_token']['display']['api_info'] = [
+    'label' => t('API Information'),
+    'description' => t('API Information'),
+    'weight' => 100,
+    'visible' => TRUE,
+  ];
+  return $extra;
+}
+
+/**
+ * Implements hook_entity_bundle_field_info().
+ */
+function tide_share_link_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+  $fields = [];
+  if ($entity_type->id() !== 'share_link_token') {
+    return $fields;
+  }
+
+  $fields['shared_node'] = BaseFieldDefinition::create('entity_reference_revisions')
+    ->setLabel(t('Shared Node'))
+    ->setDescription(t('The shared node'))
+    ->setSetting('target_type', 'node')
+    ->setSetting('handler', 'default:node')
+    ->setComputed(TRUE)
+    ->setReadOnly(FALSE)
+    ->setInternal(FALSE)
+    ->setTargetEntityTypeId($entity_type->id())
+    ->setClass(ShareLinkTokenSharedNodeFieldItemList::class)
+    ->setDisplayOptions('view', [
+      'label' => 'inline',
+      'type' => 'entity_reference_revisions_label_revision_number',
+      'weight' => -5,
+      'settings' => [
+        'link' => TRUE,
+        'show_revision_number' => TRUE,
+      ],
+    ])
+    ->setDisplayConfigurable('view', TRUE);
+
+  return $fields;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Add Share links to Node Revision Overview form.
+ *
+ * @see \Drupal\diff\Form\RevisionOverviewForm::buildForm()
+ */
+function tide_share_link_form_revision_overview_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Determine if the current user can create share link tokens.
+  $account = \Drupal::currentUser();
+  $has_administer_token_perm = $account->hasPermission('administer share link token entities');
+  $has_add_token_perm = $account->hasPermission('add share link token entities');
+  if (!$has_administer_token_perm && !$has_add_token_perm) {
+    return;
+  }
+
+  if (!isset($form['node_revisions_table'])) {
+    return;
+  }
+
+  // Load the current node.
+  $node = \Drupal::routeMatch()->getParameter('node');
+  if ($node && !($node instanceof NodeInterface)) {
+    $node = Node::load((int) $node);
+  }
+  if (!$node) {
+    return;
+  }
+
+  foreach (Element::children($form['node_revisions_table']) as $delta) {
+    // The current revision.
+    if (!$delta) {
+      $form['node_revisions_table'][$delta]['operations'] = [
+        '#type' => 'operations',
+        '#links' => [
+          'share' => [
+            'title' => t('Share'),
+            'url' => Url::fromRoute('share_link_token.share_node', [
+              'node' => $node->id(),
+            ]),
+          ],
+        ],
+        '#prefix' => '<em>' . t('Current revision') . '</em>',
+      ];
+      continue;
+    }
+
+    // Attempt to retrieve the revision id.
+    $vid = $form['node_revisions_table'][$delta]['select_column_one']['#return_value']
+      ?? $form['node_revisions_table'][$delta]['select_column_two']['#return_value']
+      ?? NULL;
+    if ($vid) {
+      $form['node_revisions_table'][$delta]['operations']['#links']['share'] = [
+        'title' => t('Share'),
+        'url' => Url::fromRoute('share_link_token.share_node_revision', [
+          'node' => $node->id(),
+          'node_revision' => $vid,
+        ]),
+      ];
+    }
+  }
+}
+
+/**
+ * Title callback for node_collection and revision_collection routes.
+ */
+function _tide_share_link_get_list_title() {
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = \Drupal::routeMatch()->getParameter('node');
+  if ($node instanceof NodeInterface) {
+    $vid = \Drupal::routeMatch()->getParameter('node_revision');
+    if ($vid) {
+      return t('Share links for <em>@title (rev. @vid)</em>', [
+        '@title' => $node->getTitle(),
+        '@vid' => $vid,
+      ]);
+    }
+    return t('Share links for <em>@title</em>', [
+      '@title' => $node->getTitle(),
+    ]);
+  }
+  return t('Share links');
+}
+
+/**
+ * Title callback for entity.share_link_token.edit_form route.
+ */
+function _tide_share_link_get_edit_title() {
+  /** @var \Drupal\tide_share_link\Entity\ShareLinkTokenInterface $token */
+  $token = \Drupal::routeMatch()->getParameter('share_link_token');
+  if ($token instanceof ShareLinkTokenInterface) {
+    return t('Edit share link token <em>@name</em>', ['@name' => $token->label()]);
+  }
+
+  return t('Edit Share link token');
+}
+
+/**
+ * Implements hook_node_delete().
+ *
+ * Delete all share link tokens of the deleted node.
+ */
+function tide_share_link_node_delete(EntityInterface $entity) {
+  try {
+    /** @var \Drupal\node\NodeInterface $entity */
+    /** @var \Drupal\tide_share_link\ShareLinkTokenStorageInterface $storage */
+    $storage = \Drupal::entityTypeManager()->getStorage('share_link_token');
+    $storage->deleteBySharedNodeId($entity->id());
+  }
+  catch (Exception $exception) {
+    watchdog_exception('tide_share_link', $exception);
+  }
+}
+
+/**
+ * Implements hook_node_revision_delete().
+ *
+ * Delete all share link tokens of the deleted node revision.
+ */
+function tide_share_link_node_revision_delete(EntityInterface $entity) {
+  try {
+    /** @var \Drupal\node\NodeInterface $entity */
+    /** @var \Drupal\tide_share_link\ShareLinkTokenStorageInterface $storage */
+    $storage = \Drupal::entityTypeManager()->getStorage('share_link_token');
+    $storage->deleteBySharedNodeRevisionId($entity->getLoadedRevisionId());
+  }
+  catch (Exception $exception) {
+    watchdog_exception('tide_share_link', $exception);
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function tide_share_link_theme($existing, $type, $theme, $path) {
+  return [
+    'share_link_token' => [
+      'render element' => 'elements',
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for Share Link Token templates.
+ *
+ * Default template: share-link-token.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - elements: An associative array containing the user information and any
+ *   - attributes: HTML attributes for the containing element.
+ */
+function template_preprocess_share_link_token(array &$variables) {
+  // Fetch ShareLinkToken Entity Object.
+  /** @var \Drupal\tide_share_link\Entity\ShareLinkTokenInterface $share_link_token */
+  $share_link_token = $variables['elements']['#share_link_token'];
+
+  if (isset($variables['elements']['status'])) {
+    foreach (Element::children($variables['elements']['status']) as $key) {
+      if ($share_link_token->isExpired()) {
+        $variables['elements']['status'][$key]['#markup'] = $share_link_token->isPublished() ? t('Expired') : t('Revoked and Expired');
+      }
+    }
+  }
+
+  // Helpful $content variable for templates.
+  foreach (Element::children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+}
+
+/**
+ * Implements hook_jsonapi_ENTITY_TYPE_filter_access().
+ */
+function tide_share_link_jsonapi_share_link_token_filter_access(EntityTypeInterface $entity_type, AccountInterface $account) {
+  // Deny access to Share Link Token via JSON:API filter.
+  return [
+    JSONAPI_FILTER_AMONG_ALL => AccessResult::forbidden(),
+  ];
+}

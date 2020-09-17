@@ -1,0 +1,13 @@
+# Share Link Token menu items definition
+entity.share_link_token.collection:
+  title: 'Share Link Tokens'
+  route_name: entity.share_link_token.collection
+  description: 'List Share Link Token entities'
+  parent: system.admin_content
+  weight: 90
+
+share_link_token.admin.structure.settings:
+  title: 'Share Link Token settings'
+  description: 'Configure Share Link Token entities'
+  route_name: share_link_token.settings
+  parent: system.admin_structure
