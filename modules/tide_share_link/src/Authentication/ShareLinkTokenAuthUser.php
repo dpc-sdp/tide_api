@@ -127,7 +127,7 @@ class ShareLinkTokenAuthUser implements ShareLinkTokenAuthUserInterface {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   protected function getTokenRole() : ?RoleInterface {
-    $token_role = $this->configFactory->get('share_link_token.settings')->get('token_role');
+    $token_role = $this->configFactory->get('tide_share_link.settings')->get('token_role');
     if ($token_role) {
       return static::getEntityTypeManager()
         ->getStorage('user_role')

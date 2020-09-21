@@ -60,7 +60,7 @@ class ShareLinkTokenSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   protected function getEditableConfigNames() {
-    return ['share_link_token.settings'];
+    return ['tide_share_link.settings'];
   }
 
   /**
@@ -72,7 +72,7 @@ class ShareLinkTokenSettingsForm extends ConfigFormBase {
    *   The current state of the form.
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $config = $this->config('share_link_token.settings');
+    $config = $this->config('tide_share_link.settings');
     $config->set('token_role', $form_state->getValue('token_role'));
     $config->save();
     parent::submitForm($form, $form_state);
@@ -90,7 +90,7 @@ class ShareLinkTokenSettingsForm extends ConfigFormBase {
    *   Form definition array.
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config('share_link_token.settings');
+    $config = $this->config('tide_share_link.settings');
 
     $role_options = [];
     $admin_permissions = [

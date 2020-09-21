@@ -9,4 +9,4 @@ dependencies:
   - tide_api:tide_api
 config_devel:
   install:
-    - share_link_token.settings
+    - tide_share_link.settings
