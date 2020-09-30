@@ -96,7 +96,7 @@ function tide_share_link_form_revision_overview_form_alter(&$form, FormStateInte
 
   foreach (Element::children($form['node_revisions_table']) as $delta) {
     // The current revision.
-    if (!$delta) {
+    if (empty($form['node_revisions_table'][$delta]['operations']['#type'])) {
       $form['node_revisions_table'][$delta]['operations'] = [
         '#type' => 'operations',
         '#links' => [

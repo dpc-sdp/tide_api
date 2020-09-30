@@ -330,7 +330,7 @@ class ShareLinkToken extends ContentEntityBase implements ShareLinkTokenInterfac
 
       case 'revision-collection':
         $uri_route_parameters['node'] = $this->getSharedNodeId();
-        $uri_route_parameters['node_revision'] = $this->getSharedNodeRevisionId();
+        $uri_route_parameters['node_revision'] = $this->getSharedNodeRevisionId() ?? 0;
         break;
     }
 
