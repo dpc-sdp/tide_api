@@ -39,9 +39,11 @@ class ShareLinkTokenForm extends ContentEntityForm {
     $form = parent::buildForm($form, $form_state);
     // Set the field description to the timestamp value widget.
     // @see https://www.drupal.org/project/drupal/issues/2508866
-    if (!empty($form['expiry']['widget']['#description']) && isset($form['expiry']['widget'])) {
+    if (!empty($form['expiry']['widget']['#description'])) {
       $first_key = array_key_first(Element::children($form['expiry']['widget']));
-      $form['expiry']['widget'][$first_key]['value']['#description'] = $form['expiry']['widget']['#description'];
+      if (!is_null($first_key)) {
+        $form['expiry']['widget'][$first_key]['value']['#description'] = $form['expiry']['widget']['#description'];
+      }
     }
 
     return $form;
