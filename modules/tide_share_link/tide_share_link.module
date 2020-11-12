@@ -42,7 +42,7 @@ function tide_share_link_entity_bundle_field_info(EntityTypeInterface $entity_ty
   }
 
   $fields['shared_node'] = BaseFieldDefinition::create('entity_reference_revisions')
-    ->setLabel(t('Shared Node'))
+    ->setLabel(t('Shared node'))
     ->setDescription(t('The shared node'))
     ->setSetting('target_type', 'node')
     ->setSetting('handler', 'default:node')
@@ -101,7 +101,7 @@ function tide_share_link_form_revision_overview_form_alter(&$form, FormStateInte
         '#type' => 'operations',
         '#links' => [
           'share' => [
-            'title' => t('Share'),
+            'title' => t('Create a share preview link'),
             'url' => Url::fromRoute('share_link_token.share_node', [
               'node' => $node->id(),
             ]),
@@ -118,7 +118,7 @@ function tide_share_link_form_revision_overview_form_alter(&$form, FormStateInte
       ?? NULL;
     if ($vid) {
       $form['node_revisions_table'][$delta]['operations']['#links']['share'] = [
-        'title' => t('Share'),
+        'title' => t('Create a share preview link'),
         'url' => Url::fromRoute('share_link_token.share_node_revision', [
           'node' => $node->id(),
           'node_revision' => $vid,

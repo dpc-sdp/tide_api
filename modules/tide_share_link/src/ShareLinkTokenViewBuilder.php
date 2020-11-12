@@ -111,7 +111,7 @@ class ShareLinkTokenViewBuilder extends EntityViewBuilder {
     ], $node_endpoint_options);
     $api_info['#children']['#children']['node_endpoint'] = [
       '#type' => 'inline_template',
-      '#template' => '<div class="api-information-jsonapi-call"><div class="field__label">{{ label }}</div><div class="field__item"><code>GET {{ endpoint }} <br/> X-Share-Link-Token: {{ token }}</code></div></div>',
+      '#template' => '<div class="api-information-jsonapi-call"><div class="field__label">{{ label }}</div><div class="field__item color-success"><p><code class="api-information-jsonapi-call-rest">GET {{ endpoint }} <br/> X-Share-Link-Token: {{ token }}</code></p></div></div>',
       '#context' => [
         'label' => t('Subsequent JSON:API call'),
         'endpoint' => Link::fromTextAndUrl($node_endpoint->toString(), $node_endpoint),

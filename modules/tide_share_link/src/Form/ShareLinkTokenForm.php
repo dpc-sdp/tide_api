@@ -4,6 +4,7 @@ namespace Drupal\tide_share_link\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -36,6 +37,12 @@ class ShareLinkTokenForm extends ContentEntityForm {
   public function buildForm(array $form, FormStateInterface $form_state) {
     /** @var \Drupal\tide_share_link\Entity\ShareLinkTokenInterface $entity */
     $form = parent::buildForm($form, $form_state);
+    // Set the field description to the timestamp value widget.
+    // @see https://www.drupal.org/project/drupal/issues/2508866
+    if (!empty($form['expiry']['widget']['#description']) && isset($form['expiry']['widget'])) {
+      $first_key = array_key_first(Element::children($form['expiry']['widget']));
+      $form['expiry']['widget'][$first_key]['value']['#description'] = $form['expiry']['widget']['#description'];
+    }
 
     return $form;
   }

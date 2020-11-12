@@ -181,7 +181,7 @@ class ShareLinkToken extends ContentEntityBase implements ShareLinkTokenInterfac
 
     $fields['name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Name'))
-      ->setDescription(t('The name of the Share Link.'))
+      ->setDescription(t('This field shows the CMS-given name for the preview link. It includes the page title, the page’s node number and the email address of the person sharing.<br/> You can edit it to be more meaningful to preview link recipients. If you’ll be sharing a draft page multiple times, it could be helpful to put a version number or the time of the edits or latest draft (eg. Minister’s report, 2pm).'))
       ->setSettings([
         'max_length' => 255,
         'text_processing' => 0,
@@ -202,7 +202,7 @@ class ShareLinkToken extends ContentEntityBase implements ShareLinkTokenInterfac
 
     $fields['status']
       ->setLabel(t('Status'))
-      ->setDescription(t('Whether the Share Link Token is active.'))
+      ->setDescription(t('Whether the share preview link is active.'))
       ->setSetting('on_label', t('Active'))
       ->setSetting('off_label', t('Revoked'))
       ->setDisplayOptions('form', [
@@ -245,7 +245,7 @@ class ShareLinkToken extends ContentEntityBase implements ShareLinkTokenInterfac
 
     $fields['expiry'] = BaseFieldDefinition::create('timestamp')
       ->setLabel(t('Expiry'))
-      ->setDescription(t('The time that the share link token expires.'))
+      ->setDescription(t('When you share a preview link it automatically expires after a set amount of time. You can extend the time limit by updating these date and time fields.'))
       ->setRequired(TRUE)
       ->setDisplayOptions('view', [
         'label' => 'inline',
