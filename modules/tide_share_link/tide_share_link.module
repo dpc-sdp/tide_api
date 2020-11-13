@@ -20,6 +20,8 @@ use Drupal\tide_share_link\ShareLinkTokenSharedNodeFieldItemList;
 
 /**
  * Implements hook_entity_extra_field_info().
+ *
+ * Declare the API Info block in display view of Share Link Token entity.
  */
 function tide_share_link_entity_extra_field_info() {
   $extra = [];
@@ -34,6 +36,8 @@ function tide_share_link_entity_extra_field_info() {
 
 /**
  * Implements hook_entity_bundle_field_info().
+ *
+ * Declare the computed field shared_node for Share Link Token entity.
  */
 function tide_share_link_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
   $fields = [];
@@ -238,9 +242,10 @@ function template_preprocess_share_link_token(array &$variables) {
 
 /**
  * Implements hook_jsonapi_ENTITY_TYPE_filter_access().
+ *
+ * Deny access to Share Link Token via JSON:API filter.
  */
 function tide_share_link_jsonapi_share_link_token_filter_access(EntityTypeInterface $entity_type, AccountInterface $account) {
-  // Deny access to Share Link Token via JSON:API filter.
   return [
     JSONAPI_FILTER_AMONG_ALL => AccessResult::forbidden(),
   ];
@@ -259,4 +264,112 @@ function tide_share_link_cron() {
     $storage = \Drupal::entityTypeManager()->getStorage('share_link_token');
     $storage->deleteExpiredTokens();
   }
+}
+
+/**
+ * Implements hook_event_log_track_handlers().
+ *
+ * Add support for event log track.
+ */
+function tide_share_link_event_log_track_handlers() {
+  return [
+    'share_link_token' => ['title' => t('Share Link Token')],
+  ];
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ *
+ * Log an event when a node is shared.
+ */
+function tide_share_link_share_link_token_insert(EntityInterface $entity) {
+  if (!\Drupal::moduleHandler()->moduleExists('event_log_track')) {
+    return;
+  }
+
+  /** @var \Drupal\tide_share_link\Entity\ShareLinkTokenInterface $entity */
+  $node = $entity->getSharedNode();
+
+  if (\Drupal::moduleHandler()->moduleExists('event_log_track_node')) {
+    $log = [
+      'type' => 'node',
+      'operation' => 'share',
+      'description' => t('%type: %title', [
+        '%type' => $node ? $node->getType() : NULL,
+        '%title' => $node ? $node->getTitle() : NULL,
+      ]),
+      'ref_numeric' => $node->id(),
+      'ref_char' => $node->getTitle(),
+    ];
+    event_log_track_insert($log);
+  }
+
+  $log = [
+    'type' => 'share_link_token',
+    'operation' => 'create',
+    'description' => t('Node %type: %title (%nid - rev. %vid)', [
+      '%type' => $node ? $node->getType() : NULL,
+      '%title' => $node ? $node->getTitle() : NULL,
+      '%nid' => $entity->getSharedNodeId(),
+      '%vid' => $entity->getSharedNodeRevisionId() ?: t('current'),
+    ]),
+    'ref_numeric' => $entity->id(),
+    'ref_char' => $entity->getName(),
+  ];
+  event_log_track_insert($log);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update().
+ *
+ * Log an event when a share link token is updated.
+ */
+function tide_share_link_share_link_token_update(EntityInterface $entity) {
+  if (!\Drupal::moduleHandler()->moduleExists('event_log_track')) {
+    return;
+  }
+
+  /** @var \Drupal\tide_share_link\Entity\ShareLinkTokenInterface $entity */
+  $log = [
+    'type' => 'share_link_token',
+    'operation' => 'update',
+    'description' => t('Expiry: %expiry %expired - Status: %status', [
+      '%expiry' => \Drupal::service('date.formatter')->format($entity->getExpiry(), 'short'),
+      '%expired' => $entity->isExpired() ? t('(expired)') : '',
+      '%status' => $entity->isActive() ? t('Active') : t('Revoked'),
+    ]),
+    'ref_numeric' => $entity->id(),
+    'ref_char' => $entity->getName(),
+  ];
+  event_log_track_insert($log);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete().
+ *
+ * Log an event when a share link token is deleted.
+ */
+function tide_share_link_share_link_token_delete(EntityInterface $entity) {
+  if (!\Drupal::moduleHandler()->moduleExists('event_log_track')) {
+    return;
+  }
+
+  /** @var \Drupal\tide_share_link\Entity\ShareLinkTokenInterface $entity */
+  $node = $entity->getSharedNode();
+  $log = [
+    'type' => 'share_link_token',
+    'operation' => 'delete',
+    'description' => t('Node %type: %title (%nid - rev. %vid) - Expiry: %expiry%expired - Status: %status', [
+      '%type' => $node ? $node->getType() : NULL,
+      '%title' => $node ? $node->getTitle() : NULL,
+      '%nid' => $entity->getSharedNodeId(),
+      '%vid' => $entity->getSharedNodeRevisionId() ?: t('current'),
+      '%expiry' => \Drupal::service('date.formatter')->format($entity->getExpiry(), 'short'),
+      '%expired' => $entity->isExpired() ? t('(expired)') : '',
+      '%status' => $entity->isActive() ? t('Active') : t('Revoked'),
+    ]),
+    'ref_numeric' => $entity->id(),
+    'ref_char' => $entity->getName(),
+  ];
+  event_log_track_insert($log);
 }
