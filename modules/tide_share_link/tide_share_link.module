@@ -245,3 +245,18 @@ function tide_share_link_jsonapi_share_link_token_filter_access(EntityTypeInterf
     JSONAPI_FILTER_AMONG_ALL => AccessResult::forbidden(),
   ];
 }
+
+/**
+ * Implements hook_cron().
+ *
+ * Cleanup expired tokens.
+ */
+function tide_share_link_cron() {
+  $config = \Drupal::config('tide_share_link.settings');
+  $cleanup_in_cron = $config->get('cleanup_in_cron');
+  if ($cleanup_in_cron) {
+    /** @var \Drupal\tide_share_link\ShareLinkTokenStorageInterface $storage */
+    $storage = \Drupal::entityTypeManager()->getStorage('share_link_token');
+    $storage->deleteExpiredTokens();
+  }
+}

@@ -23,7 +23,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Class TideApiController.
+ * Class Tide Api Controller.
  *
  * @package Drupal\tide_api\Controller
  */

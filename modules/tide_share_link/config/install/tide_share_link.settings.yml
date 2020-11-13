@@ -1,1 +1,3 @@
 token_role: previewer
+default_expiry: 2592000
+cleanup_in_cron: 1

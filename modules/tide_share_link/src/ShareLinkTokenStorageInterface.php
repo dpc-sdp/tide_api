@@ -29,6 +29,11 @@ interface ShareLinkTokenStorageInterface extends ContentEntityStorageInterface {
   public function deleteBySharedNodeRevisionId($vid) : void;
 
   /**
+   * Delete all expired tokens.
+   */
+  public function deleteExpiredTokens() : void;
+
+  /**
    * Load a share link token by token value.
    *
    * @param string $token

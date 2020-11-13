@@ -64,21 +64,6 @@ class ShareLinkTokenSettingsForm extends ConfigFormBase {
   }
 
   /**
-   * Form submission handler.
-   *
-   * @param array $form
-   *   An associative array containing the structure of the form.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
-   */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
-    $config = $this->config('tide_share_link.settings');
-    $config->set('token_role', $form_state->getValue('token_role'));
-    $config->save();
-    parent::submitForm($form, $form_state);
-  }
-
-  /**
    * Defines the settings form for Share Link Token entities.
    *
    * @param array $form
@@ -102,10 +87,10 @@ class ShareLinkTokenSettingsForm extends ConfigFormBase {
       'administer users',
       'administer permissions',
     ];
+    /** @var \Drupal\user\RoleInterface[] $roles */
     $roles = $this->entityTypeManager->getStorage('user_role')->loadMultiple();
-    foreach ($roles as $role) {
-      /** @var \Drupal\user\RoleInterface $role */
-      if ($role->isAdmin() || $role->id() === RoleInterface::ANONYMOUS_ID || $role->id() === RoleInterface::AUTHENTICATED_ID) {
+    foreach ($roles as $role_id => $role) {
+      if ($role_id === RoleInterface::ANONYMOUS_ID || $role_id === RoleInterface::AUTHENTICATED_ID || $role->isAdmin()) {
         continue;
       }
 
@@ -124,8 +109,42 @@ class ShareLinkTokenSettingsForm extends ConfigFormBase {
       '#description' => $this->t('Authorized requests with a valid Share Link Token will be treated an authenticated user with the selected role.<br/> For security reasons, roles with certain administrative permissions cannot be selected.'),
       '#options' => $role_options,
       '#default_value' => $form_state->getValue('token_role') ?? $config->get('token_role'),
+      '#required' => TRUE,
     ];
+
+    $form['default_expiry'] = [
+      '#type' => 'number',
+      '#min' => 1,
+      '#title' => $this->t('Default expiry'),
+      '#description' => $this->t('The default expiry in second for new share link tokens, eg. 3600 (1 hour), 86400 (1 day), 604800 (1 week), 2592000 (1 month).'),
+      '#default_value' => $form_state->getValue('default_expiry') ?? ($config->get('default_expiry') ?: 2592000),
+      '#required' => TRUE,
+    ];
+
+    $form['cleanup_in_cron'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Cleanup expired tokens during cron'),
+      '#default_value' => $form_state->getValue('cleanup_in_cron') ?? $config->get('cleanup_in_cron'),
+    ];
+
     return parent::buildForm($form, $form_state);
+  }
+
+  /**
+   * Form submission handler.
+   *
+   * @param array $form
+   *   An associative array containing the structure of the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   */
+  public function submitForm(array &$form, FormStateInterface $form_state) {
+    $config = $this->config('tide_share_link.settings');
+    $config->set('token_role', $form_state->getValue('token_role'));
+    $config->set('default_expiry', $form_state->getValue('default_expiry'));
+    $config->set('cleanup_in_cron', $form_state->getValue('cleanup_in_cron'));
+    $config->save();
+    parent::submitForm($form, $form_state);
   }
 
 }

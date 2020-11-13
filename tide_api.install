@@ -28,8 +28,10 @@ function tide_api_install() {
  * Implements hook_update_dependencies().
  */
 function tide_api_update_dependencies() {
-  $dependencies['tide_api'][8001] = [
-    'jsonapi' => 8701,
+  return [
+    'tide_api' => [
+      8001 => ['jsonapi' => 8701],
+    ],
   ];
 }
 

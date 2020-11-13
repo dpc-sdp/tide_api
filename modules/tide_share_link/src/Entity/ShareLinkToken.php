@@ -78,9 +78,11 @@ class ShareLinkToken extends ContentEntityBase implements ShareLinkTokenInterfac
    */
   public static function preCreate(EntityStorageInterface $storage_controller, array &$values) : void {
     parent::preCreate($storage_controller, $values);
+    $config = \Drupal::config('tide_share_link.settings');
+    $default_expiry = $config->get('default_expiry') ?: 2592000;
     $values += [
       'uid' => \Drupal::currentUser()->id(),
-      'expiry' => \Drupal::time()->getCurrentTime() + 2592000,
+      'expiry' => \Drupal::time()->getCurrentTime() + $default_expiry,
     ];
   }
 

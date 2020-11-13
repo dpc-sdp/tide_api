@@ -7,7 +7,7 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
- * Class TideApiEventSubscriber.
+ * Class TideApi Version Subscriber.
  *
  * @package Drupal\tide_api\EventSubscriber.
  */
@@ -22,9 +22,9 @@ class TideApiVersionSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[KernelEvents::RESPONSE][] = ['setApiVersion', -10];
-
-    return $events;
+    return [
+      KernelEvents::RESPONSE => [['setApiVersion', -10]],
+    ];
   }
 
   /**

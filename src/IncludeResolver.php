@@ -17,7 +17,7 @@ use Drupal\jsonapi\JsonApiResource\ResourceIdentifierInterface;
 use Drupal\jsonapi\JsonApiResource\ResourceObject;
 
 /**
- * Class IncludeResolver.
+ * Class Include Resolver.
  *
  * @package Drupal\tide_api
  */

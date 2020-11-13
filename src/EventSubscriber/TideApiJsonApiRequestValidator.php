@@ -10,7 +10,7 @@ use Drupal\jsonapi\JsonApiSpec;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Class TideApiJsonApiRequestValidator.
+ * Class TideApi JsonApi Request Validator.
  *
  * @package Drupal\tide_api
  */

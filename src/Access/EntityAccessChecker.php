@@ -9,7 +9,7 @@ use Drupal\jsonapi\Access\EntityAccessChecker as JsonapiEntityAccessChecker;
 use Drupal\paragraphs\Entity\Paragraph;
 
 /**
- * Class EntityAccessChecker.
+ * Class Entity Access Checker.
  *
  * @package Drupal\tide_api\Access
  */
