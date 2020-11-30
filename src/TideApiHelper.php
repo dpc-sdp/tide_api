@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Class TideApiHelper.
+ * Class TideApi Helper.
  *
  * @package Drupal\tide_api
  */

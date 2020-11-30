@@ -7,7 +7,7 @@ use Drupal\Core\Language\Language;
 use Drupal\redirect\Exception\RedirectLoopException;
 
 /**
- * Class TideApiRedirectRepository.
+ * Class TideApi Redirect Repository.
  *
  * @package Drupal\tide_api
  */

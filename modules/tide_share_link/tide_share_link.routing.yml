@@ -1,0 +1,18 @@
+share_link_token.share_node:
+  path: '/node/{node}/share/add'
+  defaults:
+    _controller: '\Drupal\tide_share_link\Controller\ShareLinkTokenController::shareNode'
+  requirements:
+    _entity_create_access: 'share_link_token'
+    _custom_access: '\Drupal\tide_share_link\Controller\ShareLinkTokenController::checkNodeAccess'
+
+share_link_token.share_node_revision:
+  path: '/node/{node}/revisions/{node_revision}/share/add'
+  defaults:
+    _controller: '\Drupal\tide_share_link\Controller\ShareLinkTokenController::shareNodeRevision'
+  requirements:
+    _entity_create_access: 'share_link_token'
+    _custom_access: '\Drupal\tide_share_link\Controller\ShareLinkTokenController::checkNodeAccess'
+
+route_callbacks:
+  - '\Drupal\tide_share_link\Routing\Routes::routes'
