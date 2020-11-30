@@ -8,7 +8,7 @@ use Drupal\Core\Routing\RoutingEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class TideApiRouteAlterSubscriber.
+ * Class TideApi Route Alter Subscriber.
  *
  * @package Drupal\tide_api\EventSubscriber
  */
@@ -35,9 +35,9 @@ class TideApiRouteAlterSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[RoutingEvents::ALTER][] = ['onRoutingRouteAlterReplaceJsonapiPrefix'];
-
-    return $events;
+    return [
+      RoutingEvents::ALTER => [['onRoutingRouteAlterReplaceJsonapiPrefix']],
+    ];
   }
 
   /**

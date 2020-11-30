@@ -1,0 +1,20 @@
+access share link token entities listing:
+  title: 'Access Share Link Token entities listing'
+
+add share link token entities:
+  title: 'Create new Share Link Token entities'
+
+administer share link token entities:
+  title: 'Administer Share Link Token entities'
+  description: 'Allow to access the administration form to configure Share Link Token entities.'
+  restrict access: true
+
+delete share link token entities:
+  title: 'Delete Share Link Token entities'
+
+view published share link token entities:
+  title: 'View published Share Link Token entities'
+
+view unpublished share link token entities:
+  title: 'View unpublished Share Link Token entities'
+

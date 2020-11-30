@@ -1,0 +1,41 @@
+# Share Link Token routing definition
+share_link_token.settings_tab:
+  route_name: share_link_token.settings
+  title: 'Settings'
+  base_route: share_link_token.settings
+
+entity.share_link_token.canonical:
+  route_name: entity.share_link_token.canonical
+  base_route: entity.share_link_token.canonical
+  title: 'View Share link'
+  parent_id: entity.node.canonical
+
+entity.share_link_token.edit_form:
+  route_name: entity.share_link_token.edit_form
+  base_route: entity.share_link_token.canonical
+  title: 'Edit Share link'
+  parent_id: entity.node.canonical
+
+entity.share_link_token.delete_form:
+  route_name: entity.share_link_token.delete_form
+  base_route: entity.share_link_token.canonical
+  title: Delete Share link
+  weight: 10
+  parent_id: entity.node.canonical
+
+entity.share_link_token.node_collection:
+  route_name: entity.share_link_token.node_collection
+  base_route: entity.node.canonical
+  title: Share links
+  weight: 90
+
+entity.node.revision:
+  route_name: entity.node.revision
+  base_route: entity.node.revision
+  title: View revision
+
+entity.share_link_token.revision_collection:
+  route_name: entity.share_link_token.revision_collection
+  base_route: entity.node.revision
+  title: Share links
+  weight: 90

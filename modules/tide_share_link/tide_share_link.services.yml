@@ -1,0 +1,31 @@
+services:
+  tide_share_link.page_cache.request_policy.disallow_share_link_token_authorization_requests:
+    class: Drupal\tide_share_link\PageCache\RequestPolicy\DisallowShareLinkTokenAuthorizationRequests
+    arguments: [ '@entity_type.manager' ]
+    public: false
+    tags:
+      - { name: page_cache_request_policy }
+      - { name: dynamic_page_cache_request_policy }
+  tide_share_link.page_cache.response_policy.disallow_share_link_token_authorization_requests:
+    class: Drupal\tide_share_link\PageCache\ResponsePolicy\DisallowShareLinkTokenAuthorizationRequests
+    arguments: [ '@entity_type.manager' ]
+    public: false
+    tags:
+      - { name: page_cache_response_policy }
+      - { name: dynamic_page_cache_response_policy }
+  tide_share_link.authentication.share_link_token_authentication:
+    class: Drupal\tide_share_link\Authentication\Provider\ShareLinkTokenAuthenticationProvider
+    arguments:
+      - '@entity_type.manager'
+      - '@tide_share_link.page_cache.request_policy.disallow_share_link_token_authorization_requests'
+      - '@config.factory'
+    tags:
+      - { name: authentication_provider, provider_id: share_link_token, global: TRUE, priority: 0 }
+  tide_share_link.event_subscriber.share_link_token_validation:
+    class: Drupal\tide_share_link\EventSubscriber\ShareLinkTokenValidation
+    arguments:
+      - '@entity_type.manager'
+      - '@current_user'
+      - '@tide_share_link.page_cache.request_policy.disallow_share_link_token_authorization_requests'
+    tags:
+      - { name: event_subscriber }

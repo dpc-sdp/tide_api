@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Class GetRouteEvent.
+ * Class Get Route Event.
  *
  * @package Drupal\tide_api\Event
  */

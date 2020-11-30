@@ -1,0 +1,12 @@
+name: Tide Share Link
+description: Provides functionality to share non-published content to anyone.
+type: module
+package: Tide
+core: 8.x
+dependencies:
+  - drupal:node
+  - entity_reference_revisions:entity_reference_revisions
+  - tide_api:tide_api
+config_devel:
+  install:
+    - tide_share_link.settings
