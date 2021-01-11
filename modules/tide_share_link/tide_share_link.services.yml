@@ -20,7 +20,7 @@ services:
       - '@tide_share_link.page_cache.request_policy.disallow_share_link_token_authorization_requests'
       - '@config.factory'
     tags:
-      - { name: authentication_provider, provider_id: share_link_token, global: TRUE, priority: 0 }
+      - { name: authentication_provider, provider_id: share_link_token, global: TRUE, priority: 150 }
   tide_share_link.event_subscriber.share_link_token_validation:
     class: Drupal\tide_share_link\EventSubscriber\ShareLinkTokenValidation
     arguments:
