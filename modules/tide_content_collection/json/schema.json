@@ -1,0 +1,358 @@
+{
+  "type": "object",
+  "description": "Schema for the Content Collection",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Title displayed above results"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description displayed above the results"
+    },
+    "callToAction": {
+      "type": "object",
+      "description": "A link to another page.",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Display text of the link"
+        },
+        "url": {
+          "type": "string",
+          "description": "A relative or absolute URL."
+        }
+      },
+      "additionalProperties": false
+    },
+    "dataConnectionType": {
+      "type": "string"
+    },
+    "internal": {
+      "type": "object",
+      "description": "Contains the rules for generating the search query.",
+      "oneOf": [
+        {
+          "properties": {
+            "contentIds": {
+              "type": "array",
+              "description": "Array of node ids for content",
+              "items": {
+                "type": "number"
+              }
+            },
+            "contentTypes": {
+              "type": "array",
+              "description": "Array of content types",
+              "items": {
+                "type": "string"
+              }
+            },
+            "contentFields": {
+              "type": "object",
+              "description": "Fields to filter the content against.",
+              "patternProperties": {
+                "^[a-z0-9]+$": {
+                  "type": "object",
+                  "properties": {
+                    "operator": {
+                      "type": "string",
+                      "enum": [
+                        "AND",
+                        "OR"
+                      ]
+                    },
+                    "values": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "includeCurrentPage": {
+              "type": "boolean",
+              "description": "For excluding the page that this component is being rendered upon."
+            },
+            "excludeIds": {
+              "type": "array",
+              "description": "Array of node ids for excluding from content",
+              "items": {
+                "type": "number"
+              }
+            },
+            "dateFilter": {
+              "type": "object",
+              "properties": {
+                "criteria": {
+                  "type": "string",
+                  "description": "",
+                  "enum": [
+                    "today",
+                    "this_week",
+                    "this_month",
+                    "this_year",
+                    "today_and_future",
+                    "past",
+                    "range"
+                  ]
+                },
+                "startDateField": {
+                  "type": "string",
+                  "description": ""
+                },
+                "endDateField": {
+                  "type": "string",
+                  "description": ""
+                },
+                "dateRangeStart": {
+                  "type": "string",
+                  "description": "Start and end dates to test against. Formatted as ISO 8601",
+                  "pattern": "\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)"
+                },
+                "dateRangeEnd": {
+                  "type": "string",
+                  "description": "Start and end dates to test against. Formatted as ISO 8601",
+                  "pattern": "\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)"
+                }
+              },
+              "additionalProperties": false
+            },
+            "sort": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "field": {
+                    "type": "string"
+                  },
+                  "direction": {
+                    "type": "string",
+                    "enum": [
+                      "desc",
+                      "asc"
+                    ]
+                  }
+                }
+              }
+            },
+            "itemsToLoad": {
+              "type": "number",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "custom": {
+              "type": "object",
+              "description": "Pure Elasticsearch DSL Query"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "interface": {
+      "type": "object",
+      "description": "User options for filtering by keywords.",
+      "properties": {
+        "keyword": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "label": {
+              "type": "string"
+            },
+            "placeholder": {
+              "type": "string"
+            },
+            "fields": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "filters": {
+          "type": "object",
+          "properties": {
+            "expandSearchFilters": {
+              "type": "boolean"
+            },
+            "submitOnChange": {
+              "type": "boolean"
+            },
+            "label": {
+              "type": "string"
+            },
+            "submit": {
+              "type": "object",
+              "properties": {
+                "visibility": {
+                  "type": "string",
+                  "enum": [
+                    "visible",
+                    "hidden",
+                    "when-needed"
+                  ]
+                },
+                "label": {
+                  "type": "string"
+                }
+              }
+            },
+            "clearForm": {
+              "type": "object",
+              "properties": {
+                "visibility": {
+                  "type": "string",
+                  "enum": [
+                    "visible",
+                    "hidden",
+                    "when-needed"
+                  ]
+                },
+                "label": {
+                  "type": "string"
+                }
+              }
+            },
+            "defaultStyling": {
+              "type": "boolean"
+            },
+            "fields": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "options": {
+                    "type": "object"
+                  },
+                  "additionalClasses": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "elasticsearch-field": {
+                    "type": "string"
+                  },
+                  "elasticsearch-aggregation": {
+                    "type": "boolean",
+                    "description": "Determine if field should be added to aggregation."
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "display": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "resultsCountText": {
+                  "type": "string"
+                },
+                "loadingText": {
+                  "type": "string"
+                },
+                "noResultsText": {
+                  "type": "string"
+                },
+                "errorText": {
+                  "type": "string"
+                },
+                "sort": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "values": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": ["array", "null"],
+                            "description": "The sort value or values to apply."
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": ["type"]
+                },
+                "itemsToLoad": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "values": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": ["number", "null"]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": ["type"]
+                },
+                "pagination": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type"]
+                }
+              }
+            },
+            "resultComponent": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                }
+              },
+              "required": ["type"]
+            }
+          },
+          "required": ["type"]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
