@@ -13,6 +13,7 @@ aliases:
           at: /workspace
       - checkout
       # Init environment for development.
+      - run: apk add jq
       - run: if [ -f "./dev-tools.sh" ] && [ ! "$DEV_TOOLS" ]; then ./dev-tools.sh; fi
       - setup_remote_docker:
           docker_layer_caching: true
