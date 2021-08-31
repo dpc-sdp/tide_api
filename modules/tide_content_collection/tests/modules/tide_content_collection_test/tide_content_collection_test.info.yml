@@ -1,0 +1,9 @@
+name: 'Tide Content Collection Test'
+type: module
+description: 'Support module for Tide Content Collection tests'
+package: Testing
+dependencies:
+  - tide_content_collection:tide_content_collection
+  - tide_test:tide_test
+core_version_requirement: ^8.8 || ^9
+hidden: true
