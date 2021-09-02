@@ -283,14 +283,14 @@ function tide_share_link_admin_audit_trail_handlers() {
  * Log an event when a node is shared.
  */
 function tide_share_link_share_link_token_insert(EntityInterface $entity) {
-  if (!\Drupal::moduleHandler()->moduleExists('event_log_track')) {
+  if (!\Drupal::moduleHandler()->moduleExists('admin_audit_trail')) {
     return;
   }
 
   /** @var \Drupal\tide_share_link\Entity\ShareLinkTokenInterface $entity */
   $node = $entity->getSharedNode();
 
-  if (\Drupal::moduleHandler()->moduleExists('event_log_track_node')) {
+  if (\Drupal::moduleHandler()->moduleExists('admin_audit_trail_node')) {
     $log = [
       'type' => 'node',
       'operation' => 'share',
@@ -325,7 +325,7 @@ function tide_share_link_share_link_token_insert(EntityInterface $entity) {
  * Log an event when a share link token is updated.
  */
 function tide_share_link_share_link_token_update(EntityInterface $entity) {
-  if (!\Drupal::moduleHandler()->moduleExists('event_log_track')) {
+  if (!\Drupal::moduleHandler()->moduleExists('admin_audit_trail')) {
     return;
   }
 
@@ -350,7 +350,7 @@ function tide_share_link_share_link_token_update(EntityInterface $entity) {
  * Log an event when a share link token is deleted.
  */
 function tide_share_link_share_link_token_delete(EntityInterface $entity) {
-  if (!\Drupal::moduleHandler()->moduleExists('event_log_track')) {
+  if (!\Drupal::moduleHandler()->moduleExists('admin_audit_trail')) {
     return;
   }
 
