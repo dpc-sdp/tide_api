@@ -12,7 +12,7 @@ use Drupal\Core\Url;
  * @ingroup tide_share_link
  */
 class ShareLinkTokenListBuilderCallback implements RenderCallbackInterface {
-  
+
   /**
    * Build the API Information for a share link token.
    *
