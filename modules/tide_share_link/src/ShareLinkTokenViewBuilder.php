@@ -4,6 +4,7 @@ namespace Drupal\tide_share_link;
 
 use Drupal\Core\Entity\EntityViewBuilder;
 use Drupal\Core\Link;
+use Drupal\Core\Render\Element\RenderCallbackInterface;
 use Drupal\Core\Url;
 
 /**
@@ -11,7 +12,7 @@ use Drupal\Core\Url;
  *
  * @package Drupal\tide_share_link\Entity
  */
-class ShareLinkTokenViewBuilder extends EntityViewBuilder {
+class ShareLinkTokenViewBuilder extends EntityViewBuilder implements RenderCallbackInterface {
 
   /**
    * {@inheritdoc}
@@ -31,12 +32,19 @@ class ShareLinkTokenViewBuilder extends EntityViewBuilder {
       if ($display->getComponent('api_info')) {
         $build[$id]['api_info'] = [
           '#lazy_builder' => [
-            get_called_class() . '::renderApiInformation',
+            static::class . '::renderApiInformation',
             [$entity->id()],
           ],
         ];
       }
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function trustedCallbacks() {
+    return ['renderApiInformation'];
   }
 
   /**
@@ -53,7 +61,9 @@ class ShareLinkTokenViewBuilder extends EntityViewBuilder {
    */
   public static function renderApiInformation($entity_id) {
     /** @var \Drupal\tide_share_link\Entity\ShareLinkTokenInterface $token */
-    $token = \Drupal::entityTypeManager()->getStorage('share_link_token')->load($entity_id);
+    $token = \Drupal::entityTypeManager()
+      ->getStorage('share_link_token')
+      ->load($entity_id);
     if (!$token->isActive()) {
       return [];
     }
