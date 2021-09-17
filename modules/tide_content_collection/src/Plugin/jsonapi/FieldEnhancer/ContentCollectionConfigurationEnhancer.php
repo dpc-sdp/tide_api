@@ -2,7 +2,6 @@
 
 namespace Drupal\tide_content_collection\Plugin\jsonapi\FieldEnhancer;
 
-use Drupal\Component\Serialization\Json;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\jsonapi_extras\Plugin\ResourceFieldEnhancerBase;
 use Drupal\jsonapi_extras\Plugin\ResourceFieldEnhancerManager;
@@ -89,20 +88,20 @@ class ContentCollectionConfigurationEnhancer extends ResourceFieldEnhancerBase i
    * {@inheritdoc}
    */
   protected function doUndoTransform($data, Context $context) {
-    $configuration = Json::decode($data);
-    if (!empty($configuration['index'])) {
-      $configuration['server_index'] = $this->indexHelper->getServerIndexId($configuration['index']);
+    $configuration = json_decode($data);
+    if (!empty($configuration->connection->index)) {
+      $configuration->connection->serverIndex = $this->indexHelper->getServerIndexId($configuration->connection->index);
     }
 
     if (!empty($this->getConfiguration()['apply_link_enhancer'])) {
-      if (!empty($configuration['callToAction']['url'])) {
-        $cta = $configuration['callToAction'];
+      if (!empty($configuration->callToAction->url)) {
+        $cta = json_decode(json_encode($configuration->callToAction), TRUE);
         $cta['uri'] = $cta['url'];
 
         $link_enhancer = $this->fieldEnhancerManager->createInstance('link_enhancer');
         if ($link_enhancer instanceof LinkEnhancer) {
           $cta = $link_enhancer->undoTransform($cta, $context);
-          $configuration['callToAction'] = $cta;
+          $configuration->callToAction = (object) $cta;
         }
       }
     }
@@ -114,22 +113,22 @@ class ContentCollectionConfigurationEnhancer extends ResourceFieldEnhancerBase i
    * {@inheritdoc}
    */
   protected function doTransform($data, Context $context) {
-    unset($data['server_index']);
+    unset($data->connection->serverIndex);
 
     if (!empty($this->getConfiguration()['apply_link_enhancer'])) {
-      if (isset($data['callToAction']['uri'])) {
-        $cta = $data['callToAction'];
+      if (isset($data->callToAction->uri)) {
+        $cta = json_decode(json_encode($data->callToAction), TRUE);
         $link_enhancer = $this->fieldEnhancerManager->createInstance('link_enhancer');
         if ($link_enhancer instanceof LinkEnhancer) {
           $cta = $link_enhancer->transform($cta, $context);
           $cta['url'] = $cta['uri'];
           unset($cta['uri']);
-          $data['callToAction'] = $cta;
+          $data->callToAction = (object) $cta;
         }
       }
     }
 
-    return Json::encode($data);
+    return json_encode($data);
   }
 
   /**

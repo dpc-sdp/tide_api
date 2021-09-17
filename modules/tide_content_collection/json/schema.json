@@ -25,8 +25,24 @@
       },
       "additionalProperties": false
     },
-    "dataConnectionType": {
-      "type": "string"
+    "connection": {
+      "type": "object",
+      "description": "Configuration of the search endpoint.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The type of search endpoint to query. Defaults to elastic-search."
+        },
+        "index": {
+          "type": "string",
+          "description": "Used by Tide to store the machine name of the index to query."
+        },
+        "serverIndex": {
+          "type": "string",
+          "description": "Used by Nuxt-tide Search API to query a particular index."
+        }
+      },
+      "additionalProperties": false
     },
     "internal": {
       "type": "object",
@@ -161,6 +177,10 @@
       "type": "object",
       "description": "User options for filtering by keywords.",
       "properties": {
+        "keepState": {
+          "type": "boolean",
+          "description": "Store the state of the user interactions in the URL. Only one Content Collection can use this per page."
+        },
         "keyword": {
           "type": "object",
           "properties": {
