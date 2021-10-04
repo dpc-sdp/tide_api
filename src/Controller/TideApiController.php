@@ -32,7 +32,7 @@ class TideApiController extends ControllerBase {
   /**
    * The path alias manager.
    *
-   * @var \Drupal\path_alias\AliasManagerInterface;
+   * @var \Drupal\path_alias\AliasManagerInterface
    */
   protected $aliasManager;
 
