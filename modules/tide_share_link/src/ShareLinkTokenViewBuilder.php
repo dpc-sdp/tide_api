@@ -3,13 +3,14 @@
 namespace Drupal\tide_share_link;
 
 use Drupal\Core\Entity\EntityViewBuilder;
+use Drupal\Core\Render\Element\RenderCallbackInterface;
 
 /**
  * View builder for Share Link Token entities.
  *
  * @package Drupal\tide_share_link\Entity
  */
-class ShareLinkTokenViewBuilder extends EntityViewBuilder {
+class ShareLinkTokenViewBuilder extends EntityViewBuilder implements RenderCallbackInterface {
 
   /**
    * {@inheritdoc}
@@ -35,6 +36,13 @@ class ShareLinkTokenViewBuilder extends EntityViewBuilder {
         ];
       }
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function trustedCallbacks() {
+    return ['renderApiInformation'];
   }
 
 }
