@@ -8,7 +8,7 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
-use Drupal\Core\Path\AliasManagerInterface;
+use Drupal\path_alias\AliasManagerInterface;
 use Drupal\Core\Url;
 use Drupal\jsonapi\ResourceType\ResourceTypeRepository;
 use Drupal\tide_api\Event\GetCacheIdEvent;
@@ -32,7 +32,7 @@ class TideApiController extends ControllerBase {
   /**
    * The path alias manager.
    *
-   * @var \Drupal\Core\Path\AliasManagerInterface
+   * @var \Drupal\path_alias\AliasManagerInterface
    */
   protected $aliasManager;
 
@@ -102,7 +102,7 @@ class TideApiController extends ControllerBase {
   /**
    * Constructs a new PathController.
    *
-   * @param \Drupal\Core\Path\AliasManagerInterface $alias_manager
+   * @param \Drupal\path_alias\AliasManagerInterface $alias_manager
    *   The path alias manager.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
@@ -133,7 +133,7 @@ class TideApiController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('path.alias_manager'),
+      $container->get('path_alias.manager'),
       $container->get('entity_type.manager'),
       $container->get('jsonapi.resource_type.repository'),
       $container->get('event_dispatcher'),
