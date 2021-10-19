@@ -5,7 +5,7 @@ Feature: Route lookup
   Scenario: Request to route lookup API to find a route by non-existing alias
     Given I am an anonymous user
     When I send a GET request to "api/v1/route?path=/test-non-existing-alias"
-    Then the rest response status code should be 404
+    Then the response code should be 404
     And the response should be in JSON
     And the JSON node "links.self" should exist
     And the JSON node "links.self.href" should contain "api/v1/route"
@@ -15,7 +15,7 @@ Feature: Route lookup
   Scenario: Request to route lookup API without a parameter specified.
     Given I am an anonymous user
     When I send a GET request to "api/v1/route"
-    Then the rest response status code should be 400
+    Then the response code should be 400
     And the JSON node "links.self" should exist
     And the JSON node "links.self.href" should contain "api/v1/route"
     And the JSON node "errors" should exist
@@ -31,7 +31,7 @@ Feature: Route lookup
 
     # Anonymous users should not have access to unpublished nodes.
     When I send a GET request to "api/v1/route?path=/test-draft-article"
-    Then the rest response status code should be 403
+    Then the response code should be 403
     And the response should be in JSON
     And the JSON node "links.self" should exist
     And the JSON node "links.self.href" should contain "api/v1/route"
@@ -40,7 +40,7 @@ Feature: Route lookup
 
     # Anonymous users should have access to published nodes.
     When I send a GET request to "api/v1/route?path=/test-published-article"
-    Then the rest response status code should be 200
+    Then the response code should be 200
     And the response should be in JSON
     And the JSON node "links.self" should exist
     And the JSON node "links.self.href" should contain "api/v1/route"
@@ -53,11 +53,11 @@ Feature: Route lookup
     And the cache has been cleared
 
     Then I send a GET request to "api/v1/route?path=/test-published-article"
-    Then the rest response status code should be 403
+    Then the response code should be 403
     And the JSON node "errors" should exist
     And the JSON node "errors[0].title" should contain "Permission denied."
 
     Then I send a GET request to "api/v1/route?path=/test-draft-article"
-    Then the rest response status code should be 200
+    Then the response code should be 200
     And the JSON node "data" should exist
     And the JSON node "errors" should not exist

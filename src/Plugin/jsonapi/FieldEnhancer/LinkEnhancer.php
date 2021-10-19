@@ -110,7 +110,7 @@ class LinkEnhancer extends UuidLinkEnhancer {
         $parts = explode("#", $processed_uri[1]);
         if (!empty($parts)) {
           // Getting node from the alias.
-          $path = \Drupal::service('path.alias_manager')->getPathByAlias('/' . $parts[0]);
+          $path = \Drupal::service('path_alias.manager')->getPathByAlias('/' . $parts[0]);
           if (!empty($path) && preg_match('/(node)\/(\d+)/', $path, $entity_info)) {
             $anchor = array_key_exists(1, $parts) ? '#' . $parts[1] : '';
             $entity_type = $entity_info[1];

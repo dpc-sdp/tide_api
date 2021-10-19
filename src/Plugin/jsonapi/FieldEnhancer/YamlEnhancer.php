@@ -79,7 +79,7 @@ class YamlEnhancer extends ResourceFieldEnhancerBase {
           $entity_type = $element->getAttribute('data-entity-type');
           if ($entity_type == 'node') {
             $href = $element->getAttribute('href');
-            $aliasByPath = \Drupal::service('path.alias_manager')->getAliasByPath($href);
+            $aliasByPath = \Drupal::service('path_alias.manager')->getAliasByPath($href);
             $alias_helper = \Drupal::service('tide_site.alias_storage_helper');
             $url = $alias_helper->getPathAliasWithoutSitePrefix(['alias' => $aliasByPath]);
             $element->setAttribute('href', $url);

@@ -14,15 +14,15 @@ Feature: Share Link
 
     # Anon user can't see the draft.
     When I send a GET request to "api/v1/node/test/99999999-aaaa-bbbb-ccc-000000000000"
-    Then the rest response status code should be 404
+    Then the response code should be 404
 
     # Share link without the correspond NID can't be retrieved.
     When I send a GET request to "api/v1/share_link/99999999-aaaa-bbbb-ccc-000000000001"
-    Then the rest response status code should be 404
+    Then the response code should be 404
 
     # Share link with the correspond NID.
     When I send a GET request to "api/v1/share_link/99999999-aaaa-bbbb-ccc-000000000001/999999"
-    Then the rest response status code should be 200
+    Then the response code should be 200
     And the response should be in JSON
     And the JSON node "data" should exist
     And the JSON node "data.type" should be equal to "share_link_token--share_link_token"
@@ -40,7 +40,7 @@ Feature: Share Link
     # Retrieve the draft with Share Link token header.
     When I set "X-Share-Link-Token" header equal to "99999999-aaaa-bbbb-ccc-000000000001"
     And I send a GET request to "api/v1/node/test/99999999-aaaa-bbbb-ccc-000000000000"
-    Then the rest response status code should be 200
+    Then the response code should be 200
     And the response should be in JSON
     And the JSON node "data.type" should be equal to "node--test"
     And the JSON node "data.id" should be equal to "99999999-aaaa-bbbb-ccc-000000000000"
