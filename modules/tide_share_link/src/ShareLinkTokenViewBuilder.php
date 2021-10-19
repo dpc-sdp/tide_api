@@ -44,4 +44,5 @@ class ShareLinkTokenViewBuilder extends EntityViewBuilder implements RenderCallb
   public static function trustedCallbacks() {
     return ['renderApiInformation'];
   }
+
 }
