@@ -11,7 +11,7 @@ Feature: Link Enhancer
     Given I am an anonymous user
 
     When I send a GET request to "api/v1/node/test/99999999-aaaa-bbbb-ccc-000000000001"
-    Then the rest response status code should be 200
+    Then the response code should be 200
     And the response should be in JSON
     And the JSON node "links.self" should exist
     And the JSON node "links.self.href" should contain "api/v1/node/test"

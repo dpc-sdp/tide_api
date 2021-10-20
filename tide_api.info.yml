@@ -2,7 +2,7 @@ name: 'Tide API'
 description: 'Content API functionality.'
 type: module
 package: Tide
-core: 8.x
+core_version_requirement: ^8.9 || ^9
 dependencies:
   - drupal:jsonapi_extras (>=8.x-3.8)
   - drupal:schemata

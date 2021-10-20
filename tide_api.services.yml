@@ -1,7 +1,7 @@
 services:
   tide_api.helper:
     class: Drupal\tide_api\TideApiHelper
-    arguments: [ '@path.alias_manager', '@entity_type.manager', '@jsonapi.resource_type.repository', '@config.factory' ]
+    arguments: [ '@path_alias.manager', '@entity_type.manager', '@jsonapi.resource_type.repository', '@config.factory' ]
   tide_api.version_subscriber:
     class: Drupal\tide_api\EventSubscriber\TideApiVersionSubscriber
     tags:
@@ -14,6 +14,6 @@ services:
       - {name: event_subscriber}
   tide_api.redirect_repository:
     class: Drupal\tide_api\TideApiRedirectRepository
-    arguments: ['@entity.manager', '@database', '@config.factory']
+    arguments: ['@entity_type.manager', '@database', '@config.factory']
     tags:
       - { name: backend_overridable }
