@@ -119,9 +119,10 @@ class ContentCollectionConfigurationWidgetEnhanced extends StringTextareaWidget 
     if (!empty($entity_reference_fields)) {
       foreach ($entity_reference_fields as $field_id => $field_label) {
         $field_advanced = $this->getSetting($field_id);
-        $summary[] = $this->t($field_label['label'] . ' Field: @status', [
+        $text = $this->t(' Field: @status', [
           '@status' => $field_advanced ? $this->t('Enabled') : $this->t('Disabled'),
         ]);
+        $summary[] = $field_label['label'] . $text;
       }
     }
 
@@ -166,7 +167,7 @@ class ContentCollectionConfigurationWidgetEnhanced extends StringTextareaWidget 
       foreach ($entity_reference_fields as $field_id => $field_label) {
         $element['contentFields'][$field_id] = [
           '#type' => 'checkbox',
-          '#title' => $field_label['label'],
+          '#title' => $this->t('Enable/Disable ') . $field_label['label'],
           '#default_value' => $this->getSetting($field_id),
         ];
       }
@@ -390,8 +391,8 @@ class ContentCollectionConfigurationWidgetEnhanced extends StringTextareaWidget 
       '#states' => [
         'visible' => [
           ':input[name="' . $this->getFormStatesElementName('tabs|content|show_advanced_filters', $items, $delta, $element) . '"]' => ['checked' => TRUE],
-        ]
-      ]
+        ],
+      ],
     ];
 
     // Generate all entity reference filters.
