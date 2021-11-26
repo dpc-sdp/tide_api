@@ -15,7 +15,7 @@ use JsonSchema\Validator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Implementation of the 'content_collection_configuration_widget_enhanced' widget.
+ * Implementation of the content collection configuration enhanced widget.
  *
  * @FieldWidget(
  *   id = "content_collection_configuration_enhanced",
