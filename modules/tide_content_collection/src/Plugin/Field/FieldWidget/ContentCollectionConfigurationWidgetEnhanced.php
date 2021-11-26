@@ -9,9 +9,6 @@ use Drupal\Core\Field\Plugin\Field\FieldWidget\StringTextareaWidget;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\tide_automated_listing\SearchApiIndexHelper;
-use JsonSchema\Constraints\Factory;
-use JsonSchema\SchemaStorage;
-use JsonSchema\Validator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -117,6 +114,17 @@ class ContentCollectionConfigurationWidgetEnhanced extends StringTextareaWidget 
       '@status' => $field_tags ? $this->t('Enabled') : $this->t('Disabled'),
     ]);
 
+    $entity_reference_fields = $this->getEntityReferenceFields();
+
+    if (!empty($entity_reference_fields)) {
+      foreach ($entity_reference_fields as $field_id => $field_label) {
+        $field_advanced = $this->getSetting($field_id);
+        $summary[] = $this->t($field_label['label'] . ' Field: @status', [
+          '@status' => $field_advanced ? $this->t('Enabled') : $this->t('Disabled'),
+        ]);
+      }
+    }
+
     return $summary;
   }
 
@@ -151,6 +159,19 @@ class ContentCollectionConfigurationWidgetEnhanced extends StringTextareaWidget 
       '#title' => $this->t('Enable/Disable Content Tags Field'),
       '#default_value' => $this->getSetting('field_tags'),
     ];
+
+    $entity_reference_fields = $this->getEntityReferenceFields();
+
+    if (!empty($entity_reference_fields)) {
+      foreach ($entity_reference_fields as $field_id => $field_label) {
+        $element['contentFields'][$field_id] = [
+          '#type' => 'checkbox',
+          '#title' => $field_label['label'],
+          '#default_value' => $this->getSetting($field_id),
+        ];
+      }
+    }
+
     return $element;
   }
 
@@ -187,16 +208,6 @@ class ContentCollectionConfigurationWidgetEnhanced extends StringTextareaWidget 
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $element = parent::formElement($items, $delta, $element, $form, $form_state);
 
-    $element['value']['#element_validate'][] = [$this, 'validateJson'];
-
-    // Use CodeMirror editor if webform module is enabled.
-    if ($this->moduleHandler->moduleExists('webform')) {
-      $element['value']['#type'] = 'webform_codemirror';
-      $element['value']['#mode'] = 'javascript';
-      $element['value']['#skip_validation'] = TRUE;
-      $element['value']['#attributes']['style'] = 'max-height: 500px;';
-    }
-
     // Hide the YAML configuration field.
     $element['value']['#access'] = FALSE;
 
@@ -226,8 +237,7 @@ class ContentCollectionConfigurationWidgetEnhanced extends StringTextareaWidget 
     if (!empty($json)) {
       $json_object = json_decode($json, TRUE);
       if ($json_object === NULL) {
-        $element['value']['#access'] = TRUE;
-        return $element;
+        $json_object = [];
       }
     }
 
@@ -303,6 +313,7 @@ class ContentCollectionConfigurationWidgetEnhanced extends StringTextareaWidget 
    *   The json_object of the listing.
    */
   protected function buildContentTab(FieldItemListInterface $items, $delta, array &$element, array &$form, FormStateInterface $form_state, array $configuration = NULL, array $json_object = NULL) {
+
     $element['tabs']['content'] = [
       '#type' => 'details',
       '#open' => TRUE,
@@ -317,26 +328,169 @@ class ContentCollectionConfigurationWidgetEnhanced extends StringTextareaWidget 
         '#title' => $this->t('Select Content types'),
         '#options' => $this->indexHelper->getNodeTypes(),
         '#default_value' => $json_object['internal']['contentTypes'] ?? [],
+        '#weight' => 1,
       ];
     }
 
-    $element['tabs']['content']['contentFields'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Content Fields'),
-      '#open' => TRUE,
-      '#collapsible' => TRUE,
-      '#group_name' => 'tabs_content_fields',
-    ];
-
     if ($this->indexHelper->isFieldTopicIndexed($this->index) && $this->getSetting('field_topic')) {
-      $element['tabs']['content']['contentFields']['field_topic_wrapper']['field_topic'] = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, 'field_topic', $json_object['internal']['contentFields']['field_topic']['values'] ?? []);
-      $element['tabs']['content']['contentFields']['field_topic_wrapper']['field_topic_operator'] = $this->buildFilterOperatorSelect($json_object['internal']['contentFields']['field_topic']['operator'] ?? 'OR', $this->t('This filter operator is used to combined all the selected values together.'));
+      $default_values = $json_object['internal']['contentFields']['field_topic']['values'] ?? [];
+      $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, 'field_topic', $default_values);
+      if ($field_filter) {
+        $element['tabs']['content']['field_topic_wrapper'] = [
+          '#type' => 'details',
+          '#title' => 'Select topics',
+          '#open' => FALSE,
+          '#collapsible' => TRUE,
+          '#group_name' => 'tabs_content_filters_field_topic_wrapper',
+          '#weight' => 2,
+        ];
+        $element['tabs']['content']['field_topic_wrapper']['field_topic'] = $field_filter;
+        $element['tabs']['content']['field_topic_wrapper']['operator'] = $this->buildFilterOperatorSelect($json_object['internal']['contentFields']['field_topic']['operator'] ?? 'OR', $this->t('This filter operator is used to combined all the selected values together.'));
+        if (isset($json_object['internal']['contentFields']['field_topic'])) {
+          $element['tabs']['content']['field_topic_wrapper']['#open'] = TRUE;
+        }
+      }
     }
 
     if ($this->indexHelper->isFieldTagsIndexed($this->index) && $this->getSetting('field_tags')) {
-      $element['tabs']['content']['contentFields']['field_tags_wrapper']['field_tags'] = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, 'field_tags', $json_object['internal']['contentFields']['field_tags']['values'] ?? []);
-      $element['tabs']['content']['contentFields']['field_tags_wrapper']['field_tags_operator'] = $this->buildFilterOperatorSelect($json_object['internal']['contentFields']['field_tags']['operator'] ?? 'OR', $this->t('This filter operator is used to combined all the selected values together.'));
+      $default_values = $json_object['internal']['contentFields']['field_tags']['values'] ?? [];
+      $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, 'field_tags', $default_values);
+      if ($field_filter) {
+        $element['tabs']['content']['field_tags_wrapper'] = [
+          '#type' => 'details',
+          '#title' => 'Select tags',
+          '#open' => FALSE,
+          '#collapsible' => TRUE,
+          '#group_name' => 'tabs_content_filters_field_tags_wrapper',
+          '#weight' => 3,
+        ];
+        $element['tabs']['content']['field_tags_wrapper']['field_tags'] = $field_filter;
+        $element['tabs']['content']['field_tags_wrapper']['operator'] = $this->buildFilterOperatorSelect($json_object['internal']['contentFields']['field_tags']['operator'] ?? 'OR', $this->t('This filter operator is used to combined all the selected values together.'));
+        if (isset($json_object['internal']['contentFields']['field_tags'])) {
+          $element['tabs']['content']['field_tags_wrapper']['#open'] = TRUE;
+        }
+      }
     }
+
+    $element['tabs']['content']['show_advanced_filters'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Show advanced filters.'),
+      '#description'   => $this->t('Show detailed filters to further limit the overall results.'),
+      '#default_value' => TRUE,
+      '#weight' => 4,
+    ];
+
+    $element['tabs']['content']['advanced_filters'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Advanced filters'),
+      '#open' => TRUE,
+      '#collapsible' => TRUE,
+      '#group_name' => 'tabs_content_advanced_filters',
+      '#weight' => 5,
+      '#states' => [
+        'visible' => [
+          ':input[name="' . $this->getFormStatesElementName('tabs|content|show_advanced_filters', $items, $delta, $element) . '"]' => ['checked' => TRUE],
+        ]
+      ]
+    ];
+
+    // Generate all entity reference filters.
+    $entity_reference_fields = $this->getEntityReferenceFields($items, $delta);
+
+    if (!empty($entity_reference_fields)) {
+      foreach ($entity_reference_fields as $field_id => $field_label) {
+        $default_values = $json_object['internal']['contentFields'][$field_id]['values'] ?? [];
+        $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, $field_id, $default_values);
+        if ($field_filter) {
+          $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper'] = [
+            '#type' => 'details',
+            '#title' => $field_label['label'],
+            '#open' => FALSE,
+            '#collapsible' => TRUE,
+            '#group_name' => 'tabs_content_advanced_filters_' . $field_id . '_wrapper',
+          ];
+          $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper'][$field_id] = $field_filter;
+          $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['operator'] = $this->buildFilterOperatorSelect($json_object['internal']['contentFields'][$field_id]['operator'] ?? 'OR', $this->t('This filter operator is used to combined all the selected values together.'));
+          if (isset($json_object['internal']['contentFields'][$field_id]['values'])) {
+            $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['#open'] = TRUE;
+            $element['tabs']['content']['show_advanced_filters']['#default_value'] = TRUE;
+          }
+        }
+      }
+    }
+
+    // Build extra filters.
+    $extra_filters = $this->moduleHandler->invokeAll('tide_content_collection_extra_filters_build', [
+      $this->index,
+      clone $items,
+      $delta,
+      $json_object['internal']['contentFields'] ?? [],
+    ]);
+    $context = [
+      'index' => clone $items,
+      'delta' => $delta,
+      'filters' => $json_object['internal']['contentFields'] ?? [],
+    ];
+    $this->moduleHandler->alter('tide_content_collection_extra_filters_build', $extra_filters, $this->index, $context);
+    if (!empty($extra_filters) && is_array($extra_filters)) {
+      foreach ($extra_filters as $field_id => $field_filter) {
+        $field_id_index = explode('.', $field_id);
+        $field_id_index = is_array($field_id_index) ? reset($field_id_index) : $field_id;
+        // Skip entity reference fields in extra filters.
+        if (isset($entity_reference_fields[$field_id_index])) {
+          continue;
+        }
+        $index_field = $this->index->getField($field_id_index);
+        if ($index_field) {
+          $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper'] = [
+            '#type' => 'details',
+            '#title' => $index_field->getLabel(),
+            '#open' => FALSE,
+            '#collapsible' => TRUE,
+            '#group_name' => 'filters' . $field_id . '_wrapper',
+          ];
+          $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper'][$field_id] = $field_filter;
+          if (empty($field_filter['#disable_filter_operator'])) {
+            $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['operator'] = $this->buildFilterOperatorSelect($json_object['internal']['contentFields'][$field_id]['operator'] ?? 'OR', $this->t('This filter operator is used to combined all the selected values together.'));
+          }
+          unset($field_filter['#disable_filter_operator']);
+          if (isset($json_object['internal']['contentFields'][$field_id]['values'])) {
+            $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['#open'] = TRUE;
+            $element['tabs']['content']['show_advanced_filters']['#default_value'] = TRUE;
+          }
+        }
+      }
+    }
+
+  }
+
+  /**
+   * Get all entity reference fields.
+   *
+   * @param \Drupal\Core\Field\FieldItemListInterface $items
+   *   Field items.
+   * @param int $delta
+   *   The current delta.
+   *
+   * @return array
+   *   The reference fields.
+   */
+  protected function getEntityReferenceFields(FieldItemListInterface $items = NULL, $delta = NULL) {
+    $entity_reference_fields = $this->indexHelper->getIndexEntityReferenceFields($this->index, ['nid']);
+    // Allow other modules to remove entity reference filters.
+    $excludes = $this->moduleHandler->invokeAll('tide_content_collection_entity_reference_fields_exclude', [
+      $this->index,
+      $entity_reference_fields,
+      !empty($items) ? clone $items : NULL,
+      $delta,
+    ]);
+    // Exclude the below fields as they are loaded manually.
+    $excludes[] = 'field_topic';
+    $excludes[] = 'field_tags';
+    if (!empty($excludes) && is_array($excludes)) {
+      $entity_reference_fields = $this->indexHelper::excludeArrayKey($entity_reference_fields, $excludes);
+    }
+    return $entity_reference_fields;
   }
 
   /**
@@ -392,44 +546,93 @@ class ContentCollectionConfigurationWidgetEnhanced extends StringTextareaWidget 
   }
 
   /**
-   * Callback to validate the JSON.
+   * Get the element name for Form States API.
    *
+   * @param string $element_name
+   *   The name of the element.
+   * @param \Drupal\Core\Field\FieldItemListInterface $items
+   *   Field items.
+   * @param int $delta
+   *   Delta.
    * @param array $element
-   *   The form element.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The form state.
+   *   The element.
+   *
+   * @return string
+   *   The final element name.
    */
-  public function validateJson(array $element, FormStateInterface $form_state) {
-    $json = $element['#value'];
-    if (!empty($json)) {
-      $json_object = json_decode($json);
-      if ($json_object === NULL) {
-        $form_state->setError($element, t('Invalid JSON.'));
+  protected function getFormStatesElementName($element_name, FieldItemListInterface $items, $delta, array $element) {
+    $name = '';
+    foreach ($element['#field_parents'] as $index => $parent) {
+      $name .= $index ? ('[' . $parent . ']') : $parent;
+    }
+    $name .= '[' . $items->getName() . ']';
+    $name .= '[' . $delta . ']';
+    foreach (explode('|', $element_name) as $path) {
+      $name .= '[' . $path . ']';
+    }
+    return $name;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function massageFormValues(array $values, array $form, FormStateInterface $form_state) {
+    $values = parent::massageFormValues($values, $form, $form_state);
+    foreach ($values as $delta => &$value) {
+      $config = [];
+      $config['title'] = $value['title'] ?? '';
+      $config['description'] = $value['description'] ?? '';
+      $config['callToAction']['text'] = ['callToAction']['text'] ?? '';
+      $config['callToAction']['url'] = ['callToAction']['url'] ?? '';
+      $config['internal']['contentTypes'] = $value['tabs']['content']['contentTypes'] ? array_values(array_filter($value['tabs']['content']['contentTypes'])) : [];
+      if (isset($value['tabs']['content']['field_topic_wrapper']['field_topic'])) {
+        foreach ($value['tabs']['content']['field_topic_wrapper']['field_topic'] as $index => $reference) {
+          if (!empty($reference['target_id'])) {
+            $config['internal']['contentFields']['field_topic']['values'][] = (int) $reference['target_id'];
+          }
+        }
+        $config['internal']['contentFields']['field_topic']['operator'] = $value['tabs']['content']['field_topic_wrapper']['operator'] ?? NULL;
       }
-      elseif ($this->getSetting('schema_validation')) {
-        // Validate against the JSON Schema.
-        $json_schema = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('schema');
-        if (!empty($json_schema)) {
-          $json_schema_object = json_decode($json_schema);
-          $schema_storage = new SchemaStorage();
-          $schema_storage->addSchema('file://content_collection_configuration_schema', $json_schema_object);
-          $json_validator = new Validator(new Factory($schema_storage));
-          $num_errors = $json_validator->validate($json_object, $json_schema_object);
-          if ($num_errors) {
-            $errors = [];
-            foreach ($json_validator->getErrors() as $error) {
-              $errors[] = t('[@property] @message', [
-                '@property' => $error['property'],
-                '@message' => $error['message'],
-              ]);
+      if (isset($value['tabs']['content']['field_tags_wrapper']['field_tags'])) {
+        foreach ($value['tabs']['content']['field_tags_wrapper']['field_tags'] as $index => $reference) {
+          if (!empty($reference['target_id'])) {
+            $config['internal']['contentFields']['field_tags']['values'][] = (int) $reference['target_id'];
+          }
+        }
+        $config['internal']['contentFields']['field_tags']['operator'] = $value['tabs']['content']['field_tags_wrapper']['operator'] ?? NULL;
+      }
+
+      $entity_reference_fields = $this->getEntityReferenceFields();
+      foreach ($value['tabs']['content']['advanced_filters'] as $wrapper_id => $wrapper) {
+        $field_id = str_replace('_wrapper', '', $wrapper_id);
+        if (isset($wrapper[$field_id])) {
+          // Entity reference fields.
+          if (isset($entity_reference_fields[$field_id])) {
+            foreach ($wrapper[$field_id] as $index => $reference) {
+              if (!empty($reference['target_id'])) {
+                $config['internal']['contentFields'][$field_id]['values'][] = (int) $reference['target_id'];
+              }
             }
-            $form_state->setError($element, t('JSON does not validate against the schema. Violations: @errors.', [
-              '@errors' => implode(' - ', $errors),
-            ]));
+          }
+          // Extra fields.
+          else {
+            $config['internal']['contentFields'][$field_id]['values'] = is_array($wrapper[$field_id]) ? array_values(array_filter($wrapper[$field_id])) : [$wrapper[$field_id]];
+            $config['internal']['contentFields'][$field_id]['values'] = array_filter($config['internal']['contentFields'][$field_id]['values']);
+          }
+
+          if (!empty($wrapper['operator'])) {
+            $config['internal']['contentFields'][$field_id]['operator'] = $wrapper['operator'];
+          }
+
+          if (empty($config['internal']['contentFields'][$field_id]['values'])) {
+            unset($config['internal']['contentFields'][$field_id]);
           }
         }
       }
+      $value['value'] = json_encode($config);
     }
+
+    return $values;
   }
 
 }
