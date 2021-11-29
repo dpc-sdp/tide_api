@@ -32,7 +32,7 @@ function hook_tide_content_collection_entity_reference_fields_exclude(IndexInter
 }
 
 /**
- * Build extra filters.
+ * Build internal extra filters.
  *
  * @param \Drupal\search_api\IndexInterface $index
  *   The search index.
@@ -44,12 +44,12 @@ function hook_tide_content_collection_entity_reference_fields_exclude(IndexInter
  *   The values of all filters captured in the YAML configuration.
  *
  * @return array
- *   The form elements of the extra filters, keyed by field ID in the index.
+ *   The form elements of the internal extra filters, keyed by field ID in the index.
  *   The Listing will skip all entity reference fields and fields not indexed.
- *   To disable the filter operator select for an extra filter, set the
+ *   To disable the filter operator select for an internal extra filter, set the
  *   special key #disable_filter_operator to TRUE.
  */
-function hook_tide_content_collection_extra_filters_build(IndexInterface $index, FieldItemListInterface $items = NULL, $delta = NULL, array $filters = []) {
+function hook_tide_content_collection_internal_extra_filters_build(IndexInterface $index, FieldItemListInterface $items = NULL, $delta = NULL, array $filters = []) {
   $elements = [
     'field_project_status' => [
       '#type' => 'checkboxes',
@@ -67,20 +67,20 @@ function hook_tide_content_collection_extra_filters_build(IndexInterface $index,
 }
 
 /**
- * Alter the extra filters.
+ * Alter the internal extra filters.
  *
- * @param array $extra_filters
- *   Form elements of the extra filters.
+ * @param array $internal_extra_filters
+ *   Form elements of the internal extra filters.
  * @param \Drupal\search_api\IndexInterface $index
  *   The search index.
  * @param array $context
- *   Extra context with the following items:
+ *   internal Extra context with the following items:
  *   - items: Field item list.
  *   - delta: the delta of the current field item.
  *   - filters: the values of all filters captured in the YAML configuration.
  */
-function hook_tide_content_collection_extra_filters_build_alter(array &$extra_filters, IndexInterface $index, array &$context) {
+function hook_tide_content_collection_internal_extra_filters_build_alter(array &$internal_extra_filters, IndexInterface $index, array &$context) {
   if ($index->id() == 'node') {
-    unset($extra_filters['field_budget']);
+    unset($internal_extra_filters['field_budget']);
   }
 }
