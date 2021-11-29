@@ -44,7 +44,7 @@ function hook_tide_content_collection_entity_reference_fields_exclude(IndexInter
  *   The values of all filters captured in the YAML configuration.
  *
  * @return array
- *   The form elements of the internal extra filters, keyed by field ID in the index.
+ *   The form elements of the internal filters, keyed by field ID in the index.
  *   The Listing will skip all entity reference fields and fields not indexed.
  *   To disable the filter operator select for an internal extra filter, set the
  *   special key #disable_filter_operator to TRUE.
