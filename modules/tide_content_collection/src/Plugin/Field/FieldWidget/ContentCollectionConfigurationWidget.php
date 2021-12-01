@@ -10,6 +10,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\tide_content_collection\SearchApiIndexHelper;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Datetime\DrupalDateTime;
 
 /**
  * Implementation of the content collection configuration widget.
@@ -99,41 +100,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
    * {@inheritdoc}
    */
   public function settingsSummary() : array {
-    $summary = [];
-    $settings = $this->getSettings();
-    $summary[] = $this->t('Call To Action: @status', [
-      '@status' => $settings['tabs']['content']['enable_call_to_action'] ? $this->t('Enabled') : $this->t('Disabled'),
-    ]);
-    unset($settings['tabs']['content']['enable_call_to_action']);
-    if (isset($settings['tabs']['content']['content_types_wrapper'])) {
-      $summary[] = $this->t('Content types: @status', [
-        '@status' => $settings['tabs']['content']['content_types_wrapper']['enable_content_types'] ? $this->t('Enabled') : $this->t('Disabled'),
-      ]);
-      if ($settings['tabs']['content']['content_types_wrapper']['enable_content_types']) {
-        $summary[] = $this->t('Allowed content types: @values', [
-          '@values' => $settings['tabs']['content']['content_types_wrapper']['contentTypes'] ? ucwords(str_replace('_', ' ', implode(',', array_map('ucwords', array_values(array_filter($settings['tabs']['content']['content_types_wrapper']['contentTypes'])))))) : $this->t('All'),
-        ]);
-      }
-    }
-    unset($settings['tabs']['content']['content_types_wrapper']);
-    if (!empty($settings['tabs']['content'])) {
-      foreach ($settings['tabs']['content'] as $key => $value) {
-        $field_id = str_replace('_wrapper', '', $key);
-        $summary[] = $this->t('@field: @status', [
-          '@field' => ucfirst(str_replace('_', ' ', $field_id)),
-          '@status' => $value['enable_' . $field_id] ? $this->t('Enabled') : $this->t('Disabled'),
-        ]);
-        if ($value['enable_' . $field_id]) {
-          $summary[] = $this->t('@field operator: @status', [
-            '@field' => ucfirst(str_replace('_', ' ', $field_id)),
-            '@status' => $value['show_' . $field_id . '_operator'] ? $this->t('Exposed') : $this->t('Hidden'),
-          ]);
-        }
-        unset($settings['tabs']['content'][$key]);
-      }
-    }
-
-    return $summary;
+    return [];
   }
 
   /**
@@ -201,12 +168,12 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       ];
       $element['tabs']['content']['field_topic_wrapper']['enable_field_topic'] = [
         '#type' => 'checkbox',
-        '#title' => $this->t('Enable field topic'),
+        '#title' => $this->t('Enable field_topic'),
         '#default_value' => $settings['tabs']['content']['field_topic_wrapper']['enable_field_topic'] ?? FALSE,
       ];
       $element['tabs']['content']['field_topic_wrapper']['show_field_topic_operator'] = [
         '#type' => 'checkbox',
-        '#title' => $this->t('Show field topic operator'),
+        '#title' => $this->t('Show filter operator'),
         '#default_value' => $settings['tabs']['content']['field_topic_wrapper']['show_field_topic_operator'] ?? FALSE,
       ];
     }
@@ -221,12 +188,12 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       ];
       $element['tabs']['content']['field_tags_wrapper']['enable_field_tags'] = [
         '#type' => 'checkbox',
-        '#title' => $this->t('Enable field tags'),
+        '#title' => $this->t('Enable field_tags'),
         '#default_value' => $settings['tabs']['content']['field_tags_wrapper']['enable_field_tags'] ?? FALSE,
       ];
       $element['tabs']['content']['field_tags_wrapper']['show_field_tags_operator'] = [
         '#type' => 'checkbox',
-        '#title' => $this->t('Show field tags operator'),
+        '#title' => $this->t('Show filter operator'),
         '#default_value' => $settings['tabs']['content']['field_tags_wrapper']['show_field_tags_operator'] ?? FALSE,
       ];
     }
@@ -243,12 +210,12 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         ];
         $element['tabs']['content'][$field_id . '_wrapper']['enable_' . $field_id] = [
           '#type' => 'checkbox',
-          '#title' => $this->t('Enable @field_id', ['@field_id' => str_replace('_', ' ', $field_id)]),
+          '#title' => $this->t('Enable @field_id', ['@field_id' => $field_id]),
           '#default_value' => $settings['tabs']['content'][$field_id . '_wrapper']['enable_' . $field_id] ?? FALSE,
         ];
         $element['tabs']['content'][$field_id . '_wrapper']['show_' . $field_id . '_operator'] = [
           '#type' => 'checkbox',
-          '#title' => $this->t('Show @field_id operator', ['@field_id' => str_replace('_', ' ', $field_id)]),
+          '#title' => $this->t('Show filter operator'),
           '#default_value' => $settings['tabs']['content'][$field_id . '_wrapper']['show_' . $field_id . '_operator'] ?? FALSE,
         ];
       }
@@ -382,6 +349,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
 
     $this->buildContentTab($items, $delta, $element, $form, $form_state, $configuration, $json_object);
     $this->buildLayoutTab($items, $delta, $element, $form, $form_state, $configuration, $json_object);
+    $this->buildAdvancedTab($items, $delta, $element, $form, $form_state, $configuration, $json_object);
 
     return $element;
   }
@@ -446,6 +414,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           '#weight' => 2,
         ];
         $element['tabs']['content']['field_topic_wrapper']['field_topic'] = $field_filter;
+        $element['tabs']['content']['field_topic_wrapper']['field_topic']['#title'] = 'Select topics';
         if ($settings['tabs']['content']['field_topic_wrapper']['show_field_topic_operator']) {
           $element['tabs']['content']['field_topic_wrapper']['operator'] = $this->buildFilterOperatorSelect($json_object['internal']['contentFields']['field_topic']['operator'] ?? 'OR', $this->t('This filter operator is used to combined all the selected values together.'));
         }
@@ -468,6 +437,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           '#weight' => 3,
         ];
         $element['tabs']['content']['field_tags_wrapper']['field_tags'] = $field_filter;
+        $element['tabs']['content']['field_tags_wrapper']['field_tags']['#title'] = 'Select tags';
         if ($settings['tabs']['content']['field_tags_wrapper']['show_field_tags_operator']) {
           $element['tabs']['content']['field_tags_wrapper']['operator'] = $this->buildFilterOperatorSelect($json_object['internal']['contentFields']['field_tags']['operator'] ?? 'OR', $this->t('This filter operator is used to combined all the selected values together.'));
         }
@@ -477,6 +447,32 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       }
     }
 
+    $this->buildContentTabAdvancedFilters($items, $delta, $element, $form, $form_state, $configuration, $json_object, $settings);
+    $this->buildContentTabDateFilters($items, $delta, $element, $form, $form_state, $configuration, $json_object, $settings);
+
+  }
+
+  /**
+   * Build Content Tab Advanced Filters.
+   *
+   * @param \Drupal\Core\Field\FieldItemListInterface $items
+   *   Field items.
+   * @param int $delta
+   *   The current delta.
+   * @param array $element
+   *   The element.
+   * @param array $form
+   *   The form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   * @param array $configuration
+   *   The YAML configuration of the listing.
+   * @param array $json_object
+   *   The json_object of the listing.
+   * @param array $settings
+   *   The settings of the listing.
+   */
+  protected function buildContentTabAdvancedFilters(FieldItemListInterface $items, $delta, array &$element, array &$form, FormStateInterface $form_state, array $configuration = NULL, array $json_object = NULL, array $settings = []) {
     $element['tabs']['content']['show_advanced_filters'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show advanced filters.'),
@@ -531,7 +527,31 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         }
       }
     }
+    // Extra filters added via hook.
+    $this->buildContentTabAdvancedExtraFilters($items, $delta, $element, $form, $form_state, $configuration, $json_object, $settings);
+  }
 
+  /**
+   * Build Content Tab Advanced Extra Filters.
+   *
+   * @param \Drupal\Core\Field\FieldItemListInterface $items
+   *   Field items.
+   * @param int $delta
+   *   The current delta.
+   * @param array $element
+   *   The element.
+   * @param array $form
+   *   The form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   * @param array $configuration
+   *   The YAML configuration of the listing.
+   * @param array $json_object
+   *   The json_object of the listing.
+   * @param array $settings
+   *   The settings of the listing.
+   */
+  protected function buildContentTabAdvancedExtraFilters(FieldItemListInterface $items, $delta, array &$element, array &$form, FormStateInterface $form_state, array $configuration = NULL, array $json_object = NULL, array $settings = []) {
     // Build internal extra filters.
     $internal_extra_filters = $this->moduleHandler->invokeAll('tide_content_collection_internal_extra_filters_build', [
       $this->index,
@@ -574,7 +594,29 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         }
       }
     }
+  }
 
+  /**
+   * Build Content Tab Date Filters.
+   *
+   * @param \Drupal\Core\Field\FieldItemListInterface $items
+   *   Field items.
+   * @param int $delta
+   *   The current delta.
+   * @param array $element
+   *   The element.
+   * @param array $form
+   *   The form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   * @param array $configuration
+   *   The YAML configuration of the listing.
+   * @param array $json_object
+   *   The json_object of the listing.
+   * @param array $settings
+   *   The settings of the listing.
+   */
+  protected function buildContentTabDateFilters(FieldItemListInterface $items, $delta, array &$element, array &$form, FormStateInterface $form_state, array $configuration = NULL, array $json_object = NULL, array $settings = []) {
     $date_fields = $this->indexHelper->getIndexDateFields($this->index);
     if (!empty($date_fields)) {
       $element['tabs']['content']['show_dateFilter'] = [
@@ -649,18 +691,25 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           ],
         ],
       ];
+      $default_date_range_start = '';
+      $default_date_range_end = '';
+      if (!empty($json_object['internal']['dateFilter']['dateRangeStart'])) {
+        $default_date_range_start = DrupalDateTime::createFromFormat('Y-m-d\TH:i:sP', $json_object['internal']['dateFilter']['dateRangeStart']);
+      }
+      if (!empty($json_object['internal']['dateFilter']['dateRangeEnd'])) {
+        $default_date_range_end = DrupalDateTime::createFromFormat('Y-m-d\TH:i:sP', $json_object['internal']['dateFilter']['dateRangeEnd']);
+      }
       $element['tabs']['content']['dateFilter']['dateRange']['dateRangeStart'] = [
         '#type' => 'datetime',
         '#title' => $this->t('Date range start'),
-        '#default_value' => $json_object['internal']['dateFilter']['dateRangeStart'] ?? '',
+        '#default_value' => $default_date_range_start,
       ];
       $element['tabs']['content']['dateFilter']['dateRange']['dateRangeEnd'] = [
         '#type' => 'datetime',
         '#title' => $this->t('Date range end'),
-        '#default_value' => $json_object['internal']['dateFilter']['dateRangeEnd'] ?? '',
+        '#default_value' => $default_date_range_end,
       ];
     }
-
   }
 
   /**
@@ -711,7 +760,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
    *   The json_object of the listing.
    */
   protected function buildLayoutTab(FieldItemListInterface $items, $delta, array &$element, array &$form, FormStateInterface $form_state, array $configuration = NULL, array $json_object = NULL) {
-    $settings = $this->getSettings();
     $element['tabs']['layout'] = [
       '#type' => 'details',
       '#open' => TRUE,
@@ -729,6 +777,178 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         'list' => $this->t('List view'),
       ],
     ];
+
+    $element['tabs']['layout']['display']['resultComponent']['style'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Card display style'),
+      '#default_value' => $json_object['interface']['display']['resultComponent']['style'] ?? 'thumbnail',
+      '#options' => [
+        'no-image' => $this->t('No Image'),
+        'thumbnail' => $this->t('Thumbnail'),
+        'profile' => $this->t('Profile'),
+      ],
+    ];
+
+    $sort_data = $json_object['interface']['display']['options']['sort']['values'] ?? [];
+    $default_options = [];
+    $default_title_sort = [];
+    $default_date_sort = [];
+    $default_date_field = '';
+    if (!empty($sort_data)) {
+      foreach ($sort_data as $options) {
+        switch ($options['name']) {
+          case 'Relevance':
+            $default_options[] = 'relevance';
+            break;
+
+          case 'Title A-Z':
+          case 'Title Z-A':
+            $default_options[] = 'title';
+            $default_title_sort[] = $options['value']['direction'];
+            break;
+
+          case 'Newest':
+          case 'Oldest':
+            $default_options[] = 'date';
+            $default_date_sort[] = $options['value']['direction'];
+            $default_date_field = $options['value']['field'];
+            break;
+
+          default:
+            break;
+        }
+      }
+    }
+
+    $element['tabs']['layout']['display']['sort']['options'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Sort content collection by'),
+      '#multiple' => TRUE,
+      '#default_value' => $default_options,
+      '#options' => [
+        'relevance' => $this->t('Relevance'),
+        'title' => $this->t('Title'),
+        'date' => $this->t('Date'),
+      ],
+    ];
+
+    $element['tabs']['layout']['display']['sort']['title'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Title'),
+      '#open' => TRUE,
+      '#collapsible' => TRUE,
+      '#states' => [
+        'visible' => [
+          ':input[name="' . $this->getFormStatesElementName('tabs|layout|display|sort|options', $items, $delta, $element) . '"]' => ['value' => 'title'],
+        ],
+      ],
+    ];
+
+    $element['tabs']['layout']['display']['sort']['title']['title_sort'] = [
+    '#type' => 'select',
+    '#title' => $this->t('Sort order'),
+    '#default_value' => $default_title_sort,
+    '#multiple' => TRUE,
+    '#options' => [
+      'asc' => $this->t('A-Z'),
+      'desc' => $this->t('Z-A'),
+    ]
+    ];
+
+    $date_fields = $this->indexHelper->getIndexDateFields($this->index);
+
+    $element['tabs']['layout']['display']['sort']['date'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Date'),
+      '#open' => TRUE,
+      '#collapsible' => TRUE,
+      '#states' => [
+        'visible' => [
+          ':input[name="' . $this->getFormStatesElementName('tabs|layout|display|sort|options', $items, $delta, $element) . '"]' => ['value' => 'date'],
+        ],
+      ],
+    ];
+
+    $element['tabs']['layout']['display']['sort']['date']['date_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Select date field'),
+      '#default_value' => $default_date_field,
+      '#options' => $date_fields ?? [],
+    ];
+    $element['tabs']['layout']['display']['sort']['date']['date_sort'] = [
+    '#type' => 'select',
+    '#title' => $this->t('Sort order'),
+    '#default_value' => $default_date_sort,
+    '#multiple' => TRUE,
+    '#options' => [
+      'asc' => $this->t('Newest'),
+      'desc' => $this->t('Oldest'),
+    ]
+    ];
+
+  }
+
+  /**
+   * Build Advanced Tab.
+   *
+   * @param \Drupal\Core\Field\FieldItemListInterface $items
+   *   Field items.
+   * @param int $delta
+   *   The current delta.
+   * @param array $element
+   *   The element.
+   * @param array $form
+   *   The form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   * @param array $configuration
+   *   The YAML configuration of the listing.
+   * @param array $json_object
+   *   The json_object of the listing.
+   */
+  protected function buildAdvancedTab(FieldItemListInterface $items, $delta, array &$element, array &$form, FormStateInterface $form_state, array $configuration = NULL, array $json_object = NULL) {
+    $element['tabs']['advanced'] = [
+      '#type' => 'details',
+      '#open' => TRUE,
+      '#collapsible' => TRUE,
+      '#title' => $this->t('Advanced'),
+      '#group_name' => 'advanced',
+    ];
+
+    $element['tabs']['advanced']['display']['options']['resultsCountText'] = [
+      '#title' => $this->t('Show total number of results'),
+      '#type' => 'textfield',
+      '#description' => $this->t('
+        Text to display above the results.<br>
+        This is read out to a screen reader when a search is performed.<br>
+        Supports 2 tokens:<br>
+        - {range} - The current range of results E.g. 1-12<br>
+        - {count} - The total count of results
+      '),
+      '#default_value' => $json_object['interface']['display']['options']['resultsCountText'] ?? $this->t('Displaying {range} of {count} results.'),
+    ];
+
+    $element['tabs']['advanced']['display']['options']['noResultsText'] = [
+      '#title' => $this->t('No results message'),
+      '#type' => 'textfield',
+      '#description' => $this->t('Text to display when no results were returned.'),
+      '#default_value' => $json_object['interface']['display']['options']['noResultsText'] ?? $this->t("Sorry! We couldn't find any matches."),
+    ];
+
+    $element['tabs']['advanced']['display']['options']['loadingText'] = [
+      '#title' => $this->t('Loading message'),
+      '#type' => 'textfield',
+      '#description' => $this->t('Text to display when search results are loading.'),
+      '#default_value' => $json_object['interface']['display']['options']['loadingText'] ?? $this->t('Loading'),
+    ];
+
+    $element['tabs']['advanced']['display']['options']['errorText'] = [
+      '#title' => $this->t('Error message'),
+      '#type' => 'textfield',
+      '#description' => $this->t('Text to display when an error occurs.'),
+      '#default_value' => $json_object['interface']['display']['options']['errorText'] ?? $this->t("Search isn't working right now, please try again later."),
+    ];
+
   }
 
   /**
@@ -801,7 +1021,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             $config['internal']['contentFields']['field_topic']['values'][] = (int) $reference['target_id'];
           }
         }
-        $config['internal']['contentFields']['field_topic']['operator'] = $value['tabs']['content']['field_topic_wrapper']['operator'] ?? NULL;
+        $config['internal']['contentFields']['field_topic']['operator'] = $value['tabs']['content']['field_topic_wrapper']['operator'] ?? 'OR';
       }
       if (isset($value['tabs']['content']['field_tags_wrapper']['field_tags'])) {
         foreach ($value['tabs']['content']['field_tags_wrapper']['field_tags'] as $index => $reference) {
@@ -809,7 +1029,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             $config['internal']['contentFields']['field_tags']['values'][] = (int) $reference['target_id'];
           }
         }
-        $config['internal']['contentFields']['field_tags']['operator'] = $value['tabs']['content']['field_tags_wrapper']['operator'] ?? NULL;
+        $config['internal']['contentFields']['field_tags']['operator'] = $value['tabs']['content']['field_tags_wrapper']['operator'] ?? 'OR';
       }
 
       $entity_reference_fields = $this->getEntityReferenceFields();
@@ -844,11 +1064,13 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       if (!empty($value['tabs']['content']['dateFilter']['criteria'])) {
         $config['internal']['dateFilter']['criteria'] = $value['tabs']['content']['dateFilter']['criteria'] ?? '';
         if ($value['tabs']['content']['dateFilter']['criteria'] == 'range') {
-          if (!empty($value['tabs']['content']['dateFilter']['dateRange']['dateRangeStart'])) {
-            $config['internal']['dateFilter']['dateRangeStart'] = $value['tabs']['content']['dateFilter']['dateRange']['dateRangeStart'] ?? '';
+          $dateRangeStart = $value['tabs']['content']['dateFilter']['dateRange']['dateRangeStart'] ?? '';
+          if ($dateRangeStart instanceof DrupalDateTime) {
+            $config['internal']['dateFilter']['dateRangeStart'] = $dateRangeStart->format('c');
           }
-          if (!empty($value['tabs']['content']['dateFilter']['dateRange']['dateRangeEnd'])) {
-            $config['internal']['dateFilter']['dateRangeEnd'] = $value['tabs']['content']['dateFilter']['dateRange']['dateRangeEnd'] ?? '';
+          $dateRangeEnd = $value['tabs']['content']['dateFilter']['dateRange']['dateRangeEnd'] ?? '';
+          if ($dateRangeEnd instanceof DrupalDateTime) {
+            $config['internal']['dateFilter']['dateRangeEnd'] = $dateRangeEnd->format('c');
           }
         }
       }
@@ -863,10 +1085,65 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
 
       // Display Layout.
       $config['interface']['display']['type'] = $value['tabs']['layout']['display']['type'] ?? 'grid';
+      $config['interface']['display']['resultComponent']['style'] = $value['tabs']['layout']['display']['resultComponent']['style'] ?? 'thumbnail';
+
+      if (!empty($value['tabs']['layout']['display']['sort']['options']) && is_array($value['tabs']['layout']['display']['sort']['options'])) {
+        if (isset($value['tabs']['layout']['display']['sort']['options']['relevance'])) {
+          $config['interface']['display']['options']['sort']['values'][] = [
+            'name' => 'Relevance',
+            'value' => NULL,
+          ];
+        }
+        if (isset($value['tabs']['layout']['display']['sort']['options']['title'])) {
+          if (isset($value['tabs']['layout']['display']['sort']['title']['title_sort']['asc'])) {
+            $config['interface']['display']['options']['sort']['values'][] = [
+              'name' => 'Title A-Z',
+              'value' => [
+                'field' => 'title',
+                'direction' => 'asc'
+              ],
+            ];
+          }
+          if (isset($value['tabs']['layout']['display']['sort']['title']['title_sort']['desc'])) {
+            $config['interface']['display']['options']['sort']['values'][] = [
+              'name' => 'Title Z-A',
+              'value' => [
+                'field' => 'title',
+                'direction' => 'desc'
+              ],
+            ];
+          }
+        }
+        if (isset($value['tabs']['layout']['display']['sort']['options']['date']) && isset($value['tabs']['layout']['display']['sort']['date']['date_field'])) {
+          if (isset($value['tabs']['layout']['display']['sort']['date']['date_sort']['asc'])) {
+            $config['interface']['display']['options']['sort']['values'][] = [
+              'name' => 'Newest',
+              'value' => [
+                'field' => $value['tabs']['layout']['display']['sort']['date']['date_field'],
+                'direction' => 'asc'
+              ],
+            ];
+          }
+          if (isset($value['tabs']['layout']['display']['sort']['date']['date_sort']['desc'])) {
+            $config['interface']['display']['options']['sort']['values'][] = [
+              'name' => 'Oldest',
+              'value' => [
+                'field' => $value['tabs']['layout']['display']['sort']['date']['date_field'],
+                'direction' => 'desc'
+              ],
+            ];
+          }
+        }
+      }
+
+      // Advanced Layout.
+      $config['interface']['display']['options']['resultsCountText'] = $value['tabs']['advanced']['display']['options']['resultsCountText'] ?? '';
+      $config['interface']['display']['options']['noResultsText'] = $value['tabs']['advanced']['display']['options']['noResultsText'] ?? '';
+      $config['interface']['display']['options']['loadingText'] = $value['tabs']['advanced']['display']['options']['loadingText'] ?? '';
+      $config['interface']['display']['options']['errorText'] = $value['tabs']['advanced']['display']['options']['errorText'] ?? '';
 
       $value['value'] = json_encode($config);
     }
-
     return $values;
   }
 
