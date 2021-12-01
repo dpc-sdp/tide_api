@@ -845,14 +845,14 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     ];
 
     $element['tabs']['layout']['display']['sort']['title']['title_sort'] = [
-    '#type' => 'select',
-    '#title' => $this->t('Sort order'),
-    '#default_value' => $default_title_sort,
-    '#multiple' => TRUE,
-    '#options' => [
-      'asc' => $this->t('A-Z'),
-      'desc' => $this->t('Z-A'),
-    ]
+      '#type' => 'select',
+      '#title' => $this->t('Sort order'),
+      '#default_value' => $default_title_sort,
+      '#multiple' => TRUE,
+      '#options' => [
+        'asc' => $this->t('A-Z'),
+        'desc' => $this->t('Z-A'),
+      ],
     ];
 
     $date_fields = $this->indexHelper->getIndexDateFields($this->index);
