@@ -876,14 +876,14 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#options' => $date_fields ?? [],
     ];
     $element['tabs']['layout']['display']['sort']['date']['date_sort'] = [
-    '#type' => 'select',
-    '#title' => $this->t('Sort order'),
-    '#default_value' => $default_date_sort,
-    '#multiple' => TRUE,
-    '#options' => [
-      'asc' => $this->t('Newest'),
-      'desc' => $this->t('Oldest'),
-    ]
+      '#type' => 'select',
+      '#title' => $this->t('Sort order'),
+      '#default_value' => $default_date_sort,
+      '#multiple' => TRUE,
+      '#options' => [
+        'asc' => $this->t('Newest'),
+        'desc' => $this->t('Oldest'),
+      ],
     ];
 
   }
@@ -1100,7 +1100,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
               'name' => 'Title A-Z',
               'value' => [
                 'field' => 'title',
-                'direction' => 'asc'
+                'direction' => 'asc',
               ],
             ];
           }
@@ -1109,7 +1109,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
               'name' => 'Title Z-A',
               'value' => [
                 'field' => 'title',
-                'direction' => 'desc'
+                'direction' => 'desc',
               ],
             ];
           }
@@ -1120,7 +1120,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
               'name' => 'Newest',
               'value' => [
                 'field' => $value['tabs']['layout']['display']['sort']['date']['date_field'],
-                'direction' => 'asc'
+                'direction' => 'asc',
               ],
             ];
           }
@@ -1129,7 +1129,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
               'name' => 'Oldest',
               'value' => [
                 'field' => $value['tabs']['layout']['display']['sort']['date']['date_field'],
-                'direction' => 'desc'
+                'direction' => 'desc',
               ],
             ];
           }
