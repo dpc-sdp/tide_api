@@ -76,22 +76,27 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
    */
   public static function defaultSettings() {
     return [
-      'tabs' => [
+      'settings' => [
         'content' => [
-          'content_types_wrapper' => [
-            'enable_content_types' => '1',
-            'contentTypes' => [],
+          'internal' => [
+            'contentTypes' => [
+              'enabled' => TRUE,
+              'allowed_values' => [],
+              'default_values' => [],
+            ],
+            'field_topic' => [
+              'enabled' => TRUE,
+              'show_filter_operator' => FALSE,
+              'default_values' => [],
+            ],
+            'field_tags' => [
+              'enabled' => TRUE,
+              'show_filter_operator' => FALSE,
+              'default_values' => [],
+            ],
           ],
-          'field_topic_wrapper' => [
-            'enable_field_topic' => '1',
-            'show_field_topic_operator' => 0,
-          ],
-          'field_tags_wrapper' => [
-            'enable_field_tags' => '1',
-            'show_field_tags_operator' => 0,
-          ],
+          'enable_call_to_action' => FALSE,
         ],
-        'enable_call_to_action' => 0,
       ],
     ];
   }
@@ -110,16 +115,17 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     $element = [];
     $element['#attached']['library'][] = 'field_group/formatter.horizontal_tabs';
     $settings = $this->getSettings();
+    $field_name = $this->fieldDefinition->getName();
     // Load and verify the index.
     /** @var \Drupal\search_api\IndexInterface $index */
     $index = $this->getIndex();
 
-    $element['tabs'] = [
+    $element['settings'] = [
       '#type' => 'horizontal_tabs',
       '#tree' => TRUE,
-      '#group_name' => 'tabs',
+      '#group_name' => 'settings',
     ];
-    $element['tabs']['content'] = [
+    $element['settings']['content'] = [
       '#type' => 'details',
       '#open' => TRUE,
       '#collapsible' => TRUE,
@@ -127,106 +133,148 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#group_name' => 'tabs_content',
     ];
 
-    $element['tabs']['content']['enable_call_to_action'] = [
+    $element['settings']['content']['enable_call_to_action'] = [
       '#type' => 'checkbox',
-      '#default_value' => $settings['tabs']['content']['enable_call_to_action'] ?? [],
       '#title' => $this->t('Enable call to action'),
-      '#default_value' => $settings['tabs']['content']['enable_call_to_action'] ?? FALSE,
-      '#weight' => 1,
+      '#default_value' => $settings['settings']['content']['enable_call_to_action'] ?? FALSE,
+      '#weight' => -1,
     ];
 
     if ($content_type_options = $this->indexHelper->getNodeTypes()) {
-      $element['tabs']['content']['content_types_wrapper'] = [
+      $element['settings']['content']['internal']['contentTypes'] = [
         '#type' => 'details',
         '#title' => 'Content Types',
         '#open' => FALSE,
         '#collapsible' => TRUE,
         '#weight' => 2,
       ];
-      $element['tabs']['content']['content_types_wrapper']['enable_content_types'] = [
+      $element['settings']['content']['internal']['contentTypes']['enabled'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Enable content types'),
-        '#default_value' => $settings['tabs']['content']['content_types_wrapper']['enable_content_types'] ?? FALSE,
+        '#default_value' => $settings['settings']['content']['internal']['contentTypes']['enabled'] ?? FALSE,
       ];
-      $element['tabs']['content']['content_types_wrapper']['contentTypes'] = [
+      $element['settings']['content']['internal']['contentTypes']['allowed_values'] = [
         '#type' => 'checkboxes',
         '#title' => $this->t('Allowed content types'),
         '#description' => $this->t('When no content type is selected in the widget settings, the widget will show all available content types in the Select content type filter.'),
         '#options' => $content_type_options,
-        '#default_value' => $settings['tabs']['content']['content_types_wrapper']['contentTypes'] ?? [],
+        '#default_value' => $settings['settings']['content']['internal']['contentTypes']['allowed_values'] ?? [],
         '#weight' => 1,
+      ];
+      $element['settings']['content']['internal']['contentTypes']['default_values'] = [
+        '#type' => 'checkboxes',
+        '#title' => $this->t('Default content types'),
+        '#description' => $this->t('When no content type is selected in the widget settings, the widget will show all available content types in the Select content type filter.'),
+        '#options' => $content_type_options,
+        '#default_value' => $settings['settings']['content']['internal']['contentTypes']['default_values'] ?? [],
+        '#weight' => 1,
+        '#states' => [
+          'visible' => [
+            ':input[name="fields[' . $field_name . '][settings_edit_form][settings][settings][content][internal][contentTypes][enabled]"]' => ['checked' => FALSE],
+          ],
+        ],
       ];
     }
 
     if ($this->indexHelper->isFieldTopicIndexed($index)) {
-      $element['tabs']['content']['field_topic_wrapper'] = [
+      $element['settings']['content']['internal']['field_topic'] = [
         '#type' => 'details',
         '#title' => 'Field Topic',
         '#open' => FALSE,
         '#collapsible' => TRUE,
         '#weight' => 2,
       ];
-      $element['tabs']['content']['field_topic_wrapper']['enable_field_topic'] = [
+      $element['settings']['content']['internal']['field_topic']['enabled'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Enable field_topic'),
-        '#default_value' => $settings['tabs']['content']['field_topic_wrapper']['enable_field_topic'] ?? FALSE,
+        '#default_value' => $settings['settings']['content']['internal']['field_topic']['enabled'] ?? FALSE,
       ];
-      $element['tabs']['content']['field_topic_wrapper']['show_field_topic_operator'] = [
+      $element['settings']['content']['internal']['field_topic']['show_filter_operator'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Show filter operator'),
-        '#default_value' => $settings['tabs']['content']['field_topic_wrapper']['show_field_topic_operator'] ?? FALSE,
+        '#default_value' => $settings['settings']['content']['internal']['field_topic']['show_filter_operator'] ?? FALSE,
       ];
+      if ($this->indexHelper->isFieldTopicIndexed($this->index)) {
+        $default_values = $settings['settings']['content']['internal']['field_topic']['default_values'] ? array_column(array_values(array_filter($settings['settings']['content']['internal']['field_topic']['default_values'])), 'target_id') : [];
+        $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, 'field_topic', $default_values);
+        if ($field_filter) {
+          $element['settings']['content']['internal']['field_topic']['default_values'] = $field_filter;
+          $element['settings']['content']['internal']['field_topic']['default_values']['#title'] = 'Default topics';
+          $element['settings']['content']['internal']['field_topic']['default_values']['#states'] = [
+            'visible' => [
+              ':input[name="fields[' . $field_name . '][settings_edit_form][settings][settings][content][internal][field_topic][enabled]"]' => ['checked' => FALSE],
+            ],
+          ];
+        }
+      }
     }
 
     if ($this->indexHelper->isFieldTopicIndexed($index)) {
-      $element['tabs']['content']['field_tags_wrapper'] = [
+      $element['settings']['content']['internal']['field_tags'] = [
         '#type' => 'details',
         '#title' => 'Field Tags',
         '#open' => FALSE,
         '#collapsible' => TRUE,
         '#weight' => 2,
       ];
-      $element['tabs']['content']['field_tags_wrapper']['enable_field_tags'] = [
+      $element['settings']['content']['internal']['field_tags']['enabled'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Enable field_tags'),
-        '#default_value' => $settings['tabs']['content']['field_tags_wrapper']['enable_field_tags'] ?? FALSE,
+        '#default_value' => $settings['settings']['content']['internal']['field_tags']['enabled'] ?? FALSE,
       ];
-      $element['tabs']['content']['field_tags_wrapper']['show_field_tags_operator'] = [
+      $element['settings']['content']['internal']['field_tags']['show_filter_operator'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Show filter operator'),
-        '#default_value' => $settings['tabs']['content']['field_tags_wrapper']['show_field_tags_operator'] ?? FALSE,
+        '#default_value' => $settings['settings']['content']['internal']['field_tags']['show_filter_operator'] ?? FALSE,
       ];
+      if ($this->indexHelper->isFieldTagsIndexed($this->index)) {
+        $default_values = $settings['settings']['content']['internal']['field_tags']['default_values'] ? array_column(array_values(array_filter($settings['settings']['content']['internal']['field_tags']['default_values'])), 'target_id') : [];
+        $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, 'field_tags', $default_values);
+        if ($field_filter) {
+          $element['settings']['content']['internal']['field_tags']['default_values'] = $field_filter;
+          $element['settings']['content']['internal']['field_tags']['default_values']['#title'] = 'Default tags';
+          $element['settings']['content']['internal']['field_tags']['default_values']['#states'] = [
+            'visible' => [
+              ':input[name="fields[' . $field_name . '][settings_edit_form][settings][settings][content][internal][field_tags][enabled]"]' => ['checked' => FALSE],
+            ],
+          ];
+        }
+      }
     }
 
     $entity_reference_fields = $this->getEntityReferenceFields();
     if (!empty($entity_reference_fields)) {
       foreach ($entity_reference_fields as $field_id => $field_label) {
-        $element['tabs']['content'][$field_id . '_wrapper'] = [
+        $element['settings']['content']['internal'][$field_id] = [
           '#type' => 'details',
           '#title' => $field_label,
           '#open' => FALSE,
           '#collapsible' => TRUE,
           '#weight' => 2,
         ];
-        $element['tabs']['content'][$field_id . '_wrapper']['enable_' . $field_id] = [
+        $element['settings']['content']['internal'][$field_id]['enabled'] = [
           '#type' => 'checkbox',
           '#title' => $this->t('Enable @field_id', ['@field_id' => $field_id]),
-          '#default_value' => $settings['tabs']['content'][$field_id . '_wrapper']['enable_' . $field_id] ?? FALSE,
+          '#default_value' => $settings['settings']['content']['internal'][$field_id]['enabled'] ?? FALSE,
         ];
-        $element['tabs']['content'][$field_id . '_wrapper']['show_' . $field_id . '_operator'] = [
+        $element['settings']['content']['internal'][$field_id]['show_filter_operator'] = [
           '#type' => 'checkbox',
           '#title' => $this->t('Show filter operator'),
-          '#default_value' => $settings['tabs']['content'][$field_id . '_wrapper']['show_' . $field_id . '_operator'] ?? FALSE,
+          '#default_value' => $settings['settings']['content']['internal'][$field_id]['show_filter_operator'] ?? FALSE,
         ];
+        $default_values = $settings['settings']['content']['internal'][$field_id]['default_values'] ? array_column(array_values(array_filter($settings['settings']['content']['internal'][$field_id]['default_values'])), 'target_id') : [];
+        $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, $field_id, $default_values);
+        if ($field_filter) {
+          $element['settings']['content']['internal'][$field_id]['default_values'] = $field_filter;
+          $element['settings']['content']['internal'][$field_id]['default_values']['#title'] = $this->t('Default @field_id', ['@field_id' => $field_id]);
+          $element['settings']['content']['internal'][$field_id]['default_values']['#states'] = [
+            'visible' => [
+              ':input[name="fields[' . $field_name . '][settings_edit_form][settings][settings][content][internal][' . $field_id . '][enabled]"]' => ['checked' => FALSE],
+            ],
+          ];
+        }
       }
     }
-
-    $element['tabs']['layout'] = [
-      '#type' => 'details',
-      '#collapsible' => TRUE,
-      '#title' => $this->t('Layout'),
-      '#group_name' => 'tabs_layout',
-    ];
 
     return $element;
   }
@@ -315,7 +363,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#weight' => 2,
     ];
 
-    if (!empty($settings['tabs']['content']['enable_call_to_action']) && $settings['tabs']['content']['enable_call_to_action']) {
+    if (!empty(['settings']['content']['enable_call_to_action']) && ['settings']['content']['enable_call_to_action']) {
       $element['callToAction'] = [
         '#type' => 'details',
         '#title' => $this->t('Call To Action'),
@@ -382,9 +430,9 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#group_name' => 'tabs_content',
     ];
 
-    if ($this->indexHelper->isNodeTypeIndexed($this->index) && !empty($settings['tabs']['content']['content_types_wrapper']['enable_content_types'])) {
+    if ($this->indexHelper->isNodeTypeIndexed($this->index) && !empty($settings['settings']['content']['internal']['contentTypes']['enabled'])) {
       $content_types_options = $this->indexHelper->getNodeTypes();
-      $allowed_content_types = array_filter($settings['tabs']['content']['content_types_wrapper']['contentTypes']);
+      $allowed_content_types = array_filter($settings['settings']['content']['internal']['contentTypes']['allowed_values']);
       if (!empty($allowed_content_types)) {
         foreach ($content_types_options as $key => $value) {
           if (!isset($allowed_content_types[$key])) {
@@ -401,7 +449,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       ];
     }
 
-    if ($this->indexHelper->isFieldTopicIndexed($this->index) && !empty($settings['tabs']['content']['field_topic_wrapper']['enable_field_topic'])) {
+    if ($this->indexHelper->isFieldTopicIndexed($this->index) && !empty($settings['settings']['content']['internal']['field_topic']['enabled'])) {
       $default_values = $json_object['internal']['contentFields']['field_topic']['values'] ?? [];
       $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, 'field_topic', $default_values);
       if ($field_filter) {
@@ -415,7 +463,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         ];
         $element['tabs']['content']['field_topic_wrapper']['field_topic'] = $field_filter;
         $element['tabs']['content']['field_topic_wrapper']['field_topic']['#title'] = 'Select topics';
-        if ($settings['tabs']['content']['field_topic_wrapper']['show_field_topic_operator']) {
+        if ($settings['settings']['content']['internal']['field_topic']['show_filter_operator']) {
           $element['tabs']['content']['field_topic_wrapper']['operator'] = $this->buildFilterOperatorSelect($json_object['internal']['contentFields']['field_topic']['operator'] ?? 'OR', $this->t('This filter operator is used to combined all the selected values together.'));
         }
         if (isset($json_object['internal']['contentFields']['field_topic'])) {
@@ -424,7 +472,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       }
     }
 
-    if ($this->indexHelper->isFieldTagsIndexed($this->index)  && !empty($settings['tabs']['content']['field_tags_wrapper']['enable_field_tags'])) {
+    if ($this->indexHelper->isFieldTagsIndexed($this->index)  && !empty($settings['settings']['content']['internal']['field_tags']['enabled'])) {
       $default_values = $json_object['internal']['contentFields']['field_tags']['values'] ?? [];
       $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, 'field_tags', $default_values);
       if ($field_filter) {
@@ -438,7 +486,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         ];
         $element['tabs']['content']['field_tags_wrapper']['field_tags'] = $field_filter;
         $element['tabs']['content']['field_tags_wrapper']['field_tags']['#title'] = 'Select tags';
-        if ($settings['tabs']['content']['field_tags_wrapper']['show_field_tags_operator']) {
+        if ($settings['settings']['content']['internal']['field_tags']['show_filter_operator']) {
           $element['tabs']['content']['field_tags_wrapper']['operator'] = $this->buildFilterOperatorSelect($json_object['internal']['contentFields']['field_tags']['operator'] ?? 'OR', $this->t('This filter operator is used to combined all the selected values together.'));
         }
         if (isset($json_object['internal']['contentFields']['field_tags'])) {
@@ -502,7 +550,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
 
     if (!empty($entity_reference_fields)) {
       foreach ($entity_reference_fields as $field_id => $field_label) {
-        if (!empty($settings['tabs']['content'][$field_id . '_wrapper']['enable_' . $field_id])) {
+        if (!empty($settings['settings']['content']['internal'][$field_id]['enabled'])) {
           $default_values = $json_object['internal']['contentFields'][$field_id]['values'] ?? [];
           $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, $field_id, $default_values);
           if ($field_filter) {
@@ -516,7 +564,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
               '#group_name' => 'tabs_content_advanced_filters_' . $field_id . '_wrapper',
             ];
             $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper'][$field_id] = $field_filter;
-            if ($settings['tabs']['content'][$field_id . '_wrapper']['show_' . $field_id . '_operator']) {
+            if ($settings['settings']['content']['internal'][$field_id]['show_filter_operator']) {
               $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['operator'] = $this->buildFilterOperatorSelect($json_object['internal']['contentFields'][$field_id]['operator'] ?? 'OR', $this->t('This filter operator is used to combined all the selected values together.'));
             }
             if (isset($json_object['internal']['contentFields'][$field_id]['values'])) {
@@ -788,101 +836,29 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         'profile' => $this->t('Profile'),
       ],
     ];
-
-    $sort_data = $json_object['interface']['display']['options']['sort']['values'] ?? [];
-    $default_options = [];
-    $default_title_sort = [];
-    $default_date_sort = [];
-    $default_date_field = '';
-    if (!empty($sort_data)) {
-      foreach ($sort_data as $options) {
-        switch ($options['name']) {
-          case 'Relevance':
-            $default_options[] = 'relevance';
-            break;
-
-          case 'Title A-Z':
-          case 'Title Z-A':
-            $default_options[] = 'title';
-            $default_title_sort[] = $options['value']['direction'];
-            break;
-
-          case 'Newest':
-          case 'Oldest':
-            $default_options[] = 'date';
-            $default_date_sort[] = $options['value']['direction'];
-            $default_date_field = $options['value']['field'];
-            break;
-
-          default:
-            break;
-        }
-      }
+    $internal_sort_options = [NULL => $this->t('Relevance')];
+    $date_fields = $this->indexHelper->getIndexDateFields($this->index);
+    if (!empty($date_fields)) {
+      $internal_sort_options += $date_fields;
     }
-
-    $element['tabs']['layout']['display']['sort']['options'] = [
+    $string_fields = $this->indexHelper->getIndexStringFields($this->index);
+    if (!empty($string_fields)) {
+      $internal_sort_options += $string_fields;
+    }
+    $element['tabs']['layout']['internal']['sort']['field'] = [
       '#type' => 'select',
       '#title' => $this->t('Sort content collection by'),
-      '#multiple' => TRUE,
-      '#default_value' => $default_options,
-      '#options' => [
-        'relevance' => $this->t('Relevance'),
-        'title' => $this->t('Title'),
-        'date' => $this->t('Date'),
-      ],
+      '#default_value' => $json_object['internal']['sort']['field'] ?? 'title',
+      '#options' => $internal_sort_options,
     ];
 
-    $element['tabs']['layout']['display']['sort']['title'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Title'),
-      '#open' => TRUE,
-      '#collapsible' => TRUE,
-      '#states' => [
-        'visible' => [
-          ':input[name="' . $this->getFormStatesElementName('tabs|layout|display|sort|options', $items, $delta, $element) . '"]' => ['value' => 'title'],
-        ],
-      ],
-    ];
-
-    $element['tabs']['layout']['display']['sort']['title']['title_sort'] = [
+    $element['tabs']['layout']['internal']['sort']['direction'] = [
       '#type' => 'select',
       '#title' => $this->t('Sort order'),
-      '#default_value' => $default_title_sort,
-      '#multiple' => TRUE,
+      '#default_value' => $json_object['internal']['sort']['direction'] ?? 'asc',
       '#options' => [
-        'asc' => $this->t('A-Z'),
-        'desc' => $this->t('Z-A'),
-      ],
-    ];
-
-    $date_fields = $this->indexHelper->getIndexDateFields($this->index);
-
-    $element['tabs']['layout']['display']['sort']['date'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Date'),
-      '#open' => TRUE,
-      '#collapsible' => TRUE,
-      '#states' => [
-        'visible' => [
-          ':input[name="' . $this->getFormStatesElementName('tabs|layout|display|sort|options', $items, $delta, $element) . '"]' => ['value' => 'date'],
-        ],
-      ],
-    ];
-
-    $element['tabs']['layout']['display']['sort']['date']['date_field'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Select date field'),
-      '#default_value' => $default_date_field,
-      '#options' => $date_fields ?? [],
-    ];
-    $element['tabs']['layout']['display']['sort']['date']['date_sort'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Sort order'),
-      '#default_value' => $default_date_sort,
-      '#multiple' => TRUE,
-      '#options' => [
-        'asc' => $this->t('Newest'),
-        'desc' => $this->t('Oldest'),
+        'asc' => $this->t('Ascending (asc)'),
+        'desc' => $this->t('Descending (desc)'),
       ],
     ];
 
@@ -1008,14 +984,23 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
    */
   public function massageFormValues(array $values, array $form, FormStateInterface $form_state) {
     $values = parent::massageFormValues($values, $form, $form_state);
+    $settings = $this->getSettings();
     foreach ($values as $delta => &$value) {
       $config = [];
       $config['title'] = $value['title'] ?? '';
       $config['description'] = $value['description'] ?? '';
       $config['callToAction']['text'] = $value['callToAction']['text'] ?? '';
       $config['callToAction']['url'] = $value['callToAction']['url'] ?? '';
-      $config['internal']['contentTypes'] = $value['tabs']['content']['contentTypes'] ? array_values(array_filter($value['tabs']['content']['contentTypes'])) : [];
-      if (isset($value['tabs']['content']['field_topic_wrapper']['field_topic'])) {
+      if (!$settings['settings']['content']['internal']['contentTypes']['enabled'] && !empty($settings['settings']['content']['internal']['contentTypes']['default_values'])) {
+        $config['internal']['contentTypes'] = $settings['settings']['content']['internal']['contentTypes']['default_values'] ? array_values(array_filter($settings['settings']['content']['internal']['contentTypes']['default_values'])) : [];
+      }
+      elseif (!empty($value['tabs']['content']['contentTypes'])) {
+        $config['internal']['contentTypes'] = $value['tabs']['content']['contentTypes'] ? array_values(array_filter($value['tabs']['content']['contentTypes'])) : [];
+      }
+      if (!$settings['settings']['content']['internal']['field_topic']['enabled'] && !empty($settings['settings']['content']['internal']['field_topic']['default_values'])) {
+        $value['tabs']['content']['field_topic_wrapper']['field_topic'] = $settings['settings']['content']['internal']['field_topic']['default_values'] ?? [];
+      }
+      if (!empty($value['tabs']['content']['field_topic_wrapper']['field_topic'])) {
         foreach ($value['tabs']['content']['field_topic_wrapper']['field_topic'] as $index => $reference) {
           if (!empty($reference['target_id'])) {
             $config['internal']['contentFields']['field_topic']['values'][] = (int) $reference['target_id'];
@@ -1023,7 +1008,10 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         }
         $config['internal']['contentFields']['field_topic']['operator'] = $value['tabs']['content']['field_topic_wrapper']['operator'] ?? 'OR';
       }
-      if (isset($value['tabs']['content']['field_tags_wrapper']['field_tags'])) {
+      if (!$settings['settings']['content']['internal']['field_tags']['enabled'] && !empty($settings['settings']['content']['internal']['field_tags']['default_values'])) {
+        $value['tabs']['content']['field_tags_wrapper']['field_tags'] = $settings['settings']['content']['internal']['field_tags']['default_values'] ?? [];
+      }
+      if (!empty($value['tabs']['content']['field_tags_wrapper']['field_tags'])) {
         foreach ($value['tabs']['content']['field_tags_wrapper']['field_tags'] as $index => $reference) {
           if (!empty($reference['target_id'])) {
             $config['internal']['contentFields']['field_tags']['values'][] = (int) $reference['target_id'];
@@ -1035,7 +1023,10 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $entity_reference_fields = $this->getEntityReferenceFields();
       foreach ($value['tabs']['content']['advanced_filters'] as $wrapper_id => $wrapper) {
         $field_id = str_replace('_wrapper', '', $wrapper_id);
-        if (isset($wrapper[$field_id])) {
+        if (!empty($settings['settings']['content']['internal'][$field_id]) && !$settings['settings']['content']['internal'][$field_id]['enabled'] && !empty($settings['settings']['content']['internal'][$field_id]['default_values'])) {
+          $wrapper[$field_id] = $settings['settings']['content']['internal'][$field_id]['default_values'] ?? [];
+        }
+        if (!empty($wrapper[$field_id])) {
           // Entity reference fields.
           if (isset($entity_reference_fields[$field_id])) {
             foreach ($wrapper[$field_id] as $index => $reference) {
@@ -1043,6 +1034,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
                 $config['internal']['contentFields'][$field_id]['values'][] = (int) $reference['target_id'];
               }
             }
+            unset($entity_reference_fields[$field_id]);
           }
           // Internal Extra fields.
           else {
@@ -1056,6 +1048,18 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
 
           if (empty($config['internal']['contentFields'][$field_id]['values'])) {
             unset($config['internal']['contentFields'][$field_id]);
+          }
+        }
+      }
+
+      if (!empty($entity_reference_fields)) {
+        foreach ($entity_reference_fields as $field_id => $field_label) {
+          if (!$settings['settings']['content']['internal'][$field_id]['enabled'] && !empty($settings['settings']['content']['internal'][$field_id]['default_values'])) {
+            foreach ($settings['settings']['content']['internal'][$field_id]['default_values'] as $reference) {
+              if (!empty($reference['target_id'])) {
+                $config['internal']['contentFields'][$field_id]['values'][] = (int) $reference['target_id'];
+              }
+            }
           }
         }
       }
@@ -1087,53 +1091,12 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $config['interface']['display']['type'] = $value['tabs']['layout']['display']['type'] ?? 'grid';
       $config['interface']['display']['resultComponent']['style'] = $value['tabs']['layout']['display']['resultComponent']['style'] ?? 'thumbnail';
 
-      if (!empty($value['tabs']['layout']['display']['sort']['options']) && is_array($value['tabs']['layout']['display']['sort']['options'])) {
-        if (isset($value['tabs']['layout']['display']['sort']['options']['relevance'])) {
-          $config['interface']['display']['options']['sort']['values'][] = [
-            'name' => 'Relevance',
-            'value' => NULL,
-          ];
-        }
-        if (isset($value['tabs']['layout']['display']['sort']['options']['title'])) {
-          if (isset($value['tabs']['layout']['display']['sort']['title']['title_sort']['asc'])) {
-            $config['interface']['display']['options']['sort']['values'][] = [
-              'name' => 'Title A-Z',
-              'value' => [
-                'field' => 'title',
-                'direction' => 'asc',
-              ],
-            ];
-          }
-          if (isset($value['tabs']['layout']['display']['sort']['title']['title_sort']['desc'])) {
-            $config['interface']['display']['options']['sort']['values'][] = [
-              'name' => 'Title Z-A',
-              'value' => [
-                'field' => 'title',
-                'direction' => 'desc',
-              ],
-            ];
-          }
-        }
-        if (isset($value['tabs']['layout']['display']['sort']['options']['date']) && isset($value['tabs']['layout']['display']['sort']['date']['date_field'])) {
-          if (isset($value['tabs']['layout']['display']['sort']['date']['date_sort']['asc'])) {
-            $config['interface']['display']['options']['sort']['values'][] = [
-              'name' => 'Newest',
-              'value' => [
-                'field' => $value['tabs']['layout']['display']['sort']['date']['date_field'],
-                'direction' => 'asc',
-              ],
-            ];
-          }
-          if (isset($value['tabs']['layout']['display']['sort']['date']['date_sort']['desc'])) {
-            $config['interface']['display']['options']['sort']['values'][] = [
-              'name' => 'Oldest',
-              'value' => [
-                'field' => $value['tabs']['layout']['display']['sort']['date']['date_field'],
-                'direction' => 'desc',
-              ],
-            ];
-          }
-        }
+      if (!empty($value['tabs']['layout']['internal']['sort']['field'])) {
+        $config['internal']['sort']['field'] = $value['tabs']['layout']['internal']['sort']['field'] ?? '';
+      }
+
+      if (!empty($value['tabs']['layout']['internal']['sort']['direction'])) {
+        $config['internal']['sort']['direction'] = $value['tabs']['layout']['internal']['sort']['direction'] ?? '';
       }
 
       // Advanced Layout.
