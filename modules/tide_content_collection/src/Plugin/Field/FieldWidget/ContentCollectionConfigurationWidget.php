@@ -293,7 +293,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       'settings',
     ];
     $input = $form_state->getValue(array_merge($base_key, [
-      'settings'
+      'settings',
     ]));
     $form_state->unsetValue($base_key);
     $entity_reference_fields = $this->getEntityReferenceFields();
