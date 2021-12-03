@@ -195,7 +195,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#default_value' => $settings['settings']['content']['internal']['field_topic']['show_filter_operator'] ?? FALSE,
       ];
       if ($this->indexHelper->isFieldTopicIndexed($this->index)) {
-        $default_values = $settings['settings']['content']['internal']['field_topic']['default_values'] ? array_column(array_values(array_filter($settings['settings']['content']['internal']['field_topic']['default_values'])), 'target_id') : [];
+        $default_values = $settings['settings']['content']['internal']['field_topic']['default_values'] ?? [];
         $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, 'field_topic', $default_values);
         if ($field_filter) {
           $element['settings']['content']['internal']['field_topic']['default_values'] = $field_filter;
@@ -228,7 +228,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#default_value' => $settings['settings']['content']['internal']['field_tags']['show_filter_operator'] ?? FALSE,
       ];
       if ($this->indexHelper->isFieldTagsIndexed($this->index)) {
-        $default_values = $settings['settings']['content']['internal']['field_tags']['default_values'] ? array_column(array_values(array_filter($settings['settings']['content']['internal']['field_tags']['default_values'])), 'target_id') : [];
+        $default_values = $settings['settings']['content']['internal']['field_tags']['default_values'] ?? [];
         $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, 'field_tags', $default_values);
         if ($field_filter) {
           $element['settings']['content']['internal']['field_tags']['default_values'] = $field_filter;
@@ -262,7 +262,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           '#title' => $this->t('Show filter operator'),
           '#default_value' => $settings['settings']['content']['internal'][$field_id]['show_filter_operator'] ?? FALSE,
         ];
-        $default_values = $settings['settings']['content']['internal'][$field_id]['default_values'] ? array_column(array_values(array_filter($settings['settings']['content']['internal'][$field_id]['default_values'])), 'target_id') : [];
+        $default_values = $default_values = $settings['settings']['content']['internal'][$field_id]['default_values'] ?? [];
         $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, $field_id, $default_values);
         if ($field_filter) {
           $element['settings']['content']['internal'][$field_id]['default_values'] = $field_filter;
@@ -276,7 +276,101 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       }
     }
 
+    $element['settings']['#element_validate'][] = [$this, 'validateSettings'];
+
     return $element;
+  }
+
+  /**
+   * Handler #element_validate for the "tabs" form elements in settingsForm().
+   *
+   * Used to set the settings value in a clean structure.
+   */
+  public function validateSettings(array $element, FormStateInterface $form_state) {
+    $field_name = $this->fieldDefinition->getName();
+    $base_key = [
+      'fields',
+      $field_name,
+      'settings_edit_form',
+      'settings',
+      'settings',
+    ];
+    $input = $form_state->getValue($base_key);
+    $form_state->unsetValue([
+      'fields',
+      $field_name,
+      'settings_edit_form',
+      'settings',
+    ]);
+    $entity_reference_fields = $this->getEntityReferenceFields();
+    if (isset($input['content']['enable_call_to_action'])) {
+      $value = $input['content']['enable_call_to_action'] ? TRUE : FALSE;
+      $form_state->setValue(array_merge($base_key, [
+        'content',
+        'enable_call_to_action',
+      ]), $value);
+    }
+    if (isset($input['content']['internal']['contentTypes']['enabled'])) {
+      $value = $input['content']['internal']['contentTypes']['enabled'] ? TRUE : FALSE;
+      $form_state->setValue(array_merge($base_key, [
+        'content',
+        'internal',
+        'contentTypes',
+        'enabled',
+      ]), $value);
+    }
+    $content_types_key = ['content', 'internal', 'contentTypes'];
+    if (isset($input['content']['internal']['contentTypes']['allowed_values'])) {
+      $value = $input['content']['internal']['contentTypes']['allowed_values'] ? array_values(array_filter($input['content']['internal']['contentTypes']['allowed_values'])) : [];
+      $form_state->setValue(array_merge($base_key, $content_types_key, ['allowed_values']), $value);
+    }
+    if (isset($input['content']['internal']['contentTypes']['default_values'])) {
+      $value = $input['content']['internal']['contentTypes']['default_values'] ? array_values(array_filter($input['content']['internal']['contentTypes']['default_values'])) : [];
+      $form_state->setValue(array_merge($base_key, $content_types_key, ['default_values']), $value);
+    }
+    $field_topic_key = ['content', 'internal', 'field_topic'];
+    if (isset($input['content']['internal']['field_topic']['enabled'])) {
+      $value = $input['content']['internal']['field_topic']['enabled'] ? TRUE : FALSE;
+      $form_state->setValue(array_merge($base_key, $field_topic_key, ['enabled']), $value);
+    }
+    if (isset($input['content']['internal']['field_topic']['show_filter_operator'])) {
+      $value = $input['content']['internal']['field_topic']['show_filter_operator'] ? TRUE : FALSE;
+      $form_state->setValue(array_merge($base_key, $field_topic_key, ['show_filter_operator']), $value);
+    }
+    if (isset($input['content']['internal']['field_topic']['default_values'])) {
+      $value = $input['content']['internal']['field_topic']['default_values'] ? array_column(array_values(array_filter($input['content']['internal']['field_topic']['default_values'])), 'target_id') : [];
+      $form_state->setValue(array_merge($base_key, $field_topic_key, ['default_values']), $value);
+    }
+    $field_tags_key = ['content', 'internal', 'field_tags'];
+    if (isset($input['content']['internal']['field_tags']['enabled'])) {
+      $value = $input['content']['internal']['field_tags']['enabled'] ? TRUE : FALSE;
+      $form_state->setValue(array_merge($base_key, $field_tags_key, ['enabled']), $value);
+    }
+    if (isset($input['content']['internal']['field_tags']['show_filter_operator'])) {
+      $value = $input['content']['internal']['field_tags']['show_filter_operator'] ? TRUE : FALSE;
+      $form_state->setValue(array_merge($base_key, $field_tags_key, ['show_filter_operator']), $value);
+    }
+    if (isset($input['content']['internal']['field_tags']['default_values'])) {
+      $value = $input['content']['internal']['field_tags']['default_values'] ? array_column(array_values(array_filter($input['content']['internal']['field_tags']['default_values'])), 'target_id') : [];
+      $form_state->setValue(array_merge($base_key, $field_tags_key, ['default_values']), $value);
+    }
+    if (!empty($entity_reference_fields)) {
+      foreach ($entity_reference_fields as $field_id => $field_label) {
+        $field_id_key = ['content', 'internal', $field_id];
+        if (isset($input['content']['internal'][$field_id]['enabled'])) {
+          $value = $input['content']['internal'][$field_id]['enabled'] ? TRUE : FALSE;
+          $form_state->setValue(array_merge($base_key, $field_id_key, ['enabled']), $value);
+        }
+        if (isset($input['content']['internal'][$field_id]['show_filter_operator'])) {
+          $value = $input['content']['internal'][$field_id]['show_filter_operator'] ? TRUE : FALSE;
+          $form_state->setValue(array_merge($base_key, $field_id_key, ['show_filter_operator']), $value);
+        }
+        if (isset($input['content']['internal'][$field_id]['default_values'])) {
+          $value = $input['content']['internal'][$field_id]['default_values'] ? array_column(array_values(array_filter($input['content']['internal'][$field_id]['default_values'])), 'target_id') : [];
+          $form_state->setValue(array_merge($base_key, $field_id_key, ['default_values']), $value);
+        }
+      }
+    }
   }
 
   /**
