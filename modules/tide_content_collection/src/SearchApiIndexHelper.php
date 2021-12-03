@@ -300,8 +300,8 @@ class SearchApiIndexHelper implements SearchApiIndexHelperInterface {
    * {@inheritdoc}
    */
   public function getIndexedNodeField(IndexInterface $index, string $node_field_name) : ?string {
-    $index_fields = &drupal_static(__CLASS__ . '::' . __METHOD__);
-    if (isset($index_fields[$node_field_name])) {
+    $index_fields = &drupal_static(__CLASS__ . '::' . __METHOD__, []);
+    if (array_key_exists($node_field_name, $index_fields)) {
       return $index_fields[$node_field_name];
     }
 

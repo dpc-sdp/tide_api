@@ -76,27 +76,25 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
    */
   public static function defaultSettings() {
     return [
-      'settings' => [
-        'content' => [
-          'internal' => [
-            'contentTypes' => [
-              'enabled' => TRUE,
-              'allowed_values' => [],
-              'default_values' => [],
-            ],
-            'field_topic' => [
-              'enabled' => TRUE,
-              'show_filter_operator' => FALSE,
-              'default_values' => [],
-            ],
-            'field_tags' => [
-              'enabled' => TRUE,
-              'show_filter_operator' => FALSE,
-              'default_values' => [],
-            ],
+      'content' => [
+        'internal' => [
+          'contentTypes' => [
+            'enabled' => TRUE,
+            'allowed_values' => [],
+            'default_values' => [],
           ],
-          'enable_call_to_action' => FALSE,
+          'field_topic' => [
+            'enabled' => TRUE,
+            'show_filter_operator' => FALSE,
+            'default_values' => [],
+          ],
+          'field_tags' => [
+            'enabled' => TRUE,
+            'show_filter_operator' => FALSE,
+            'default_values' => [],
+          ],
         ],
+        'enable_call_to_action' => FALSE,
       ],
     ];
   }
@@ -136,7 +134,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     $element['settings']['content']['enable_call_to_action'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enable call to action'),
-      '#default_value' => $settings['settings']['content']['enable_call_to_action'] ?? FALSE,
+      '#default_value' => $settings['content']['enable_call_to_action'] ?? FALSE,
       '#weight' => -1,
     ];
 
@@ -151,14 +149,14 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $element['settings']['content']['internal']['contentTypes']['enabled'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Enable content types'),
-        '#default_value' => $settings['settings']['content']['internal']['contentTypes']['enabled'] ?? FALSE,
+        '#default_value' => $settings['content']['internal']['contentTypes']['enabled'] ?? FALSE,
       ];
       $element['settings']['content']['internal']['contentTypes']['allowed_values'] = [
         '#type' => 'checkboxes',
         '#title' => $this->t('Allowed content types'),
         '#description' => $this->t('When no content type is selected in the widget settings, the widget will show all available content types in the Select content type filter.'),
         '#options' => $content_type_options,
-        '#default_value' => $settings['settings']['content']['internal']['contentTypes']['allowed_values'] ?? [],
+        '#default_value' => $settings['content']['internal']['contentTypes']['allowed_values'] ?? [],
         '#weight' => 1,
       ];
       $element['settings']['content']['internal']['contentTypes']['default_values'] = [
@@ -166,7 +164,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#title' => $this->t('Default content types'),
         '#description' => $this->t('When no content type is selected in the widget settings, the widget will show all available content types in the Select content type filter.'),
         '#options' => $content_type_options,
-        '#default_value' => $settings['settings']['content']['internal']['contentTypes']['default_values'] ?? [],
+        '#default_value' => $settings['content']['internal']['contentTypes']['default_values'] ?? [],
         '#weight' => 1,
         '#states' => [
           'visible' => [
@@ -187,15 +185,15 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $element['settings']['content']['internal']['field_topic']['enabled'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Enable field_topic'),
-        '#default_value' => $settings['settings']['content']['internal']['field_topic']['enabled'] ?? FALSE,
+        '#default_value' => $settings['content']['internal']['field_topic']['enabled'] ?? FALSE,
       ];
       $element['settings']['content']['internal']['field_topic']['show_filter_operator'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Show filter operator'),
-        '#default_value' => $settings['settings']['content']['internal']['field_topic']['show_filter_operator'] ?? FALSE,
+        '#default_value' => $settings['content']['internal']['field_topic']['show_filter_operator'] ?? FALSE,
       ];
       if ($this->indexHelper->isFieldTopicIndexed($this->index)) {
-        $default_values = $settings['settings']['content']['internal']['field_topic']['default_values'] ?? [];
+        $default_values = $settings['content']['internal']['field_topic']['default_values'] ?? [];
         $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, 'field_topic', $default_values);
         if ($field_filter) {
           $element['settings']['content']['internal']['field_topic']['default_values'] = $field_filter;
@@ -220,15 +218,15 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $element['settings']['content']['internal']['field_tags']['enabled'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Enable field_tags'),
-        '#default_value' => $settings['settings']['content']['internal']['field_tags']['enabled'] ?? FALSE,
+        '#default_value' => $settings['content']['internal']['field_tags']['enabled'] ?? FALSE,
       ];
       $element['settings']['content']['internal']['field_tags']['show_filter_operator'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Show filter operator'),
-        '#default_value' => $settings['settings']['content']['internal']['field_tags']['show_filter_operator'] ?? FALSE,
+        '#default_value' => $settings['content']['internal']['field_tags']['show_filter_operator'] ?? FALSE,
       ];
       if ($this->indexHelper->isFieldTagsIndexed($this->index)) {
-        $default_values = $settings['settings']['content']['internal']['field_tags']['default_values'] ?? [];
+        $default_values = $settings['content']['internal']['field_tags']['default_values'] ?? [];
         $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, 'field_tags', $default_values);
         if ($field_filter) {
           $element['settings']['content']['internal']['field_tags']['default_values'] = $field_filter;
@@ -255,14 +253,14 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         $element['settings']['content']['internal'][$field_id]['enabled'] = [
           '#type' => 'checkbox',
           '#title' => $this->t('Enable @field_id', ['@field_id' => $field_id]),
-          '#default_value' => $settings['settings']['content']['internal'][$field_id]['enabled'] ?? FALSE,
+          '#default_value' => $settings['content']['internal'][$field_id]['enabled'] ?? FALSE,
         ];
         $element['settings']['content']['internal'][$field_id]['show_filter_operator'] = [
           '#type' => 'checkbox',
           '#title' => $this->t('Show filter operator'),
-          '#default_value' => $settings['settings']['content']['internal'][$field_id]['show_filter_operator'] ?? FALSE,
+          '#default_value' => $settings['content']['internal'][$field_id]['show_filter_operator'] ?? FALSE,
         ];
-        $default_values = $default_values = $settings['settings']['content']['internal'][$field_id]['default_values'] ?? [];
+        $default_values = $default_values = $settings['content']['internal'][$field_id]['default_values'] ?? [];
         $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, $field_id, $default_values);
         if ($field_filter) {
           $element['settings']['content']['internal'][$field_id]['default_values'] = $field_filter;
@@ -293,15 +291,11 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $field_name,
       'settings_edit_form',
       'settings',
-      'settings',
     ];
-    $input = $form_state->getValue($base_key);
-    $form_state->unsetValue([
-      'fields',
-      $field_name,
-      'settings_edit_form',
-      'settings',
-    ]);
+    $input = $form_state->getValue(array_merge($base_key, [
+      'settings'
+    ]));
+    $form_state->unsetValue($base_key);
     $entity_reference_fields = $this->getEntityReferenceFields();
     if (isset($input['content']['enable_call_to_action'])) {
       $value = $input['content']['enable_call_to_action'] ? TRUE : FALSE;
@@ -524,9 +518,9 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#group_name' => 'tabs_content',
     ];
 
-    if ($this->indexHelper->isNodeTypeIndexed($this->index) && !empty($settings['settings']['content']['internal']['contentTypes']['enabled'])) {
+    if ($this->indexHelper->isNodeTypeIndexed($this->index) && !empty($settings['content']['internal']['contentTypes']['enabled'])) {
       $content_types_options = $this->indexHelper->getNodeTypes();
-      $allowed_content_types = array_filter($settings['settings']['content']['internal']['contentTypes']['allowed_values']);
+      $allowed_content_types = array_filter($settings['content']['internal']['contentTypes']['allowed_values']);
       if (!empty($allowed_content_types)) {
         foreach ($content_types_options as $key => $value) {
           if (!isset($allowed_content_types[$key])) {
@@ -543,7 +537,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       ];
     }
 
-    if ($this->indexHelper->isFieldTopicIndexed($this->index) && !empty($settings['settings']['content']['internal']['field_topic']['enabled'])) {
+    if ($this->indexHelper->isFieldTopicIndexed($this->index) && !empty($settings['content']['internal']['field_topic']['enabled'])) {
       $default_values = $json_object['internal']['contentFields']['field_topic']['values'] ?? [];
       $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, 'field_topic', $default_values);
       if ($field_filter) {
@@ -557,7 +551,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         ];
         $element['tabs']['content']['field_topic_wrapper']['field_topic'] = $field_filter;
         $element['tabs']['content']['field_topic_wrapper']['field_topic']['#title'] = 'Select topics';
-        if ($settings['settings']['content']['internal']['field_topic']['show_filter_operator']) {
+        if ($settings['content']['internal']['field_topic']['show_filter_operator']) {
           $element['tabs']['content']['field_topic_wrapper']['operator'] = $this->buildFilterOperatorSelect($json_object['internal']['contentFields']['field_topic']['operator'] ?? 'OR', $this->t('This filter operator is used to combined all the selected values together.'));
         }
         if (isset($json_object['internal']['contentFields']['field_topic'])) {
@@ -566,7 +560,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       }
     }
 
-    if ($this->indexHelper->isFieldTagsIndexed($this->index)  && !empty($settings['settings']['content']['internal']['field_tags']['enabled'])) {
+    if ($this->indexHelper->isFieldTagsIndexed($this->index)  && !empty($settings['content']['internal']['field_tags']['enabled'])) {
       $default_values = $json_object['internal']['contentFields']['field_tags']['values'] ?? [];
       $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, 'field_tags', $default_values);
       if ($field_filter) {
@@ -580,7 +574,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         ];
         $element['tabs']['content']['field_tags_wrapper']['field_tags'] = $field_filter;
         $element['tabs']['content']['field_tags_wrapper']['field_tags']['#title'] = 'Select tags';
-        if ($settings['settings']['content']['internal']['field_tags']['show_filter_operator']) {
+        if ($settings['content']['internal']['field_tags']['show_filter_operator']) {
           $element['tabs']['content']['field_tags_wrapper']['operator'] = $this->buildFilterOperatorSelect($json_object['internal']['contentFields']['field_tags']['operator'] ?? 'OR', $this->t('This filter operator is used to combined all the selected values together.'));
         }
         if (isset($json_object['internal']['contentFields']['field_tags'])) {
@@ -644,7 +638,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
 
     if (!empty($entity_reference_fields)) {
       foreach ($entity_reference_fields as $field_id => $field_label) {
-        if (!empty($settings['settings']['content']['internal'][$field_id]['enabled'])) {
+        if (!empty($settings['content']['internal'][$field_id]['enabled'])) {
           $default_values = $json_object['internal']['contentFields'][$field_id]['values'] ?? [];
           $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, $field_id, $default_values);
           if ($field_filter) {
@@ -658,7 +652,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
               '#group_name' => 'tabs_content_advanced_filters_' . $field_id . '_wrapper',
             ];
             $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper'][$field_id] = $field_filter;
-            if ($settings['settings']['content']['internal'][$field_id]['show_filter_operator']) {
+            if ($settings['content']['internal'][$field_id]['show_filter_operator']) {
               $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['operator'] = $this->buildFilterOperatorSelect($json_object['internal']['contentFields'][$field_id]['operator'] ?? 'OR', $this->t('This filter operator is used to combined all the selected values together.'));
             }
             if (isset($json_object['internal']['contentFields'][$field_id]['values'])) {
@@ -1085,14 +1079,14 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $config['description'] = $value['description'] ?? '';
       $config['callToAction']['text'] = $value['callToAction']['text'] ?? '';
       $config['callToAction']['url'] = $value['callToAction']['url'] ?? '';
-      if (!$settings['settings']['content']['internal']['contentTypes']['enabled'] && !empty($settings['settings']['content']['internal']['contentTypes']['default_values'])) {
-        $config['internal']['contentTypes'] = $settings['settings']['content']['internal']['contentTypes']['default_values'] ? array_values(array_filter($settings['settings']['content']['internal']['contentTypes']['default_values'])) : [];
+      if (!$settings['content']['internal']['contentTypes']['enabled'] && !empty($settings['content']['internal']['contentTypes']['default_values'])) {
+        $config['internal']['contentTypes'] = $settings['content']['internal']['contentTypes']['default_values'] ? array_values(array_filter($settings['content']['internal']['contentTypes']['default_values'])) : [];
       }
       elseif (!empty($value['tabs']['content']['contentTypes'])) {
         $config['internal']['contentTypes'] = $value['tabs']['content']['contentTypes'] ? array_values(array_filter($value['tabs']['content']['contentTypes'])) : [];
       }
-      if (!$settings['settings']['content']['internal']['field_topic']['enabled'] && !empty($settings['settings']['content']['internal']['field_topic']['default_values'])) {
-        $value['tabs']['content']['field_topic_wrapper']['field_topic'] = $settings['settings']['content']['internal']['field_topic']['default_values'] ?? [];
+      if (!$settings['content']['internal']['field_topic']['enabled'] && !empty($settings['content']['internal']['field_topic']['default_values'])) {
+        $value['tabs']['content']['field_topic_wrapper']['field_topic'] = $settings['content']['internal']['field_topic']['default_values'] ?? [];
       }
       if (!empty($value['tabs']['content']['field_topic_wrapper']['field_topic'])) {
         foreach ($value['tabs']['content']['field_topic_wrapper']['field_topic'] as $index => $reference) {
@@ -1102,8 +1096,8 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         }
         $config['internal']['contentFields']['field_topic']['operator'] = $value['tabs']['content']['field_topic_wrapper']['operator'] ?? 'OR';
       }
-      if (!$settings['settings']['content']['internal']['field_tags']['enabled'] && !empty($settings['settings']['content']['internal']['field_tags']['default_values'])) {
-        $value['tabs']['content']['field_tags_wrapper']['field_tags'] = $settings['settings']['content']['internal']['field_tags']['default_values'] ?? [];
+      if (!$settings['content']['internal']['field_tags']['enabled'] && !empty($settings['content']['internal']['field_tags']['default_values'])) {
+        $value['tabs']['content']['field_tags_wrapper']['field_tags'] = $settings['content']['internal']['field_tags']['default_values'] ?? [];
       }
       if (!empty($value['tabs']['content']['field_tags_wrapper']['field_tags'])) {
         foreach ($value['tabs']['content']['field_tags_wrapper']['field_tags'] as $index => $reference) {
@@ -1117,8 +1111,8 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $entity_reference_fields = $this->getEntityReferenceFields();
       foreach ($value['tabs']['content']['advanced_filters'] as $wrapper_id => $wrapper) {
         $field_id = str_replace('_wrapper', '', $wrapper_id);
-        if (!empty($settings['settings']['content']['internal'][$field_id]) && !$settings['settings']['content']['internal'][$field_id]['enabled'] && !empty($settings['settings']['content']['internal'][$field_id]['default_values'])) {
-          $wrapper[$field_id] = $settings['settings']['content']['internal'][$field_id]['default_values'] ?? [];
+        if (!empty($settings['content']['internal'][$field_id]) && !$settings['content']['internal'][$field_id]['enabled'] && !empty($settings['content']['internal'][$field_id]['default_values'])) {
+          $wrapper[$field_id] = $settings['content']['internal'][$field_id]['default_values'] ?? [];
         }
         if (!empty($wrapper[$field_id])) {
           // Entity reference fields.
@@ -1148,8 +1142,8 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
 
       if (!empty($entity_reference_fields)) {
         foreach ($entity_reference_fields as $field_id => $field_label) {
-          if (!$settings['settings']['content']['internal'][$field_id]['enabled'] && !empty($settings['settings']['content']['internal'][$field_id]['default_values'])) {
-            foreach ($settings['settings']['content']['internal'][$field_id]['default_values'] as $reference) {
+          if (!$settings['content']['internal'][$field_id]['enabled'] && !empty($settings['content']['internal'][$field_id]['default_values'])) {
+            foreach ($settings['content']['internal'][$field_id]['default_values'] as $reference) {
               if (!empty($reference['target_id'])) {
                 $config['internal']['contentFields'][$field_id]['values'][] = (int) $reference['target_id'];
               }
