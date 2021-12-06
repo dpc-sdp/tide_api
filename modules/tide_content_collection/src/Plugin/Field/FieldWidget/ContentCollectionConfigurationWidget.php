@@ -903,7 +903,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
    */
   protected function getEntityReferenceFields(FieldItemListInterface $items = NULL, $delta = NULL, array $exclude_fields = [
     'field_topic',
-    'field_tags'
+    'field_tags',
   ]) {
     $entity_reference_fields = $this->indexHelper->getIndexEntityReferenceFields($this->index, ['nid']);
     // Allow other modules to remove entity reference filters.
