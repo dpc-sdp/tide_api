@@ -361,6 +361,20 @@ class SearchApiIndexHelper implements SearchApiIndexHelperInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function getIndexTextFields(IndexInterface $index, array $excludes = []) : array {
+    $fields = [];
+    foreach ($index->getFields() as $field_id => $field) {
+      if (!in_array($field_id, $excludes) && $field->getType() === 'text') {
+        $fields[$field_id] = $field->getLabel();
+      }
+    }
+
+    return $fields;
+  }
+
+  /**
    * Extract all index entity reference fields.
    *
    * @param \Drupal\search_api\IndexInterface $index

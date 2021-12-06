@@ -234,6 +234,19 @@ interface SearchApiIndexHelperInterface {
   public function getIndexStringFields(IndexInterface $index, array $excludes = []) : array;
 
   /**
+   * Get all index text fields.
+   *
+   * @param \Drupal\search_api\IndexInterface $index
+   *   The search index.
+   * @param string[] $excludes
+   *   The field IDs to exclude.
+   *
+   * @return array
+   *   The list of text fields.
+   */
+  public function getIndexTextFields(IndexInterface $index, array $excludes = []) : array;
+
+  /**
    * Returns an array without the excluded keys.
    *
    * @param array $array
