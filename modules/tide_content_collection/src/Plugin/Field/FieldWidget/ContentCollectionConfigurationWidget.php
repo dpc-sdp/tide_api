@@ -588,7 +588,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           '#weight' => 2,
         ];
         $element['tabs']['content']['field_topic_wrapper']['field_topic'] = $field_filter;
-        $element['tabs']['content']['field_topic_wrapper']['field_topic']['#title'] = 'Select topics';
+        $element['tabs']['content']['field_topic_wrapper']['field_topic']['#title'] = $this->t('Select topics');
         if ($settings['content']['internal']['field_topic']['show_filter_operator']) {
           $element['tabs']['content']['field_topic_wrapper']['operator'] = $this->buildFilterOperatorSelect($json_object['internal']['contentFields']['field_topic']['operator'] ?? 'OR', $this->t('This filter operator is used to combined all the selected values together.'));
         }
@@ -611,7 +611,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           '#weight' => 3,
         ];
         $element['tabs']['content']['field_tags_wrapper']['field_tags'] = $field_filter;
-        $element['tabs']['content']['field_tags_wrapper']['field_tags']['#title'] = 'Select tags';
+        $element['tabs']['content']['field_tags_wrapper']['field_tags']['#title'] = $this->t('Select tags');
         if ($settings['content']['internal']['field_tags']['show_filter_operator']) {
           $element['tabs']['content']['field_tags_wrapper']['operator'] = $this->buildFilterOperatorSelect($json_object['internal']['contentFields']['field_tags']['operator'] ?? 'OR', $this->t('This filter operator is used to combined all the selected values together.'));
         }
