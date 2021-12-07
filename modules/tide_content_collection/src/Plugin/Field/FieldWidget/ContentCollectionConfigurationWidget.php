@@ -137,7 +137,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
 
     $element['settings']['content']['enable_call_to_action'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Enable call to action'),
+      '#title' => $this->t('Enable Call to Action'),
       '#default_value' => $settings['content']['enable_call_to_action'] ?? FALSE,
       '#weight' => -1,
     ];
