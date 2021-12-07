@@ -299,6 +299,24 @@ class SearchApiIndexHelper implements SearchApiIndexHelperInterface {
   /**
    * {@inheritdoc}
    */
+  public function getEntityReferenceFieldInfo(IndexInterface $index, string $field_id) : ?array {
+    $reference_fields = $this->extractIndexEntityReferenceFields($index);
+    if (!isset($reference_fields[$field_id])) {
+      return NULL;
+    }
+
+    try {
+      return $reference_fields[$field_id];
+    }
+    catch (\Exception $exception) {
+      watchdog_exception('tide_content_collection', $exception);
+    }
+    return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getIndexedNodeField(IndexInterface $index, string $node_field_name) : ?string {
     $index_fields = &drupal_static(__CLASS__ . '::' . __METHOD__, []);
     if (array_key_exists($node_field_name, $index_fields)) {
