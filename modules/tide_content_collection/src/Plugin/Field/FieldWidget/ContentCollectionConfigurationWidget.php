@@ -17,7 +17,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
  * Implementation of the content collection configuration widget.
  *
  * @FieldWidget(
- *   id = "content_collection_configuration",
+ *   id = "content_collection_configuration_ui",
  *   label = @Translation("Content Collection Configuration"),
  *   field_types = {
  *     "content_collection_configuration"
@@ -1251,6 +1251,47 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#type' => 'textfield',
       '#description' => $this->t('Text to display when an error occurs.'),
       '#default_value' => $json_object['interface']['display']['options']['errorText'] ?? $this->t("Search isn't working right now, please try again later."),
+    ];
+
+    $element['tabs']['advanced']['display']['sort'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Exposed sort options'),
+      '#open' => FALSE,
+      '#collapsible' => TRUE,
+    ];
+
+    $internal_sort_options = [NULL => $this->t('Relevance')];
+    $date_fields = $this->indexHelper->getIndexDateFields($this->index);
+    if (!empty($date_fields)) {
+      $internal_sort_options += $date_fields;
+    }
+    $string_fields = $this->indexHelper->getIndexStringFields($this->index);
+    if (!empty($string_fields)) {
+      $internal_sort_options += $string_fields;
+    }
+    $element['tabs']['advanced']['display']['sort']['criteria'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Select sort criteria'),
+      '#options' => $internal_sort_options,
+    ];
+    $field_name = $this->fieldDefinition->getName();
+    $element['tabs']['advanced']['display']['sort']['add_more'] = [
+      '#type' => 'submit',
+      '#name' => 'display_sort_criteria_add_more',
+      '#value' => $this->t('Add'),
+      '#attributes' => ['class' => ['field-add-more-submit']],
+      '#limit_validation_errors' => [array_merge($form['#parents'], [$field_name])],
+      '#submit' => [$this, 'addMoreSubmit'],
+      '#ajax' => [
+        'callback' => [$this, 'addMoreAjax'],
+        'wrapper' => 'display-sort-elements',
+        'effect' => 'fade',
+      ],
+    ];
+
+    $element['tabs']['advanced']['display']['sort']['elements'] = [
+      '#prefix' => '<div id="display-sort-elements">',
+      '#suffix' => '</div>',
     ];
 
   }

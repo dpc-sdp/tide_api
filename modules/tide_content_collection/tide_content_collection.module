@@ -1,0 +1,57 @@
+<?php
+
+/**
+ * @file
+ * Contains tide_content_collection.module.
+ */
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\paragraphs\ParagraphInterface;
+
+/**
+ * Implements hook_ENTITY_TYPE_access().
+ */
+function tide_content_collection_paragraph_access(ParagraphInterface $entity, $operation, AccountInterface $account) {
+  $permissions = &drupal_static(__FUNCTION__, []);
+  $type = $entity->getType();
+  if ($type == 'content_collection') {
+    if (!in_array($operation, ['update', 'delete'], TRUE)) {
+      return AccessResult::neutral();
+    }
+    if (isset($permissions[$account->id()][$type][$operation])) {
+      return $permissions[$account->id()][$type][$operation];
+    }
+    if ($account->hasPermission('access content_collection paragraph')) {
+      $permissions[$account->id()][$type][$operation] = AccessResult::allowed()->cachePerPermissions();
+    }
+    else {
+      $permissions[$account->id()][$type][$operation] = AccessResult::forbidden()->cachePerPermissions();
+    }
+
+    return $permissions[$account->id()][$type][$operation];
+  }
+  return AccessResult::neutral();
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_create_access().
+ */
+function tide_content_collection_paragraph_create_access(AccountInterface $account = NULL, array $context = [], $entity_bundle = NULL) {
+  $permissions = &drupal_static(__FUNCTION__, []);
+  $type = $entity_bundle;
+  $op = 'create';
+  if ($type == 'content_collection') {
+    if (isset($permissions[$account->id()][$type][$op])) {
+      return $permissions[$account->id()][$type][$op];
+    }
+    if ($account->hasPermission('access content_collection paragraph')) {
+      $permissions[$account->id()][$type][$op] = AccessResult::allowed()->cachePerPermissions();
+    }
+    else {
+      $permissions[$account->id()][$type][$op] = AccessResult::forbidden()->cachePerPermissions();
+    }
+
+    return $permissions[$account->id()][$type][$op];
+  }
+}
