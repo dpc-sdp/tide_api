@@ -12,6 +12,7 @@ use Drupal\tide_content_collection\SearchApiIndexHelperInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Component\Utility\NestedArray;
 
 /**
  * Implementation of the content collection configuration widget.
@@ -520,9 +521,10 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#type' => 'url',
         '#title'  => $this->t('URL'),
         '#default_value' => $json_object['callToAction']['url'] ?? '',
+        '#maxlength' => 2048,
+        '#autocomplete_route_name' => 'tide_content_collection.autocomplete.url',
       ];
     }
-
     $configuration = $items[$delta]->configuration ?? [];
 
     $element['#attached']['library'][] = 'field_group/formatter.horizontal_tabs';
@@ -1281,19 +1283,65 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#value' => $this->t('Add'),
       '#attributes' => ['class' => ['field-add-more-submit']],
       '#limit_validation_errors' => [array_merge($form['#parents'], [$field_name])],
-      '#submit' => [$this, 'addMoreSubmit'],
+      '#submit' => [[get_class($this), 'addMoreSubmit']],
       '#ajax' => [
-        'callback' => [$this, 'addMoreAjax'],
+        'callback' => [get_class($this), 'addMoreAjax'],
         'wrapper' => 'display-sort-elements',
         'effect' => 'fade',
       ],
     ];
-
     $element['tabs']['advanced']['display']['sort']['elements'] = [
+      '#type' => 'table',
+      '#empty' => $this->t('No sort values set.'),
+      '#header' => [
+        $this->t('Field'),
+        $this->t('Name'),
+        $this->t('Direction')
+      ],
       '#prefix' => '<div id="display-sort-elements">',
       '#suffix' => '</div>',
     ];
+    if (!empty($json_object['interface']['display']['sort']['values'])) {
+      $element['tabs']['advanced']['display']['sort']['#open'] = TRUE;
+      foreach ($json_object['interface']['display']['sort']['values'] as $key => $sort_element) {
+        $value = $sort_element['value'] ?? [];
+        $element['tabs']['advanced']['display']['sort']['elements'][$key]['field'] = [
+          '#type' => 'textfield',
+          '#default_value' => $value['field'] ?? NULL,
+          '#disabled' => TRUE,
+        ];
+        $element['tabs']['advanced']['display']['sort']['elements'][$key]['name'] = [
+          '#type' => 'textfield',
+          '#default_value' => $sort_element['name'] ?? '',
+        ];
+        $element['tabs']['advanced']['display']['sort']['elements'][$key]['direction'] = [
+          '#type' => 'select',
+          '#default_value' => $value['direction'] ?? 'asc',
+          '#options' => [
+            'asc' => $this->t('Ascending'),
+            'desc' => $this->t('Descending'),
+          ],
+        ];
+      }
+    }
+    $element['#attached']['library'][] = 'tide_content_collection/content_collection_ui_widget';
 
+  }
+
+  /**
+   * Submit handler for the Add button.
+   */
+  public static function addMoreSubmit(array $form, FormStateInterface $form_state) {
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Ajax callback for the Add button.
+   */
+  public static function addMoreAjax(array $form, FormStateInterface $form_state) {
+    $button = $form_state->getTriggeringElement();
+    $element = NestedArray::getValue($form, array_slice($button['#array_parents'], 0, -1));
+    return $element['elements'];
   }
 
   /**
@@ -1502,6 +1550,21 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
               }
               $config['interface']['filters']['fields'][] = $field;
             }
+          }
+        }
+      }
+
+      // Advanced sort.
+      if (!empty($value['tabs']['advanced']['display']['sort']['elements'])) {
+        foreach ($value['tabs']['advanced']['display']['sort']['elements'] as $element) {
+          if (!empty($element['name'])) {
+            $sort_value['name'] = $element['name'];
+            $sort_value['value'] = NULL;
+            if (!empty($element['field'])) {
+              $sort_value['value']['field'] = $element['field'] ?? NULL;
+              $sort_value['value']['direction'] = $element['direction'] ?? 'asc';
+            }
+            $config['interface']['display']['sort']['values'][] = $sort_value;
           }
         }
       }

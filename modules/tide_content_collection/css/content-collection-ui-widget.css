@@ -1,0 +1,4 @@
+div[class*=tabs-advanced-display-sort-criteria]{
+  display: inline-block;
+  margin-right: 0.75em;
+}

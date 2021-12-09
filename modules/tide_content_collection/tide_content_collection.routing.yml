@@ -1,0 +1,7 @@
+tide_content_collection.autocomplete.url:
+  path: '/admin/tide_content_collection/autocomplete/url'
+  defaults:
+    _controller: '\Drupal\tide_content_collection\Controller\UrlAutoCompleteController::handleAutocomplete'
+    _format: json
+  requirements:
+    _permission: 'access content'
