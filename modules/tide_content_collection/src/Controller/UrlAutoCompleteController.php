@@ -8,7 +8,6 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\Component\Utility\Xss;
-use Drupal\Core\Entity\Element\EntityAutocomplete;
 
 /**
  * Defines a route controller for url autocomplete form elements.

@@ -1296,7 +1296,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#header' => [
         $this->t('Field'),
         $this->t('Name'),
-        $this->t('Direction')
+        $this->t('Direction'),
       ],
       '#prefix' => '<div id="display-sort-elements">',
       '#suffix' => '</div>',
@@ -1558,6 +1558,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       if (!empty($value['tabs']['advanced']['display']['sort']['elements'])) {
         foreach ($value['tabs']['advanced']['display']['sort']['elements'] as $element) {
           if (!empty($element['name'])) {
+            $sort_value = [];
             $sort_value['name'] = $element['name'];
             $sort_value['value'] = NULL;
             if (!empty($element['field'])) {
