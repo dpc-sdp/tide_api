@@ -2,3 +2,9 @@ div[class*=tabs-advanced-display-sort-criteria]{
   display: inline-block;
   margin-right: 0.75em;
 }
+
+.js .field--widget-paragraphs tr[data-drupal-selector*=tabs-advanced-display-sort-elements] td,
+tr[data-drupal-selector*=tabs-advanced-display-sort-elements] > td{
+  max-width: 1em;
+  padding: 10px 12px;
+}
