@@ -36,7 +36,7 @@ content:
           - field_tags
           - field_topic
     third_party_settings: {  }
-    type: content_collection_configuration
+    type: content_collection_configuration_ui
     region: content
 hidden:
   created: true
