@@ -13,6 +13,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Entity\Element\EntityAutocomplete;
 
 /**
  * Implementation of the content collection configuration widget.
@@ -54,6 +55,11 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
+
+  /**
+   * Specifies whether the field supports both internal and external URLs.
+   */
+  const LINK_GENERIC = 0x11;
 
   /**
    * {@inheritdoc}
@@ -520,9 +526,21 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $element['callToAction']['url'] = [
         '#type' => 'url',
         '#title'  => $this->t('URL'),
-        '#default_value' => $json_object['callToAction']['url'] ?? '',
-        '#maxlength' => 2048,
-        '#autocomplete_route_name' => 'tide_content_collection.autocomplete.url',
+        '#type' => 'entity_autocomplete',
+        '#link_type' => static::LINK_GENERIC,
+        '#target_type' => 'node',
+        '#default_value' => (!empty($json_object['callToAction']['url']) && (\Drupal::currentUser()->hasPermission('link to any page'))) ? static::getUriAsDisplayableString($json_object['callToAction']['url']) : NULL,
+        '#attributes' => [
+          'data-autocomplete-first-character-blacklist' => '/#?',
+        ],
+        '#process_default_value' => FALSE,
+        '#element_validate' => [[$this, 'validateUriElement']],
+        '#description' => $this->t('Start typing the title of a piece of content to select it. You can also enter an internal path such as %add-node or an external URL such as %url. Enter %front to link to the front page. Enter %nolink to display link text only.', [
+          '%front' => '<front>',
+          '%add-node' => '/node/add',
+          '%url' => 'http://example.com',
+          '%nolink' => '<nolink>'
+        ]),
       ];
     }
     $configuration = $items[$delta]->configuration ?? [];
@@ -542,6 +560,126 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     $this->buildAdvancedTab($items, $delta, $element, $form, $form_state, $configuration, $json_object);
 
     return $element;
+  }
+
+  /**
+   * Form element validation handler for the 'uri' element.
+   *
+   * Disallows saving inaccessible or untrusted URLs.
+   */
+  public static function validateUriElement($element, FormStateInterface $form_state, $form) {
+    $uri = static::getUserEnteredStringAsUri($element['#value']);
+    $form_state->setValueForElement($element, $uri);
+
+    // If getUserEnteredStringAsUri() mapped the entered value to a 'internal:'
+    // URI , ensure the raw value begins with '/', '?' or '#'.
+    // @todo '<front>' is valid input for BC reasons, may be removed by
+    //   https://www.drupal.org/node/2421941
+    $valid_list = ['/', '?', '#'];
+    if (parse_url($uri, PHP_URL_SCHEME) === 'internal' && !in_array($element['#value'][0], $valid_list, TRUE) && substr($element['#value'], 0, 7) !== '<front>') {
+      $form_state->setError($element, t('Manually entered paths should start with one of the following characters: / ? #'));
+      return;
+    }
+  }
+
+  /**
+   * Gets the URI without the 'internal:' or 'entity:' scheme.
+   *
+   * The following two forms of URIs are transformed:
+   * - 'entity:' URIs: to entity autocomplete ("label (entity id)") strings;
+   * - 'internal:' URIs: the scheme is stripped.
+   *
+   * This method is the inverse of ::getUserEnteredStringAsUri().
+   *
+   * @param string $uri
+   *   The URI to get the displayable string for.
+   *
+   * @return string
+   *   The human readable string display value.
+   *
+   * @see static::getUserEnteredStringAsUri()
+   */
+  protected static function getUriAsDisplayableString($uri) {
+    $scheme = parse_url($uri, PHP_URL_SCHEME);
+
+    // By default, the displayable string is the URI.
+    $displayable_string = $uri;
+
+    // A different displayable string may be chosen in case of the 'internal:'
+    // or 'entity:' built-in schemes.
+    if ($scheme === 'internal') {
+      $uri_reference = explode(':', $uri, 2)[1];
+
+      // @todo '<front>' is valid input for BC reasons, may be removed by
+      //   https://www.drupal.org/node/2421941
+      $path = parse_url($uri, PHP_URL_PATH);
+      if ($path === '/') {
+        $uri_reference = '<front>' . substr($uri_reference, 1);
+      }
+
+      $displayable_string = $uri_reference;
+    }
+    elseif ($scheme === 'entity') {
+      list($entity_type, $entity_id) = explode('/', substr($uri, 7), 2);
+      // Show the 'entity:' URI as the entity autocomplete would.
+      // @todo Support entity types other than 'node'. Will be fixed in
+      //   https://www.drupal.org/node/2423093.
+      if ($entity_type == 'node' && $entity = \Drupal::entityTypeManager()->getStorage($entity_type)->load($entity_id)) {
+        $displayable_string = EntityAutocomplete::getEntityLabels([$entity]);
+      }
+    }
+    elseif ($scheme === 'route') {
+      $displayable_string = ltrim($displayable_string, 'route:');
+    }
+
+    return $displayable_string;
+  }
+
+  /**
+   * Gets the user-entered string as a URI.
+   *
+   * The following two forms of input are mapped to URIs:
+   * - entity autocomplete ("label (entity id)") strings: to 'entity:' URIs;
+   * - strings without a detectable scheme: to 'internal:' URIs.
+   *
+   * This method is the inverse of ::getUriAsDisplayableString().
+   *
+   * @param string $string
+   *   The user-entered string.
+   *
+   * @return string
+   *   The URI, if a non-empty $uri was passed.
+   *
+   * @see static::getUriAsDisplayableString()
+   */
+  protected static function getUserEnteredStringAsUri($string) {
+    // By default, assume the entered string is an URI.
+    $uri = trim($string);
+
+    // Detect entity autocomplete string, map to 'entity:' URI.
+    $entity_id = EntityAutocomplete::extractEntityIdFromAutocompleteInput($string);
+    if ($entity_id !== NULL) {
+      // @todo Support entity types other than 'node'. Will be fixed in
+      //   https://www.drupal.org/node/2423093.
+      $uri = 'entity:node/' . $entity_id;
+    }
+    // Support linking to nothing.
+    elseif (in_array($string, ['<nolink>', '<none>'], TRUE)) {
+      $uri = 'route:' . $string;
+    }
+    // Detect a schemeless string, map to 'internal:' URI.
+    elseif (!empty($string) && parse_url($string, PHP_URL_SCHEME) === NULL) {
+      // @todo '<front>' is valid input for BC reasons, may be removed by
+      //   https://www.drupal.org/node/2421941
+      // - '<front>' -> '/'
+      // - '<front>#foo' -> '/#foo'
+      if (strpos($string, '<front>') === 0) {
+        $string = '/' . substr($string, strlen('<front>'));
+      }
+      $uri = 'internal:' . $string;
+    }
+
+    return $uri;
   }
 
   /**
@@ -1283,9 +1421,9 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#value' => $this->t('Add'),
       '#attributes' => ['class' => ['field-add-more-submit']],
       '#limit_validation_errors' => [array_merge($form['#parents'], [$field_name])],
-      '#submit' => [[get_class($this), 'addMoreSubmit']],
+      '#submit' => [[$this, 'addSubmit']],
       '#ajax' => [
-        'callback' => [get_class($this), 'addMoreAjax'],
+        'callback' => [$this, 'addAjax'],
         'wrapper' => 'display-sort-elements',
         'effect' => 'fade',
       ],
@@ -1305,16 +1443,17 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $element['tabs']['advanced']['display']['sort']['#open'] = TRUE;
       foreach ($json_object['interface']['display']['sort']['values'] as $key => $sort_element) {
         $value = $sort_element['value'] ?? [];
-        $element['tabs']['advanced']['display']['sort']['elements'][$key]['field'] = [
+        $sort_field = [];
+        $sort_field['field'] = [
           '#type' => 'textfield',
           '#default_value' => $value['field'] ?? NULL,
           '#disabled' => TRUE,
         ];
-        $element['tabs']['advanced']['display']['sort']['elements'][$key]['name'] = [
+        $sort_field['name'] = [
           '#type' => 'textfield',
           '#default_value' => $sort_element['name'] ?? '',
         ];
-        $element['tabs']['advanced']['display']['sort']['elements'][$key]['direction'] = [
+        $sort_field['direction'] = [
           '#type' => 'select',
           '#default_value' => $value['direction'] ?? 'asc',
           '#options' => [
@@ -1322,7 +1461,37 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             'desc' => $this->t('Descending'),
           ],
         ];
+        $element['tabs']['advanced']['display']['sort']['elements'][] = $sort_field;
       }
+    }
+    $element_add = $form_state->getValue('element_add') ?? FALSE;
+    if ($element_add) {
+      $input = $form_state->getValues();
+      $field_name = $this->fieldDefinition->getName();
+      $parents = $form['#parents'];
+      $base_key = [
+        $field_name,
+        0,
+      ];
+      $input = $form_state->getValue(array_merge($parents, $base_key));
+      $sort_field = [];
+      $sort_field['field'] = [
+        '#type' => 'textfield',
+        '#default_value' => $input['tabs']['advanced']['display']['sort']['criteria'] ?? NULL,
+        '#disabled' => TRUE,
+      ];
+      $sort_field['name'] = [
+        '#type' => 'textfield',
+      ];
+      $sort_field['direction'] = [
+        '#type' => 'select',
+        '#options' => [
+          'asc' => $this->t('Ascending'),
+          'desc' => $this->t('Descending'),
+        ],
+      ];
+      $element['tabs']['advanced']['display']['sort']['elements'][] = $sort_field;
+      $form_state->setValue('element_add', FALSE);
     }
     $element['#attached']['library'][] = 'tide_content_collection/content_collection_ui_widget';
 
@@ -1331,17 +1500,20 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
   /**
    * Submit handler for the Add button.
    */
-  public static function addMoreSubmit(array $form, FormStateInterface $form_state) {
+  public function addSubmit(array $form, FormStateInterface $form_state) {
+    $form_state->setValue('element_add', TRUE);
     $form_state->setRebuild();
   }
 
   /**
    * Ajax callback for the Add button.
    */
-  public static function addMoreAjax(array $form, FormStateInterface $form_state) {
+  public function addAjax(array $form, FormStateInterface $form_state) {
     $button = $form_state->getTriggeringElement();
+    // Go one level up in the form, to the widgets container.
     $element = NestedArray::getValue($form, array_slice($button['#array_parents'], 0, -1));
     return $element['elements'];
+
   }
 
   /**
