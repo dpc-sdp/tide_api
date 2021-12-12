@@ -539,7 +539,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           '%front' => '<front>',
           '%add-node' => '/node/add',
           '%url' => 'http://example.com',
-          '%nolink' => '<nolink>'
+          '%nolink' => '<nolink>',
         ]),
       ];
     }
