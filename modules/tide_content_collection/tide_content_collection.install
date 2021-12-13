@@ -19,14 +19,8 @@ function tide_content_collection_install($is_syncing) {
   $icon_filename = $icon_dir . DIRECTORY_SEPARATOR . 'content_collection.svg';
   _tide_set_paragraph_type_icon('content_collection', $icon_filename);
 
-  // Assign access content_collection permission to site_admin.
-  $permission = 'access content_collection paragraph';
-  /** @var \Drupal\user\RoleInterface $role */
-  $role = Role::load('site_admin');
-  if ($role) {
-    $role->grantPermission($permission);
-    $role->save();
-  }
+  // Set content_collection permission to site_admin.
+  _assign_content_collection_perm_site_admin();
 }
 
 /**
@@ -70,6 +64,14 @@ function tide_content_collection_update_8001() {
   $config_read = _tide_read_config($json_field, $config_location, TRUE);
   $config_storage->write($json_field, $config_read);
 
+  // Set content_collection permission to site_admin.
+  _assign_content_collection_perm_site_admin();
+}
+
+/**
+ * Assign access content_collection permission to site_admin.
+ */
+function _assign_content_collection_perm_site_admin() {
   $permission = 'access content_collection paragraph';
   /** @var \Drupal\user\RoleInterface $role */
   $role = Role::load('site_admin');

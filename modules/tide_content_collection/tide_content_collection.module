@@ -16,12 +16,7 @@ function tide_content_collection_paragraph_access(ParagraphInterface $entity, $o
   $type = $entity->getType();
   if ($type === 'content_collection') {
     if (in_array($operation, ['update', 'delete'])) {
-      if ($account->hasPermission('access content_collection paragraph')) {
-        return AccessResult::allowed();
-      }
-      else {
-        return AccessResult::forbidden();
-      }
+      return AccessResult::allowedIfHasPermission($account, 'access content_collection paragraph');
     }
   }
   return AccessResult::neutral();
@@ -33,12 +28,7 @@ function tide_content_collection_paragraph_access(ParagraphInterface $entity, $o
 function tide_content_collection_paragraph_create_access(AccountInterface $account = NULL, array $context = [], $entity_bundle = NULL) {
   $type = $entity_bundle;
   if ($type === 'content_collection') {
-    if ($account->hasPermission('access content_collection paragraph')) {
-      return AccessResult::allowed();
-    }
-    else {
-      return AccessResult::forbidden();
-    }
+    return AccessResult::allowedIfHasPermission($account, 'access content_collection paragraph');
   }
   return AccessResult::neutral();
 }
