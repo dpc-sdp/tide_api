@@ -301,15 +301,8 @@ class SearchApiIndexHelper implements SearchApiIndexHelperInterface {
    */
   public function getEntityReferenceFieldInfo(IndexInterface $index, string $field_id) : ?array {
     $reference_fields = $this->extractIndexEntityReferenceFields($index);
-    if (!isset($reference_fields[$field_id])) {
-      return NULL;
-    }
-
-    try {
+    if (isset($reference_fields[$field_id])) {
       return $reference_fields[$field_id];
-    }
-    catch (\Exception $exception) {
-      watchdog_exception('tide_content_collection', $exception);
     }
     return NULL;
   }

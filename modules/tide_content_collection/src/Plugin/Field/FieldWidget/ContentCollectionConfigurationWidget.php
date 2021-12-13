@@ -14,6 +14,7 @@ use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\Element\EntityAutocomplete;
+use Drupal\link\LinkItemInterface;
 
 /**
  * Implementation of the content collection configuration widget.
@@ -55,11 +56,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
-
-  /**
-   * Specifies whether the field supports both internal and external URLs.
-   */
-  const LINK_GENERIC = 0x11;
 
   /**
    * {@inheritdoc}
@@ -527,7 +523,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#type' => 'url',
         '#title'  => $this->t('URL'),
         '#type' => 'entity_autocomplete',
-        '#link_type' => static::LINK_GENERIC,
+        '#link_type' => LinkItemInterface::LINK_GENERIC,
         '#target_type' => 'node',
         '#default_value' => (!empty($json_object['callToAction']['url']) && (\Drupal::currentUser()->hasPermission('link to any page'))) ? static::getUriAsDisplayableString($json_object['callToAction']['url']) : NULL,
         '#attributes' => [
@@ -624,7 +620,8 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       // Show the 'entity:' URI as the entity autocomplete would.
       // @todo Support entity types other than 'node'. Will be fixed in
       //   https://www.drupal.org/node/2423093.
-      if ($entity_type == 'node' && $entity = \Drupal::entityTypeManager()->getStorage($entity_type)->load($entity_id)) {
+      $entity = \Drupal::entityTypeManager()->getStorage($entity_type)->load($entity_id);
+      if ($entity_type === 'node' && !empty($entity)) {
         $displayable_string = EntityAutocomplete::getEntityLabels([$entity]);
       }
     }

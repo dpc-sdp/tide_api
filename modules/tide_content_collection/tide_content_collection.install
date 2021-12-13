@@ -30,7 +30,11 @@ function tide_content_collection_install($is_syncing) {
 }
 
 /**
+ * Updates to content_collection.
+ *
  * Update content_collection paragraph label.
+ * Installs new content_collection_enhanced paragraph type.
+ * Assign access content_collection permission to site_admin.
  */
 function tide_content_collection_update_8001() {
   /** @var \Drupal\paragraphs\Entity\ParagraphsType $paragraph_type */
@@ -39,12 +43,7 @@ function tide_content_collection_update_8001() {
     $paragraph_type->set('label', 'Content Collection (Raw JSON)');
     $paragraph_type->save();
   }
-}
 
-/**
- * Installs new content_collection_enhanced paragraph type.
- */
-function tide_content_collection_update_8002() {
   $configs = [
     'paragraphs.paragraphs_type.content_collection_enhanced' => 'paragraphs_type',
     'field.field.paragraph.content_collection_enhanced.field_content_collection_config' => 'field_config',
@@ -70,12 +69,7 @@ function tide_content_collection_update_8002() {
   $config_storage = \Drupal::service('config.storage');
   $config_read = _tide_read_config($json_field, $config_location, TRUE);
   $config_storage->write($json_field, $config_read);
-}
 
-/**
- * Assign access content_collection permission to site_admin.
- */
-function tide_content_collection_update_8003() {
   $permission = 'access content_collection paragraph';
   /** @var \Drupal\user\RoleInterface $role */
   $role = Role::load('site_admin');
