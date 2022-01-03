@@ -616,7 +616,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $displayable_string = $uri_reference;
     }
     elseif ($scheme === 'entity') {
-      list($entity_type, $entity_id) = explode('/', substr($uri, 7), 2);
+      [$entity_type, $entity_id] = explode('/', substr($uri, 7), 2);
       // Show the 'entity:' URI as the entity autocomplete would.
       // @todo Support entity types other than 'node'. Will be fixed in
       //   https://www.drupal.org/node/2423093.
@@ -711,15 +711,16 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $content_types_options = $this->indexHelper->getNodeTypes();
       $allowed_content_types = $settings['content']['internal']['contentTypes']['allowed_values'];
       if (!empty($allowed_content_types)) {
-        $content_types_options = array_intersect_key($content_types_options, array_flip($allowed_content_types));
-        $element['tabs']['content']['contentTypes'] = [
-          '#type' => 'checkboxes',
-          '#title' => $this->t('Select content types'),
-          '#options' => $content_types_options,
-          '#default_value' => $json_object['internal']['contentTypes'] ?? [],
-          '#weight' => 1,
-        ];
+        $content_types_options = array_intersect_key($content_types_options,
+          array_flip($allowed_content_types));
       }
+      $element['tabs']['content']['contentTypes'] = [
+        '#type' => 'checkboxes',
+        '#title' => $this->t('Select content types'),
+        '#options' => $content_types_options,
+        '#default_value' => $json_object['internal']['contentTypes'] ?? [],
+        '#weight' => 1,
+      ];
     }
 
     if ($this->indexHelper->isFieldTopicIndexed($this->index) && !empty($settings['content']['internal']['field_topic']['enabled'])) {
@@ -960,7 +961,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           ],
         ],
       ];
-      if (!empty($json_object['internal']['dateFilter'])) {
+      if (!empty($json_object['internal']['dateFilter']['startDateField']) || !empty($json_object['internal']['dateFilter']['endDateField'])) {
         $element['tabs']['content']['dateFilter']['#open'] = TRUE;
         $element['tabs']['content']['show_dateFilter']['#default_value'] = TRUE;
       }

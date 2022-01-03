@@ -1,9 +1,49 @@
 langcode: en
 status: true
-dependencies: {  }
-id: content_collection_enhanced
-label: 'Content Collection'
-icon_uuid: ''
-icon_default: ''
-description: ''
-behavior_plugins: {  }
+dependencies:
+  config:
+    - field.field.paragraph.content_collection_enhanced.field_content_collection_config
+    - paragraphs.paragraphs_type.content_collection_enhanced
+  module:
+    - tide_content_collection
+id: paragraph.content_collection_enhanced.default
+targetEntityType: paragraph
+bundle: content_collection_enhanced
+mode: default
+content:
+  field_content_collection_config:
+    weight: 0
+    settings:
+      content:
+        enable_call_to_action: false
+        internal:
+          contentTypes:
+            enabled: true
+            allowed_values: {  }
+            default_values: {  }
+          field_topic:
+            enabled: true
+            show_filter_operator: false
+          field_tags:
+            enabled: true
+            show_filter_operator: false
+          field_node_site:
+            enabled: false
+            show_filter_operator: false
+          field_node_primary_site:
+            enabled: false
+            show_filter_operator: false
+          uid:
+            enabled: false
+            show_filter_operator: false
+      filters:
+        enable_keyword_selection: false
+        allowed_advanced_filters:
+          - field_tags
+          - field_topic
+    third_party_settings: {  }
+    type: content_collection_configuration_ui
+    region: content
+hidden:
+  created: true
+  status: true
