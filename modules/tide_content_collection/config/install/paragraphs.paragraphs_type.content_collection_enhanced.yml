@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies: {  }
+id: content_collection_enhanced
+label: 'Content Collection'
+icon_uuid: ''
+icon_default: ''
+description: ''
+behavior_plugins: {  }

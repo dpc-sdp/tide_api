@@ -299,8 +299,19 @@ class SearchApiIndexHelper implements SearchApiIndexHelperInterface {
   /**
    * {@inheritdoc}
    */
+  public function getEntityReferenceFieldInfo(IndexInterface $index, string $field_id) : ?array {
+    $reference_fields = $this->extractIndexEntityReferenceFields($index);
+    if (isset($reference_fields[$field_id])) {
+      return $reference_fields[$field_id];
+    }
+    return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getIndexedNodeField(IndexInterface $index, string $node_field_name) : ?string {
-    $index_fields = &drupal_static(__CLASS__ . '::' . __METHOD__);
+    $index_fields = &drupal_static(__CLASS__ . '::' . __METHOD__, []);
     if (array_key_exists($node_field_name, $index_fields)) {
       return $index_fields[$node_field_name];
     }
@@ -339,6 +350,34 @@ class SearchApiIndexHelper implements SearchApiIndexHelperInterface {
     $fields = [];
     foreach ($index->getFields() as $field_id => $field) {
       if (!in_array($field_id, $excludes) && $field->getType() === 'integer') {
+        $fields[$field_id] = $field->getLabel();
+      }
+    }
+
+    return $fields;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getIndexStringFields(IndexInterface $index, array $excludes = []) : array {
+    $fields = [];
+    foreach ($index->getFields() as $field_id => $field) {
+      if (!in_array($field_id, $excludes) && $field->getType() === 'string') {
+        $fields[$field_id] = $field->getLabel();
+      }
+    }
+
+    return $fields;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getIndexTextFields(IndexInterface $index, array $excludes = []) : array {
+    $fields = [];
+    foreach ($index->getFields() as $field_id => $field) {
+      if (!in_array($field_id, $excludes) && $field->getType() === 'text') {
         $fields[$field_id] = $field->getLabel();
       }
     }
