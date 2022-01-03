@@ -11,12 +11,16 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\tide_content_collection\SearchApiIndexHelperInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Entity\Element\EntityAutocomplete;
+use Drupal\link\LinkItemInterface;
 
 /**
  * Implementation of the content collection configuration widget.
  *
  * @FieldWidget(
- *   id = "content_collection_configuration",
+ *   id = "content_collection_configuration_ui",
  *   label = @Translation("Content Collection Configuration"),
  *   field_types = {
  *     "content_collection_configuration"
@@ -47,13 +51,21 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
   protected $index;
 
   /**
+   * The Entity Type Manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, ModuleHandlerInterface $module_handler, SearchApiIndexHelperInterface $index_helper) {
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, ModuleHandlerInterface $module_handler, SearchApiIndexHelperInterface $index_helper, EntityTypeManagerInterface $entity_type_manager) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings);
     $this->moduleHandler = $module_handler;
     $this->indexHelper = $index_helper;
     $this->getIndex();
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
@@ -67,7 +79,8 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $configuration['settings'],
       $configuration['third_party_settings'],
       $container->get('module_handler'),
-      $container->get('tide_content_collection.search_api.index_helper')
+      $container->get('tide_content_collection.search_api.index_helper'),
+      $container->get('entity_type.manager')
     );
   }
 
@@ -509,10 +522,23 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $element['callToAction']['url'] = [
         '#type' => 'url',
         '#title'  => $this->t('URL'),
-        '#default_value' => $json_object['callToAction']['url'] ?? '',
+        '#type' => 'entity_autocomplete',
+        '#link_type' => LinkItemInterface::LINK_GENERIC,
+        '#target_type' => 'node',
+        '#default_value' => (!empty($json_object['callToAction']['url']) && (\Drupal::currentUser()->hasPermission('link to any page'))) ? static::getUriAsDisplayableString($json_object['callToAction']['url']) : NULL,
+        '#attributes' => [
+          'data-autocomplete-first-character-blacklist' => '/#?',
+        ],
+        '#process_default_value' => FALSE,
+        '#element_validate' => [[$this, 'validateUriElement']],
+        '#description' => $this->t('Start typing the title of a piece of content to select it. You can also enter an internal path such as %add-node or an external URL such as %url. Enter %front to link to the front page. Enter %nolink to display link text only.', [
+          '%front' => '<front>',
+          '%add-node' => '/node/add',
+          '%url' => 'http://example.com',
+          '%nolink' => '<nolink>',
+        ]),
       ];
     }
-
     $configuration = $items[$delta]->configuration ?? [];
 
     $element['#attached']['library'][] = 'field_group/formatter.horizontal_tabs';
@@ -530,6 +556,127 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     $this->buildAdvancedTab($items, $delta, $element, $form, $form_state, $configuration, $json_object);
 
     return $element;
+  }
+
+  /**
+   * Form element validation handler for the 'uri' element.
+   *
+   * Disallows saving inaccessible or untrusted URLs.
+   */
+  public static function validateUriElement($element, FormStateInterface $form_state, $form) {
+    $uri = static::getUserEnteredStringAsUri($element['#value']);
+    $form_state->setValueForElement($element, $uri);
+
+    // If getUserEnteredStringAsUri() mapped the entered value to a 'internal:'
+    // URI , ensure the raw value begins with '/', '?' or '#'.
+    // @todo '<front>' is valid input for BC reasons, may be removed by
+    //   https://www.drupal.org/node/2421941
+    $valid_list = ['/', '?', '#'];
+    if (parse_url($uri, PHP_URL_SCHEME) === 'internal' && !in_array($element['#value'][0], $valid_list, TRUE) && substr($element['#value'], 0, 7) !== '<front>') {
+      $form_state->setError($element, t('Manually entered paths should start with one of the following characters: / ? #'));
+      return;
+    }
+  }
+
+  /**
+   * Gets the URI without the 'internal:' or 'entity:' scheme.
+   *
+   * The following two forms of URIs are transformed:
+   * - 'entity:' URIs: to entity autocomplete ("label (entity id)") strings;
+   * - 'internal:' URIs: the scheme is stripped.
+   *
+   * This method is the inverse of ::getUserEnteredStringAsUri().
+   *
+   * @param string $uri
+   *   The URI to get the displayable string for.
+   *
+   * @return string
+   *   The human readable string display value.
+   *
+   * @see static::getUserEnteredStringAsUri()
+   */
+  protected static function getUriAsDisplayableString($uri) {
+    $scheme = parse_url($uri, PHP_URL_SCHEME);
+
+    // By default, the displayable string is the URI.
+    $displayable_string = $uri;
+
+    // A different displayable string may be chosen in case of the 'internal:'
+    // or 'entity:' built-in schemes.
+    if ($scheme === 'internal') {
+      $uri_reference = explode(':', $uri, 2)[1];
+
+      // @todo '<front>' is valid input for BC reasons, may be removed by
+      //   https://www.drupal.org/node/2421941
+      $path = parse_url($uri, PHP_URL_PATH);
+      if ($path === '/') {
+        $uri_reference = '<front>' . substr($uri_reference, 1);
+      }
+
+      $displayable_string = $uri_reference;
+    }
+    elseif ($scheme === 'entity') {
+      list($entity_type, $entity_id) = explode('/', substr($uri, 7), 2);
+      // Show the 'entity:' URI as the entity autocomplete would.
+      // @todo Support entity types other than 'node'. Will be fixed in
+      //   https://www.drupal.org/node/2423093.
+      $entity = \Drupal::entityTypeManager()->getStorage($entity_type)->load($entity_id);
+      if ($entity_type === 'node' && !empty($entity)) {
+        $displayable_string = EntityAutocomplete::getEntityLabels([$entity]);
+      }
+    }
+    elseif ($scheme === 'route') {
+      $displayable_string = ltrim($displayable_string, 'route:');
+    }
+
+    return $displayable_string;
+  }
+
+  /**
+   * Gets the user-entered string as a URI.
+   *
+   * The following two forms of input are mapped to URIs:
+   * - entity autocomplete ("label (entity id)") strings: to 'entity:' URIs;
+   * - strings without a detectable scheme: to 'internal:' URIs.
+   *
+   * This method is the inverse of ::getUriAsDisplayableString().
+   *
+   * @param string $string
+   *   The user-entered string.
+   *
+   * @return string
+   *   The URI, if a non-empty $uri was passed.
+   *
+   * @see static::getUriAsDisplayableString()
+   */
+  protected static function getUserEnteredStringAsUri($string) {
+    // By default, assume the entered string is an URI.
+    $uri = trim($string);
+
+    // Detect entity autocomplete string, map to 'entity:' URI.
+    $entity_id = EntityAutocomplete::extractEntityIdFromAutocompleteInput($string);
+    if ($entity_id !== NULL) {
+      // @todo Support entity types other than 'node'. Will be fixed in
+      //   https://www.drupal.org/node/2423093.
+      $uri = 'entity:node/' . $entity_id;
+    }
+    // Support linking to nothing.
+    elseif (in_array($string, ['<nolink>', '<none>'], TRUE)) {
+      $uri = 'route:' . $string;
+    }
+    // Detect a schemeless string, map to 'internal:' URI.
+    elseif (!empty($string) && parse_url($string, PHP_URL_SCHEME) === NULL) {
+      // @todo '<front>' is valid input for BC reasons, may be removed by
+      //   https://www.drupal.org/node/2421941
+      // - '<front>' -> '/'
+      // - '<front>#foo' -> '/#foo'
+      if (strpos($string, '<front>') === 0) {
+        $string = '/' . substr($string, strlen('<front>'));
+      }
+      $uri = 'internal:' . $string;
+    }
+
+    return $uri;
   }
 
   /**
@@ -914,7 +1061,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $delta,
     ]);
     if (!empty($exclude_fields)) {
-      $excludes += $exclude_fields;
+      $excludes = array_merge($excludes, $exclude_fields);
     }
     if (!empty($excludes) && is_array($excludes)) {
       $entity_reference_fields = $this->indexHelper::excludeArrayKey($entity_reference_fields, $excludes);
@@ -1070,12 +1217,22 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#type' => 'textfield',
       '#default_value' => $json_object['interface']['keyword']['label'] ?? $this->t("Search by keywords"),
       '#weight' => 2,
+      '#states' => [
+        'visible' => [
+          ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|keyword|allow_keyword_search', $items, $delta, $element) . '"]' => ['checked' => TRUE],
+        ],
+      ],
     ];
     $element['tabs']['filters']['interface_filters']['keyword']['placeholder'] = [
       '#title' => $this->t('Placeholder text'),
       '#type' => 'textfield',
       '#default_value' => $json_object['interface']['keyword']['placeholder'] ?? $this->t("Enter keyword(s)"),
       '#weight' => 3,
+      '#states' => [
+        'visible' => [
+          ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|keyword|allow_keyword_search', $items, $delta, $element) . '"]' => ['checked' => TRUE],
+        ],
+      ],
     ];
     if (!empty($settings['filters']['enable_keyword_selection']) && $settings['filters']['enable_keyword_selection']) {
       $keyword_fields_options = [];
@@ -1093,6 +1250,11 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#options' => $keyword_fields_options,
         '#default_value' => $json_object['interface']['keyword']['fields'] ?? ['title'],
         '#weight' => 4,
+        '#states' => [
+          'visible' => [
+            ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|keyword|allow_keyword_search', $items, $delta, $element) . '"]' => ['checked' => TRUE],
+          ],
+        ],
       ];
     }
 
@@ -1102,53 +1264,66 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#open' => TRUE,
       '#collapsible' => TRUE,
       '#group_name' => 'tabs_filters_interface_filters_advanced_filters',
+      '#description' => $this->t('Select additional fields to use as filters.'),
       '#weight' => 2,
     ];
     $entity_reference_fields = $this->getEntityReferenceFields(NULL, NULL, []);
     if (!empty($entity_reference_fields)) {
-      $allowed_content_types = array_filter($settings['filters']['allowed_advanced_filters']['contentTypes']['allowed_values']);
-      if (!empty($allowed_content_types)) {
-        $entity_reference_fields = array_intersect_key($entity_reference_fields, array_flip($allowed_content_types));
+      $allowed_reference_fields = array_filter($settings['filters']['allowed_advanced_filters']);
+      if (!empty($allowed_reference_fields)) {
+        $entity_reference_fields = array_intersect_key($entity_reference_fields, array_flip($allowed_reference_fields));
       }
-      $element['tabs']['filters']['interface_filters']['advanced_filters']['filters'] = [
-        '#type' => 'checkboxes',
-        '#title' => $this->t('Advanced filters'),
-        '#description' => $this->t('Select additional fields to use as filters.'),
-        '#options' => $entity_reference_fields,
-        '#default_value' => [],
-        '#weight' => -1,
-      ];
+      $weight = 1;
+      $field_data = [];
+      if (!empty($json_object['interface']['filters']['fields'])) {
+        $field_data = array_combine(array_column($json_object['interface']['filters']['fields'], 'elasticsearch-field'), $json_object['interface']['filters']['fields']);
+      }
       foreach ($entity_reference_fields as $field_id => $field_label) {
-        $element['tabs']['filters']['interface_filters']['advanced_filters']['filters_details'][$field_id] = [
-          '#type' => 'details',
-          '#title' => $this->t('@field_label additional details', ['@field_label' => $field_label]),
-          '#open' => TRUE,
-          '#collapsible' => TRUE,
+        $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id]['allow'] = [
+          '#type' => 'checkbox',
+          '#title' => $field_label,
+          '#default_value' => isset($field_data[$field_id]) ? TRUE : FALSE,
+          '#weight' => $weight++,
+        ];
+        $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_label'] = [
+          '#title' => $this->t('Label'),
+          '#type' => 'textfield',
+          '#default_value' => $field_data[$field_id]['options']['label'] ?? '',
+          '#weight' => $weight++,
           '#states' => [
             'visible' => [
-              ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|advanced_filters|filters|' . $field_id, $items, $delta, $element) . '"]' => ['checked' => TRUE],
+              ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|advanced_filters|' . $field_id . '|allow', $items, $delta, $element) . '"]' => ['checked' => TRUE],
             ],
           ],
         ];
-        $element['tabs']['filters']['interface_filters']['advanced_filters']['filters_details'][$field_id]['label'] = [
-          '#title' => $this->t('Label'),
-          '#type' => 'textfield',
-          '#default_value' => '',
-          '#weight' => 1,
-        ];
-        $element['tabs']['filters']['interface_filters']['advanced_filters']['filters_details'][$field_id]['placeholder'] = [
+        $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_placeholder'] = [
           '#title' => $this->t('Placeholder text'),
           '#type' => 'textfield',
-          '#default_value' => '',
-          '#weight' => 2,
+          '#default_value' => $field_data[$field_id]['options']['placeholder'] ?? '',
+          '#weight' => $weight++,
+          '#states' => [
+            'visible' => [
+              ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|advanced_filters|' . $field_id . '|allow', $items, $delta, $element) . '"]' => ['checked' => TRUE],
+            ],
+          ],
         ];
         $default_values = [];
+        if (!empty($field_data[$field_id]['options']['values'])) {
+          foreach ($field_data[$field_id]['options']['values'] as $value) {
+            $default_values[] = reset(array_keys($value));
+          }
+        }
         $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, $field_id, $default_values);
         if ($field_filter) {
-          $element['tabs']['filters']['interface_filters']['advanced_filters']['filters_details'][$field_id]['options'] = $field_filter;
-          $element['tabs']['filters']['interface_filters']['advanced_filters']['filters_details'][$field_id]['options']['#weight'] = 3;
-          $element['tabs']['filters']['interface_filters']['advanced_filters']['filters_details'][$field_id]['options']['#title'] = $this->t('Options');
-          $element['tabs']['filters']['interface_filters']['advanced_filters']['filters_details'][$field_id]['options']['#description'] = $this->t('Only show the selected options for this filter. If no option is selected, all available options will be shown.');
+          $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_options'] = $field_filter;
+          $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_options']['#weight'] = $weight++;
+          $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_options']['#title'] = $this->t('Options');
+          $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_options']['#description'] = $this->t('Only show the selected options for this filter. If no option is selected, all available options will be shown.');
+          $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_options']['#states'] = [
+            'visible' => [
+              ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|advanced_filters|' . $field_id . '|allow', $items, $delta, $element) . '"]' => ['checked' => TRUE],
+            ],
+          ];
         }
       }
     }
@@ -1214,6 +1389,127 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#description' => $this->t('Text to display when an error occurs.'),
       '#default_value' => $json_object['interface']['display']['options']['errorText'] ?? $this->t("Search isn't working right now, please try again later."),
     ];
+
+    $element['tabs']['advanced']['display']['sort'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Exposed sort options'),
+      '#open' => FALSE,
+      '#collapsible' => TRUE,
+    ];
+
+    $internal_sort_options = [NULL => $this->t('Relevance')];
+    $date_fields = $this->indexHelper->getIndexDateFields($this->index);
+    if (!empty($date_fields)) {
+      $internal_sort_options += $date_fields;
+    }
+    $string_fields = $this->indexHelper->getIndexStringFields($this->index);
+    if (!empty($string_fields)) {
+      $internal_sort_options += $string_fields;
+    }
+    $element['tabs']['advanced']['display']['sort']['criteria'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Select sort criteria'),
+      '#options' => $internal_sort_options,
+    ];
+    $field_name = $this->fieldDefinition->getName();
+    $element['tabs']['advanced']['display']['sort']['add_more'] = [
+      '#type' => 'submit',
+      '#name' => 'display_sort_criteria_add_more',
+      '#value' => $this->t('Add'),
+      '#attributes' => ['class' => ['field-add-more-submit']],
+      '#limit_validation_errors' => [array_merge($form['#parents'], [$field_name])],
+      '#submit' => [[$this, 'addSubmit']],
+      '#ajax' => [
+        'callback' => [$this, 'addAjax'],
+        'wrapper' => 'display-sort-elements',
+        'effect' => 'fade',
+      ],
+    ];
+    $element['tabs']['advanced']['display']['sort']['elements'] = [
+      '#type' => 'table',
+      '#empty' => $this->t('No sort values set.'),
+      '#header' => [
+        $this->t('Field'),
+        $this->t('Name'),
+        $this->t('Direction'),
+      ],
+      '#prefix' => '<div id="display-sort-elements">',
+      '#suffix' => '</div>',
+    ];
+    if (!empty($json_object['interface']['display']['sort']['values'])) {
+      $element['tabs']['advanced']['display']['sort']['#open'] = TRUE;
+      foreach ($json_object['interface']['display']['sort']['values'] as $key => $sort_element) {
+        $value = $sort_element['value'] ?? [];
+        $sort_field = [];
+        $sort_field['field'] = [
+          '#type' => 'textfield',
+          '#default_value' => $value['field'] ?? NULL,
+          '#disabled' => TRUE,
+        ];
+        $sort_field['name'] = [
+          '#type' => 'textfield',
+          '#default_value' => $sort_element['name'] ?? '',
+        ];
+        $sort_field['direction'] = [
+          '#type' => 'select',
+          '#default_value' => $value['direction'] ?? 'asc',
+          '#options' => [
+            'asc' => $this->t('Ascending'),
+            'desc' => $this->t('Descending'),
+          ],
+        ];
+        $element['tabs']['advanced']['display']['sort']['elements'][] = $sort_field;
+      }
+    }
+    $element_add = $form_state->getValue('element_add') ?? FALSE;
+    if ($element_add) {
+      $input = $form_state->getValues();
+      $field_name = $this->fieldDefinition->getName();
+      $parents = $form['#parents'];
+      $base_key = [
+        $field_name,
+        0,
+      ];
+      $input = $form_state->getValue(array_merge($parents, $base_key));
+      $sort_field = [];
+      $sort_field['field'] = [
+        '#type' => 'textfield',
+        '#default_value' => $input['tabs']['advanced']['display']['sort']['criteria'] ?? NULL,
+        '#disabled' => TRUE,
+      ];
+      $sort_field['name'] = [
+        '#type' => 'textfield',
+      ];
+      $sort_field['direction'] = [
+        '#type' => 'select',
+        '#options' => [
+          'asc' => $this->t('Ascending'),
+          'desc' => $this->t('Descending'),
+        ],
+      ];
+      $element['tabs']['advanced']['display']['sort']['elements'][] = $sort_field;
+      $form_state->setValue('element_add', FALSE);
+    }
+    $element['#attached']['library'][] = 'tide_content_collection/content_collection_ui_widget';
+
+  }
+
+  /**
+   * Submit handler for the Add button.
+   */
+  public function addSubmit(array $form, FormStateInterface $form_state) {
+    $form_state->setValue('element_add', TRUE);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Ajax callback for the Add button.
+   */
+  public function addAjax(array $form, FormStateInterface $form_state) {
+    $button = $form_state->getTriggeringElement();
+    // Go one level up in the form, to the widgets container.
+    $element = NestedArray::getValue($form, array_slice($button['#array_parents'], 0, -1));
+    return $element['elements'];
 
   }
 
@@ -1400,13 +1696,45 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         $config['interface']['keyword']['fields'] = ['title'];
       }
 
-      if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters']['filters'])) {
-        $advanced_filters = array_values(array_filter($value['tabs']['filters']['interface_filters']['advanced_filters']['filters']));
+      if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters'])) {
+        $advanced_filters = array_keys($value['tabs']['filters']['interface_filters']['advanced_filters']);
         if (!empty($advanced_filters)) {
-          foreach ($advanced_filters as $key => $field_id) {
-            $config['interface']['filters'][$key]['label'] = $value['tabs']['filters']['interface_filters']['advanced_filters']['filters_details'][$field_id]['label'] ?? '';
-            $config['interface']['filters'][$key]['placeholder'] = $value['tabs']['filters']['interface_filters']['advanced_filters']['filters_details'][$field_id]['placeholder'] ?? '';
-            $config['interface']['keyword'][$key]['values'] = $value['tabs']['filters']['interface_filters']['advanced_filters']['filters_details'][$field_id]['options'] ? array_values(array_filter($value['tabs']['filters']['interface_filters']['advanced_filters']['filters_details'][$field_id]['options'])) : [];
+          foreach ($advanced_filters as $field_id) {
+            $referenced_field = $this->indexHelper->getEntityReferenceFieldInfo($this->index, $field_id);
+            if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id]['allow']) && $value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id]['allow']) {
+              $field = [];
+              $field['elasticsearch-field'] = $field_id;
+              $field['options']['label'] = $value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_label'] ?? '';
+              $field['options']['placeholder'] = $value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_placeholder'] ?? '';
+              if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_options'])) {
+                foreach ($value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_options'] as $index => $reference) {
+                  if (!empty($reference['target_id'])) {
+                    $target_id = (int) $reference['target_id'];
+                    $entity = $this->entityTypeManager->getStorage($referenced_field['target_type'])->load($target_id);
+                    if (!empty($entity)) {
+                      $field['options']['values'][] = [$target_id => $entity->label()];
+                    }
+                  }
+                }
+              }
+              $config['interface']['filters']['fields'][] = $field;
+            }
+          }
+        }
+      }
+
+      // Advanced sort.
+      if (!empty($value['tabs']['advanced']['display']['sort']['elements'])) {
+        foreach ($value['tabs']['advanced']['display']['sort']['elements'] as $element) {
+          if (!empty($element['name'])) {
+            $sort_value = [];
+            $sort_value['name'] = $element['name'];
+            $sort_value['value'] = NULL;
+            if (!empty($element['field'])) {
+              $sort_value['value']['field'] = $element['field'] ?? NULL;
+              $sort_value['value']['direction'] = $element['direction'] ?? 'asc';
+            }
+            $config['interface']['display']['sort']['values'][] = $sort_value;
           }
         }
       }

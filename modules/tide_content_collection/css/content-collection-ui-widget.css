@@ -1,0 +1,10 @@
+.field--type-content-collection-configuration div[class*=tabs-advanced-display-sort-criteria]{
+  display: inline-block;
+  margin-right: 0.75em;
+}
+
+.field--type-content-collection-configuration .js .field--widget-paragraphs tr[data-drupal-selector*=tabs-advanced-display-sort-elements] td,
+.field--type-content-collection-configuration tr[data-drupal-selector*=tabs-advanced-display-sort-elements] > td{
+  max-width: 1em;
+  padding: 10px 12px;
+}

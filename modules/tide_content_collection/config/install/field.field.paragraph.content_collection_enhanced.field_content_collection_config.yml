@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_content_collection_config
+    - paragraphs.paragraphs_type.content_collection_enhanced
+  module:
+    - tide_content_collection
+id: paragraph.content_collection_enhanced.field_content_collection_config
+field_name: field_content_collection_config
+entity_type: paragraph
+bundle: content_collection_enhanced
+label: Configuration
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: content_collection_configuration

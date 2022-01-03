@@ -169,6 +169,19 @@ interface SearchApiIndexHelperInterface {
   public function buildEntityReferenceFieldFilter(IndexInterface $index, string $field_id, array $default_values = []) : ?array;
 
   /**
+   * Get the entity reference field information.
+   *
+   * @param \Drupal\search_api\IndexInterface $index
+   *   The search api index.
+   * @param string $field_id
+   *   The index field id.
+   *
+   * @return array|null
+   *   The entity reference field, or NULL if the field does not exist.
+   */
+  public function getEntityReferenceFieldInfo(IndexInterface $index, string $field_id) : ?array;
+
+  /**
    * Get the SAPI Index field ID of a node field.
    *
    * @param \Drupal\search_api\IndexInterface $index

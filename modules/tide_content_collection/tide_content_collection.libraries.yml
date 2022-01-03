@@ -1,0 +1,5 @@
+content_collection_ui_widget:
+  version: VERSION
+  css:
+    theme:
+      css/content-collection-ui-widget.css: {}
