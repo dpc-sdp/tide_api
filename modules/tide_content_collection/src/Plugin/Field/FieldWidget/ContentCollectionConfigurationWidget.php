@@ -1129,14 +1129,14 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     $element['tabs']['layout']['internal']['sort']['field'] = [
       '#type' => 'select',
       '#title' => $this->t('Sort content collection by'),
-      '#default_value' => $json_object['internal']['sort']['field'] ?? 'title',
+      '#default_value' => $json_object['internal']['sort'][0]['field'] ?? 'title',
       '#options' => $internal_sort_options,
     ];
 
     $element['tabs']['layout']['internal']['sort']['direction'] = [
       '#type' => 'select',
       '#title' => $this->t('Sort order'),
-      '#default_value' => $json_object['internal']['sort']['direction'] ?? 'asc',
+      '#default_value' => $json_object['internal']['sort'][0]['direction'] ?? 'asc',
       '#options' => [
         'asc' => $this->t('Ascending (asc)'),
         'desc' => $this->t('Descending (desc)'),
@@ -1652,49 +1652,62 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       }
 
       // Date Filters.
-      if (!empty($value['tabs']['content']['dateFilter']['criteria'])) {
-        $config['internal']['dateFilter']['criteria'] = $value['tabs']['content']['dateFilter']['criteria'] ?? '';
-        if ($value['tabs']['content']['dateFilter']['criteria'] == 'range') {
-          $dateRangeStart = $value['tabs']['content']['dateFilter']['dateRange']['dateRangeStart'] ?? '';
-          if ($dateRangeStart instanceof DrupalDateTime) {
-            $config['internal']['dateFilter']['dateRangeStart'] = $dateRangeStart->format('c');
-          }
-          $dateRangeEnd = $value['tabs']['content']['dateFilter']['dateRange']['dateRangeEnd'] ?? '';
-          if ($dateRangeEnd instanceof DrupalDateTime) {
-            $config['internal']['dateFilter']['dateRangeEnd'] = $dateRangeEnd->format('c');
+      if (!empty($value['tabs']['content']['show_dateFilter']) && $value['tabs']['content']['show_dateFilter']) {
+        if (!empty($value['tabs']['content']['dateFilter']['criteria'])) {
+          $config['internal']['dateFilter']['criteria'] = $value['tabs']['content']['dateFilter']['criteria'] ?? '';
+          if ($value['tabs']['content']['dateFilter']['criteria'] == 'range') {
+            $dateRangeStart = $value['tabs']['content']['dateFilter']['dateRange']['dateRangeStart'] ?? '';
+            if ($dateRangeStart instanceof DrupalDateTime) {
+              $config['internal']['dateFilter']['dateRangeStart'] = $dateRangeStart->format('c');
+            }
+            $dateRangeEnd = $value['tabs']['content']['dateFilter']['dateRange']['dateRangeEnd'] ?? '';
+            if ($dateRangeEnd instanceof DrupalDateTime) {
+              $config['internal']['dateFilter']['dateRangeEnd'] = $dateRangeEnd->format('c');
+            }
           }
         }
-      }
 
-      if (!empty($value['tabs']['content']['dateFilter']['startDateField'])) {
-        $config['internal']['dateFilter']['startDateField'] = $value['tabs']['content']['dateFilter']['startDateField'] ?? '';
-      }
+        if (!empty($value['tabs']['content']['dateFilter']['startDateField'])) {
+          $config['internal']['dateFilter']['startDateField'] = $value['tabs']['content']['dateFilter']['startDateField'] ?? '';
+        }
 
-      if (!empty($value['tabs']['content']['dateFilter']['endDateField'])) {
-        $config['internal']['dateFilter']['endDateField'] = $value['tabs']['content']['dateFilter']['endDateField'] ?? '';
+        if (!empty($value['tabs']['content']['dateFilter']['endDateField'])) {
+          $config['internal']['dateFilter']['endDateField'] = $value['tabs']['content']['dateFilter']['endDateField'] ?? '';
+        }
       }
 
       // Display Layout.
       $config['interface']['display']['type'] = $value['tabs']['layout']['display']['type'] ?? 'grid';
+      // Required field Type.
+      $config['interface']['display']['resultComponent']['type'] = 'card';
       $config['interface']['display']['resultComponent']['style'] = $value['tabs']['layout']['display']['resultComponent']['style'] ?? 'thumbnail';
 
+      $internal_sort = [];
       if (!empty($value['tabs']['layout']['internal']['sort']['field'])) {
-        $config['internal']['sort']['field'] = $value['tabs']['layout']['internal']['sort']['field'] ?? '';
+        $internal_sort['field'] = $value['tabs']['layout']['internal']['sort']['field'] ?? '';
       }
 
       if (!empty($value['tabs']['layout']['internal']['sort']['direction'])) {
-        $config['internal']['sort']['direction'] = $value['tabs']['layout']['internal']['sort']['direction'] ?? '';
+        $internal_sort['direction'] = $value['tabs']['layout']['internal']['sort']['direction'] ?? '';
+      }
+
+      if (!empty($internal_sort)) {
+        $config['internal']['sort'][] = $internal_sort;
       }
 
       // Filters Layout.
-      $config['interface']['keyword']['label'] = $value['tabs']['filters']['interface_filters']['keyword']['label'] ?? '';
-      $config['interface']['keyword']['placeholder'] = $value['tabs']['filters']['interface_filters']['keyword']['placeholder'] ?? '';
-      if (!empty($settings['filters']['enable_keyword_selection']) && $settings['filters']['enable_keyword_selection']) {
-        $config['interface']['keyword']['fields'] = $value['tabs']['filters']['interface_filters']['keyword']['fields'] ? array_values(array_filter($value['tabs']['filters']['interface_filters']['keyword']['fields'])) : [];
-        ;
-      }
-      else {
-        $config['interface']['keyword']['fields'] = ['title'];
+      if (!empty($value['tabs']['filters']['interface_filters']['keyword']['allow_keyword_search']) && $value['tabs']['filters']['interface_filters']['keyword']['allow_keyword_search']) {
+        // Required field Type.
+        $config['interface']['keyword']['type'] = 'basic';
+        $config['interface']['keyword']['label'] = $value['tabs']['filters']['interface_filters']['keyword']['label'] ?? '';
+        $config['interface']['keyword']['placeholder'] = $value['tabs']['filters']['interface_filters']['keyword']['placeholder'] ?? '';
+        if (!empty($settings['filters']['enable_keyword_selection']) && $settings['filters']['enable_keyword_selection']) {
+          $config['interface']['keyword']['fields'] = $value['tabs']['filters']['interface_filters']['keyword']['fields'] ? array_values(array_filter($value['tabs']['filters']['interface_filters']['keyword']['fields'])) : [];
+          ;
+        }
+        else {
+          $config['interface']['keyword']['fields'] = ['title'];
+        }
       }
 
       if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters'])) {
@@ -1704,7 +1717,13 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             $referenced_field = $this->indexHelper->getEntityReferenceFieldInfo($this->index, $field_id);
             if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id]['allow']) && $value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id]['allow']) {
               $field = [];
+              // Required field Type.
+              $field['type'] = "basic";
               $field['elasticsearch-field'] = $field_id;
+              // Required field VFG: Model.
+              $field['options']['model'] = $field_id;
+              // Required field VFG: Type.
+              $field['options']['type'] = 'rplselect';
               $field['options']['label'] = $value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_label'] ?? '';
               $field['options']['placeholder'] = $value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_placeholder'] ?? '';
               if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_options'])) {
@@ -1717,6 +1736,10 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
                     }
                   }
                 }
+              }
+              else {
+                // No options set use ES Aggregation to show all options.
+                $field['elasticsearch-aggregation'] = TRUE;
               }
               $config['interface']['filters']['fields'][] = $field;
             }
@@ -1745,6 +1768,8 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $config['interface']['display']['options']['noResultsText'] = $value['tabs']['advanced']['display']['options']['noResultsText'] ?? '';
       $config['interface']['display']['options']['loadingText'] = $value['tabs']['advanced']['display']['options']['loadingText'] ?? '';
       $config['interface']['display']['options']['errorText'] = $value['tabs']['advanced']['display']['options']['errorText'] ?? '';
+      // To enable pagination no ui feature yet.
+      $config['interface']['display']['options']['pagination'] = ['type' => 'numbers'];
 
       $value['value'] = json_encode($config);
     }
