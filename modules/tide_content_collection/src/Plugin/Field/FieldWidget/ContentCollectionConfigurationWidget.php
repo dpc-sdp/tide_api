@@ -1734,7 +1734,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
                     if (!empty($entity)) {
                       $field['options']['values'][] = [
                         'id' => $target_id,
-                        'name' => $entity->label()
+                        'name' => $entity->label(),
                       ];
                     }
                   }
