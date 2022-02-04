@@ -1311,7 +1311,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         $default_values = [];
         if (!empty($field_data[$field_id]['options']['values'])) {
           foreach ($field_data[$field_id]['options']['values'] as $value) {
-            $default_values[] = reset(array_keys($value));
+            $default_values[] = $value['id'];
           }
         }
         $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, $field_id, $default_values);
@@ -1732,7 +1732,10 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
                     $target_id = (int) $reference['target_id'];
                     $entity = $this->entityTypeManager->getStorage($referenced_field['target_type'])->load($target_id);
                     if (!empty($entity)) {
-                      $field['options']['values'][] = [$target_id => $entity->label()];
+                      $field['options']['values'][] = [
+                        'id' => $target_id,
+                        'name' => $entity->label()
+                      ];
                     }
                   }
                 }
