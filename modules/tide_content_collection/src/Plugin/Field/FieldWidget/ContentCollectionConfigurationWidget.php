@@ -15,6 +15,9 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\link\LinkItemInterface;
+use JsonSchema\Constraints\Factory;
+use JsonSchema\SchemaStorage;
+use JsonSchema\Validator;
 
 /**
  * Implementation of the content collection configuration widget.
@@ -1719,6 +1722,8 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
               $field = [];
               // Required field Type.
               $field['type'] = "basic";
+              // FE no support yet for dynamic value, setting a hardcoded value.
+              $field['additionalClasses'] = ['app-content-collection__form-col-2'];
               $field['elasticsearch-field'] = $field_id;
               // Required field VFG: Model.
               $field['options']['model'] = $field_id;
@@ -1775,8 +1780,56 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $config['interface']['display']['options']['pagination'] = ['type' => 'numbers'];
 
       $value['value'] = json_encode($config);
+      $errors = $this->validateJson($value['value']);
+      if (!empty($errors)) {
+        $field_name = $this->fieldDefinition->getName();
+        $widget_state = static::getWidgetState($form['#parents'], $field_name, $form_state);
+        $element = NestedArray::getValue($form_state->getCompleteForm(), $widget_state['array_parents']);
+        $form_state->setError($element, t('JSON does not validate against the schema. Violations: @errors.', [
+          '@errors' => implode(' - ', $errors),
+        ]));
+      }
     }
     return $values;
+  }
+
+  /**
+   * Callback to validate the JSON.
+   *
+   * @param string $json
+   *   The json string value.
+   *
+   * @return array
+   *   The error array list if exists.
+   */
+  public function validateJson(string $json) {
+    $errors = [];
+    if (!empty($json)) {
+      $json_object = json_decode($json);
+      if ($json_object === NULL) {
+        $errors[] = $this->t('Invalid JSON.');
+      }
+      else {
+        // Validate against the JSON Schema.
+        $json_schema = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('schema');
+        if (!empty($json_schema)) {
+          $json_schema_object = json_decode($json_schema);
+          $schema_storage = new SchemaStorage();
+          $schema_storage->addSchema('file://content_collection_configuration_schema', $json_schema_object);
+          $json_validator = new Validator(new Factory($schema_storage));
+          $num_errors = $json_validator->validate($json_object, $json_schema_object);
+          if ($num_errors) {
+            foreach ($json_validator->getErrors() as $error) {
+              $errors[] = $this->t('[@property] @message', [
+                '@property' => $error['property'],
+                '@message' => $error['message'],
+              ]);
+            }
+          }
+        }
+      }
+    }
+    return $errors;
   }
 
 }
