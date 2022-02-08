@@ -1103,10 +1103,10 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     $element['tabs']['layout']['display']['type'] = [
       '#type' => 'radios',
       '#title' => $this->t('Select layout'),
-      '#default_value' => $json_object['interface']['display']['type'] ?? 'grid',
+      '#default_value' => $json_object['interface']['display']['resultComponent']['type'] ?? 'card',
       '#options' => [
-        'grid' => $this->t('Grid view'),
-        'list' => $this->t('List view'),
+        'card' => $this->t('Grid view'),
+        'search-result' => $this->t('List view'),
       ],
     ];
 
@@ -1118,6 +1118,11 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         'no-image' => $this->t('No Image'),
         'thumbnail' => $this->t('Thumbnail'),
         'profile' => $this->t('Profile'),
+      ],
+      '#states' => [
+        'visible' => [
+          ':input[name="' . $this->getFormStatesElementName('tabs|layout|display|type', $items, $delta, $element) . '"]' => ['value' => 'card'],
+        ],
       ],
     ];
     $internal_sort_options = [NULL => $this->t('Relevance')];
@@ -1680,10 +1685,12 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       }
 
       // Display Layout.
-      $config['interface']['display']['type'] = $value['tabs']['layout']['display']['type'] ?? 'grid';
+      $config['interface']['display']['type'] = 'grid';
       // Required field Type.
-      $config['interface']['display']['resultComponent']['type'] = 'card';
-      $config['interface']['display']['resultComponent']['style'] = $value['tabs']['layout']['display']['resultComponent']['style'] ?? 'thumbnail';
+      $config['interface']['display']['resultComponent']['type'] = $value['tabs']['layout']['display']['type'] ?? 'card';
+      if ($config['interface']['display']['resultComponent']['type'] == 'card') {
+        $config['interface']['display']['resultComponent']['style'] = $value['tabs']['layout']['display']['resultComponent']['style'] ?? 'thumbnail';
+      }
 
       $internal_sort = [];
       if (!empty($value['tabs']['layout']['internal']['sort']['field'])) {
@@ -1783,9 +1790,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $errors = $this->validateJson($value['value']);
       if (!empty($errors)) {
         $field_name = $this->fieldDefinition->getName();
-        $widget_state = static::getWidgetState($form['#parents'], $field_name, $form_state);
-        $element = NestedArray::getValue($form_state->getCompleteForm(), $widget_state['array_parents']);
-        $form_state->setError($element, t('JSON does not validate against the schema. Violations: @errors.', [
+        $form_state->setErrorByName($field_name, $this->t('JSON does not validate against the schema. Violations: @errors.', [
           '@errors' => implode(' - ', $errors),
         ]));
       }
