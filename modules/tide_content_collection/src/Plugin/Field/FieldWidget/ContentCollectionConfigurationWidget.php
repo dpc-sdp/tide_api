@@ -1729,8 +1729,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
               $field = [];
               // Required field Type.
               $field['type'] = "basic";
-              // FE no support yet for dynamic value, setting a hardcoded value.
-              $field['additionalClasses'] = ['app-content-collection__form-col-2'];
               $field['elasticsearch-field'] = $field_id;
               // Required field VFG: Model.
               $field['options']['model'] = $field_id;
@@ -1759,6 +1757,17 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
               $config['interface']['filters']['fields'][] = $field;
             }
           }
+          // Enable automatic column arrangement of advanced search filters.
+          $config['interface']['filters']['defaultStyling'] = TRUE;
+          // Enable Submit and clearForm.
+          $config['interface']['filters']['submit'] = [
+            "visibility" => "visible",
+            "label" => "Apply change",
+          ];
+          $config['interface']['filters']['clearForm'] = [
+            "visibility" => "visible",
+            "label" => "Clear search",
+          ];
         }
       }
 
