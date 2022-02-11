@@ -1662,15 +1662,17 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       // Date Filters.
       if (!empty($value['tabs']['content']['show_dateFilter']) && $value['tabs']['content']['show_dateFilter']) {
         if (!empty($value['tabs']['content']['dateFilter']['criteria'])) {
-          $config['internal']['dateFilter']['criteria'] = $value['tabs']['content']['dateFilter']['criteria'] ?? '';
-          if ($value['tabs']['content']['dateFilter']['criteria'] == 'range') {
-            $dateRangeStart = $value['tabs']['content']['dateFilter']['dateRange']['dateRangeStart'] ?? '';
-            if ($dateRangeStart instanceof DrupalDateTime) {
-              $config['internal']['dateFilter']['dateRangeStart'] = $dateRangeStart->format('c');
-            }
-            $dateRangeEnd = $value['tabs']['content']['dateFilter']['dateRange']['dateRangeEnd'] ?? '';
-            if ($dateRangeEnd instanceof DrupalDateTime) {
-              $config['internal']['dateFilter']['dateRangeEnd'] = $dateRangeEnd->format('c');
+          if (!empty($value['tabs']['content']['dateFilter']['startDateField']) || !empty($value['tabs']['content']['dateFilter']['endDateField'])) {
+            $config['internal']['dateFilter']['criteria'] = $value['tabs']['content']['dateFilter']['criteria'] ?? '';
+            if ($value['tabs']['content']['dateFilter']['criteria'] == 'range') {
+              $dateRangeStart = $value['tabs']['content']['dateFilter']['dateRange']['dateRangeStart'] ?? '';
+              if ($dateRangeStart instanceof DrupalDateTime) {
+                $config['internal']['dateFilter']['dateRangeStart'] = $dateRangeStart->format('c');
+              }
+              $dateRangeEnd = $value['tabs']['content']['dateFilter']['dateRange']['dateRangeEnd'] ?? '';
+              if ($dateRangeEnd instanceof DrupalDateTime) {
+                $config['internal']['dateFilter']['dateRangeEnd'] = $dateRangeEnd->format('c');
+              }
             }
           }
         }
@@ -1706,68 +1708,70 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       }
 
       // Filters Layout.
-      if (!empty($value['tabs']['filters']['interface_filters']['keyword']['allow_keyword_search']) && $value['tabs']['filters']['interface_filters']['keyword']['allow_keyword_search']) {
-        // Required field Type.
-        $config['interface']['keyword']['type'] = 'basic';
-        $config['interface']['keyword']['label'] = $value['tabs']['filters']['interface_filters']['keyword']['label'] ?? '';
-        $config['interface']['keyword']['placeholder'] = $value['tabs']['filters']['interface_filters']['keyword']['placeholder'] ?? '';
-        if (!empty($settings['filters']['enable_keyword_selection']) && $settings['filters']['enable_keyword_selection']) {
-          $config['interface']['keyword']['fields'] = $value['tabs']['filters']['interface_filters']['keyword']['fields'] ? array_values(array_filter($value['tabs']['filters']['interface_filters']['keyword']['fields'])) : [];
-          ;
+      if (!empty($value['tabs']['filters']['show_interface_filters']) && $value['tabs']['filters']['show_interface_filters']) {
+        if (!empty($value['tabs']['filters']['interface_filters']['keyword']['allow_keyword_search']) && $value['tabs']['filters']['interface_filters']['keyword']['allow_keyword_search']) {
+          // Required field Type.
+          $config['interface']['keyword']['type'] = 'basic';
+          $config['interface']['keyword']['label'] = $value['tabs']['filters']['interface_filters']['keyword']['label'] ?? '';
+          $config['interface']['keyword']['placeholder'] = $value['tabs']['filters']['interface_filters']['keyword']['placeholder'] ?? '';
+          if (!empty($settings['filters']['enable_keyword_selection']) && $settings['filters']['enable_keyword_selection']) {
+            $config['interface']['keyword']['fields'] = $value['tabs']['filters']['interface_filters']['keyword']['fields'] ? array_values(array_filter($value['tabs']['filters']['interface_filters']['keyword']['fields'])) : [];
+            ;
+          }
+          else {
+            $config['interface']['keyword']['fields'] = ['title'];
+          }
         }
-        else {
-          $config['interface']['keyword']['fields'] = ['title'];
-        }
-      }
 
-      if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters'])) {
-        $advanced_filters = array_keys($value['tabs']['filters']['interface_filters']['advanced_filters']);
-        if (!empty($advanced_filters)) {
-          foreach ($advanced_filters as $field_id) {
-            $referenced_field = $this->indexHelper->getEntityReferenceFieldInfo($this->index, $field_id);
-            if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id]['allow']) && $value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id]['allow']) {
-              $field = [];
-              // Required field Type.
-              $field['type'] = "basic";
-              $field['elasticsearch-field'] = $field_id;
-              // Required field VFG: Model.
-              $field['options']['model'] = $field_id;
-              // Required field VFG: Type.
-              $field['options']['type'] = 'rplselect';
-              $field['options']['label'] = $value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_label'] ?? '';
-              $field['options']['placeholder'] = $value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_placeholder'] ?? '';
-              if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_options'])) {
-                foreach ($value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_options'] as $index => $reference) {
-                  if (!empty($reference['target_id'])) {
-                    $target_id = (int) $reference['target_id'];
-                    $entity = $this->entityTypeManager->getStorage($referenced_field['target_type'])->load($target_id);
-                    if (!empty($entity)) {
-                      $field['options']['values'][] = [
-                        'id' => $target_id,
-                        'name' => $entity->label(),
-                      ];
+        if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters'])) {
+          $advanced_filters = array_keys($value['tabs']['filters']['interface_filters']['advanced_filters']);
+          if (!empty($advanced_filters)) {
+            foreach ($advanced_filters as $field_id) {
+              $referenced_field = $this->indexHelper->getEntityReferenceFieldInfo($this->index, $field_id);
+              if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id]['allow']) && $value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id]['allow']) {
+                $field = [];
+                // Required field Type.
+                $field['type'] = "basic";
+                $field['elasticsearch-field'] = $field_id;
+                // Required field VFG: Model.
+                $field['options']['model'] = $field_id;
+                // Required field VFG: Type.
+                $field['options']['type'] = 'rplselect';
+                $field['options']['label'] = $value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_label'] ?? '';
+                $field['options']['placeholder'] = $value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_placeholder'] ?? '';
+                if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_options'])) {
+                  foreach ($value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_options'] as $index => $reference) {
+                    if (!empty($reference['target_id'])) {
+                      $target_id = (int) $reference['target_id'];
+                      $entity = $this->entityTypeManager->getStorage($referenced_field['target_type'])->load($target_id);
+                      if (!empty($entity)) {
+                        $field['options']['values'][] = [
+                          'id' => $target_id,
+                          'name' => $entity->label(),
+                        ];
+                      }
                     }
                   }
                 }
+                else {
+                  // No options set use ES Aggregation to show all options.
+                  $field['elasticsearch-aggregation'] = TRUE;
+                }
+                $config['interface']['filters']['fields'][] = $field;
               }
-              else {
-                // No options set use ES Aggregation to show all options.
-                $field['elasticsearch-aggregation'] = TRUE;
-              }
-              $config['interface']['filters']['fields'][] = $field;
             }
+            // Enable automatic column arrangement of advanced search filters.
+            $config['interface']['filters']['defaultStyling'] = TRUE;
+            // Enable Submit and clearForm.
+            $config['interface']['filters']['submit'] = [
+              "visibility" => "visible",
+              "label" => "Apply change",
+            ];
+            $config['interface']['filters']['clearForm'] = [
+              "visibility" => "visible",
+              "label" => "Clear search",
+            ];
           }
-          // Enable automatic column arrangement of advanced search filters.
-          $config['interface']['filters']['defaultStyling'] = TRUE;
-          // Enable Submit and clearForm.
-          $config['interface']['filters']['submit'] = [
-            "visibility" => "visible",
-            "label" => "Apply change",
-          ];
-          $config['interface']['filters']['clearForm'] = [
-            "visibility" => "visible",
-            "label" => "Clear search",
-          ];
         }
       }
 
