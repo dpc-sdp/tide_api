@@ -1764,12 +1764,12 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             $config['interface']['filters']['defaultStyling'] = TRUE;
             // Enable Submit and clearForm.
             $config['interface']['filters']['submit'] = [
-              "visibility" => "visible",
-              "label" => "Apply change",
+              'visibility' => 'visible',
+              'label' => $this->t('Apply search filters'),
             ];
             $config['interface']['filters']['clearForm'] = [
-              "visibility" => "visible",
-              "label" => "Clear search",
+              'visibility' => 'visible',
+              'label' => $this->t('Clear search filters'),
             ];
           }
         }
