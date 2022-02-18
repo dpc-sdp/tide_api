@@ -181,6 +181,14 @@
           "type": "boolean",
           "description": "Store the state of the user interactions in the URL. Only one Content Collection can use this per page."
         },
+        "skipToResultLink": {
+          "type": "boolean",
+          "description": "Show skip to result link when accessing using a tab key, default is true."
+        },
+        "SkipToResultLinkLabel": {
+          "type": "string",
+          "description": "Default is `Skip to results`"
+        },
         "keyword": {
           "type": "object",
           "properties": {
@@ -257,7 +265,14 @@
                     "type": "string"
                   },
                   "options": {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                      "model": {
+                        "type": "string",
+                        "description": "The URL query key for this field, and a fallback if elasticsearch-field is undefined."
+                      }
+                    },
+                    "required": ["model"]
                   },
                   "additionalClasses": {
                     "type": "array",
@@ -271,9 +286,22 @@
                   "elasticsearch-aggregation": {
                     "type": "boolean",
                     "description": "Determine if field should be added to aggregation."
+                  },
+                  "elasticsearch-aggregation-order": {
+                    "type": "string",
+                    "description": "The order (asc / desc) for aggregation results."
+                  },
+                  "elasticsearch-aggregation-size": {
+                    "type": "number",
+                    "description": "The number of aggregated results to return."
+                  },
+                  "elasticsearch-aggregation-show-count": {
+                    "type": "boolean",
+                    "description": "Determine if aggregation count should be displayed. Defaults to true."
                   }
                 },
-                "additionalProperties": false
+                "additionalProperties": false,
+                "required": ["type", "options"]
               }
             }
           },
