@@ -1445,10 +1445,10 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#prefix' => '<div id="display-sort-elements">',
       '#suffix' => '</div>',
     ];
-    if (!empty($json_object['interface']['display']['sort']['values'])) {
+    if (!empty($json_object['interface']['display']['options']['sort']['values'])) {
       $element['tabs']['advanced']['display']['sort']['#open'] = TRUE;
-      foreach ($json_object['interface']['display']['sort']['values'] as $key => $sort_element) {
-        $value = $sort_element['value'] ?? [];
+      foreach ($json_object['interface']['display']['options']['sort']['values'] as $key => $sort_element) {
+        $value = !empty($sort_element['value']) ? reset($sort_element['value']) : [];
         $sort_field = [];
         $sort_field['field'] = [
           '#type' => 'textfield',
@@ -1760,17 +1760,19 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
                 $config['interface']['filters']['fields'][] = $field;
               }
             }
-            // Enable automatic column arrangement of advanced search filters.
-            $config['interface']['filters']['defaultStyling'] = TRUE;
-            // Enable Submit and clearForm.
-            $config['interface']['filters']['submit'] = [
-              'visibility' => 'visible',
-              'label' => $this->t('Apply search filters'),
-            ];
-            $config['interface']['filters']['clearForm'] = [
-              'visibility' => 'visible',
-              'label' => $this->t('Clear search filters'),
-            ];
+            if (!empty($config['interface']['filters']['fields']) || !empty($config['interface']['keyword'])) {
+              // Enable automatic column arrangement of advanced search filters.
+              $config['interface']['filters']['defaultStyling'] = TRUE;
+              // Enable Submit and clearForm.
+              $config['interface']['filters']['submit'] = [
+                'visibility' => 'visible',
+                'label' => $this->t('Apply search filters'),
+              ];
+              $config['interface']['filters']['clearForm'] = [
+                'visibility' => 'visible',
+                'label' => $this->t('Clear search filters'),
+              ];
+            }
           }
         }
       }
@@ -1783,12 +1785,17 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             $sort_value['name'] = $element['name'];
             $sort_value['value'] = NULL;
             if (!empty($element['field'])) {
-              $sort_value['value']['field'] = $element['field'] ?? NULL;
-              $sort_value['value']['direction'] = $element['direction'] ?? 'asc';
+              $sort_value['value'][] = [
+                'field' => $element['field'] ?? NULL,
+                'direction' => $element['direction'] ?? 'asc',
+              ];
             }
-            $config['interface']['display']['sort']['values'][] = $sort_value;
+            $config['interface']['display']['options']['sort']['values'][] = $sort_value;
           }
         }
+      }
+      if (!empty($config['interface']['display']['options']['sort']['values'])) {
+        $config['interface']['display']['options']['sort']['type'] = 'field';
       }
 
       // Advanced Layout.
