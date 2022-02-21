@@ -502,7 +502,8 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
 
     $element['description'] = [
       '#title' => $this->t('Description'),
-      '#type' => 'textarea',
+      '#type' => 'text_format',
+      '#base_type' => 'textarea',
       '#description' => $this->t('Description displayed above the results'),
       '#default_value' => $json_object['description'] ?? '',
       '#weight' => 2,
@@ -723,6 +724,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#options' => $content_types_options,
         '#default_value' => $json_object['internal']['contentTypes'] ?? [],
         '#weight' => 1,
+        '#required' => TRUE,
       ];
     }
 
@@ -1115,7 +1117,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#title' => $this->t('Card display style'),
       '#default_value' => $json_object['interface']['display']['resultComponent']['style'] ?? 'thumbnail',
       '#options' => [
-        'no-image' => $this->t('No Image'),
+        'noImage' => $this->t('No Image'),
         'thumbnail' => $this->t('Thumbnail'),
         'profile' => $this->t('Profile'),
       ],
@@ -1583,7 +1585,12 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     foreach ($values as $delta => &$value) {
       $config = [];
       $config['title'] = $value['title'] ?? '';
-      $config['description'] = $value['description'] ?? '';
+      if (!empty($value['description']) && is_array($value['description'])) {
+        $config['description'] = $value['description']['value'] ?? '';
+      }
+      else {
+        $config['description'] = $value['description'] ?? '';
+      }
       $config['callToAction']['text'] = $value['callToAction']['text'] ?? '';
       $config['callToAction']['url'] = $value['callToAction']['url'] ?? '';
       if (!$settings['content']['internal']['contentTypes']['enabled'] && !empty($settings['content']['internal']['contentTypes']['default_values'])) {
