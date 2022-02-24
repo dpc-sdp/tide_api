@@ -495,7 +495,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     $element['title'] = [
       '#title' => $this->t('Title'),
       '#type' => 'textfield',
-      '#description' => $this->t('Title displayed above results.'),
+      '#description' => $this->t('You can add a Heading 2 above your card collection (optional).'),
       '#default_value' => $json_object['title'] ?? '',
       '#weight' => 1,
     ];
@@ -504,7 +504,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#title' => $this->t('Description'),
       '#type' => 'text_format',
       '#base_type' => 'textarea',
-      '#description' => $this->t('Description displayed above the results'),
+      '#description' => $this->t('You can add a plain text description above your card collection (optional).'),
       '#default_value' => $json_object['description'] ?? '',
       '#weight' => 2,
     ];
@@ -725,6 +725,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#default_value' => $json_object['internal']['contentTypes'] ?? [],
         '#weight' => 1,
         '#required' => TRUE,
+        '#description' => $this->t('Tick the content types you want to display. You can choose more than 1.'),
       ];
     }
 
@@ -739,6 +740,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           '#collapsible' => TRUE,
           '#group_name' => 'tabs_content_filters_field_topic_wrapper',
           '#weight' => 2,
+          '#description' => $this->t('Add your choice of topics for this content collection. You can choose more than 1. Start typing to choose a topic. Type a comma between topics.'),
         ];
         $element['tabs']['content']['field_topic_wrapper']['field_topic'] = $field_filter;
         $element['tabs']['content']['field_topic_wrapper']['field_topic']['#title'] = $this->t('Select topics');
@@ -762,6 +764,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           '#collapsible' => TRUE,
           '#group_name' => 'tabs_content_filters_field_tags_wrapper',
           '#weight' => 3,
+          '#description' => $this->t('Add your choice of tags for this content collection. You can choose more than 1. Start typing to choose a topic. Type a comma between tags.'),
         ];
         $element['tabs']['content']['field_tags_wrapper']['field_tags'] = $field_filter;
         $element['tabs']['content']['field_tags_wrapper']['field_tags']['#title'] = $this->t('Select tags');
@@ -803,7 +806,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     $element['tabs']['content']['show_advanced_filters'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show advanced filters.'),
-      '#description' => $this->t('Show detailed filters to further limit the overall results.'),
+      '#description' => $this->t('Show/hide additional tags to filter the content displayed.'),
       '#default_value' => FALSE,
       '#access' => FALSE,
       '#weight' => 4,
@@ -842,6 +845,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
               '#collapsible' => TRUE,
               '#group_name' => 'tabs_content_advanced_filters_' . $field_id . '_wrapper',
             ];
+            $field_filter['#title'] = $this->t('Add @label filters', ['@label' => strtolower($field_label)]);
             $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper'][$field_id] = $field_filter;
             if ($settings['content']['internal'][$field_id]['show_filter_operator']) {
               $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['operator'] = $this->buildFilterOperatorSelect($json_object['internal']['contentFields'][$field_id]['operator'] ?? 'OR', $this->t('This filter operator is used to combined all the selected values together.'));
@@ -984,6 +988,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           'past' => $this->t('Past'),
           'range' => $this->t('Range'),
         ],
+        '#description' => $this->t('Choose criteria for displaying content. You can set a specific date range or choose other preset options.'),
       ];
       $default_filter_today_start_date = $json_object['internal']['dateFilter']['startDateField'] ?? '';
       if (!isset($date_fields[$default_filter_today_start_date])) {
@@ -995,15 +1000,17 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       }
       $element['tabs']['content']['dateFilter']['startDateField'] = [
         '#type' => 'select',
-        '#title' => $this->t('Start date'),
+        '#title' => $this->t('Start field selection/s'),
         '#default_value' => $default_filter_today_start_date,
         '#options' => ['' => $this->t('- No mapping -')] + $date_fields,
+        '#description' => $this->t('Choose the content end field/s that match your content type selection/s above. If you selected more than 1 content type, you should select matching fields'),
       ];
       $element['tabs']['content']['dateFilter']['endDateField'] = [
         '#type' => 'select',
-        '#title' => $this->t('End date'),
+        '#title' => $this->t('End field selection/s'),
         '#default_value' => $default_filter_today_end_date,
         '#options' => ['' => $this->t('- No mapping -')] + $date_fields,
+        '#description' => $this->t('Choose the content end field/s that match your content type selection/s above. If you selected more than 1 content type, you should select matching fields'),
       ];
       $element['tabs']['content']['dateFilter']['dateRange'] = [
         '#type' => 'details',
@@ -1017,6 +1024,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             ':input[name="' . $this->getFormStatesElementName('tabs|content|dateFilter|criteria', $items, $delta, $element) . '"]' => ['value' => 'range'],
           ],
         ],
+        '#description' => $this->t('Select from date range options in content types.'),
       ];
       $default_date_range_start = '';
       $default_date_range_end = '';
@@ -1117,9 +1125,9 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#title' => $this->t('Card display style'),
       '#default_value' => $json_object['interface']['display']['resultComponent']['style'] ?? 'thumbnail',
       '#options' => [
-        'noImage' => $this->t('No Image'),
+        'noImage' => $this->t('No image'),
         'thumbnail' => $this->t('Thumbnail'),
-        'profile' => $this->t('Profile'),
+        'profile' => $this->t('Circle image'),
       ],
       '#states' => [
         'visible' => [
@@ -1292,14 +1300,14 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       foreach ($entity_reference_fields as $field_id => $field_label) {
         $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id]['allow'] = [
           '#type' => 'checkbox',
-          '#title' => $field_label,
+          '#title' => ucfirst(strtolower($field_label)),
           '#default_value' => isset($field_data[$field_id]) ? TRUE : FALSE,
           '#weight' => $weight++,
         ];
         $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_label'] = [
           '#title' => $this->t('Label'),
           '#type' => 'textfield',
-          '#default_value' => $field_data[$field_id]['options']['label'] ?? '',
+          '#default_value' => $field_data[$field_id]['options']['label'] ?? $this->t('Select %label', ['%label' => strtolower($field_label)]),
           '#weight' => $weight++,
           '#states' => [
             'visible' => [
@@ -1328,8 +1336,9 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         if ($field_filter) {
           $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_options'] = $field_filter;
           $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_options']['#weight'] = $weight++;
-          $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_options']['#title'] = $this->t('Options');
-          $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_options']['#description'] = $this->t('Only show the selected options for this filter. If no option is selected, all available options will be shown.');
+          $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_options']['#title'] = $this->t('Start typing to add and select %label filters. Type a comma and start typing to add more.', ['%label' => strtolower($field_label)]);
+          $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_options']['#description'] = $this->t('You can allow the user to filter by a subset of tags. If no tag is selected, all available tags will be shown.
+          Note this filtering is affected by the tags filtering you set in the Content tab.');
           $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_options']['#states'] = [
             'visible' => [
               ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|advanced_filters|' . $field_id . '|allow', $items, $delta, $element) . '"]' => ['checked' => TRUE],
@@ -1397,8 +1406,8 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     $element['tabs']['advanced']['display']['options']['errorText'] = [
       '#title' => $this->t('Error message'),
       '#type' => 'textfield',
-      '#description' => $this->t('Text to display when an error occurs.'),
-      '#default_value' => $json_object['interface']['display']['options']['errorText'] ?? $this->t("Search isn't working right now, please try again later."),
+      '#description' => $this->t('Text to display when a search error occurs.'),
+      '#default_value' => $json_object['interface']['display']['options']['errorText'] ?? $this->t("Search isn't working right now. Try again later."),
     ];
 
     $element['tabs']['advanced']['display']['sort'] = [
