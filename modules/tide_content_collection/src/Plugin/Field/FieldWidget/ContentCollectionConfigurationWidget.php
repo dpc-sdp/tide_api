@@ -1267,7 +1267,11 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#type' => 'checkboxes',
         '#title' => $this->t('Keyword fields'),
         '#options' => $keyword_fields_options,
-        '#default_value' => $json_object['interface']['keyword']['fields'] ?? ['title'],
+        '#default_value' => $json_object['interface']['keyword']['fields'] ?? [
+          'title',
+          'summary_processed',
+          'body',
+        ],
         '#weight' => 4,
         '#states' => [
           'visible' => [
@@ -1297,6 +1301,18 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       if (!empty($json_object['interface']['filters']['fields'])) {
         $field_data = array_combine(array_column($json_object['interface']['filters']['fields'], 'elasticsearch-field'), $json_object['interface']['filters']['fields']);
       }
+      $sort_weight = -count($field_data);
+      $sorted_entity_reference_fields = [];
+      if (!empty($field_data)) {
+        foreach ($field_data as $field_id => $field_value) {
+          if (!in_array($field_id, $entity_reference_fields)) {
+            $sorted_entity_reference_fields[$field_id] = $entity_reference_fields[$field_id];
+          }
+        }
+        if (!empty($sorted_entity_reference_fields)) {
+          $entity_reference_fields = array_merge($sorted_entity_reference_fields, $entity_reference_fields);
+        }
+      }
       foreach ($entity_reference_fields as $field_id => $field_label) {
         $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id]['allow'] = [
           '#type' => 'checkbox',
@@ -1307,7 +1323,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_label'] = [
           '#title' => $this->t('Label'),
           '#type' => 'textfield',
-          '#default_value' => $field_data[$field_id]['options']['label'] ?? $this->t('Select %label', ['%label' => strtolower($field_label)]),
+          '#default_value' => $field_data[$field_id]['options']['label'] ?? ucfirst(strtolower($field_label)),
           '#weight' => $weight++,
           '#states' => [
             'visible' => [
@@ -1318,7 +1334,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_placeholder'] = [
           '#title' => $this->t('Placeholder text'),
           '#type' => 'textfield',
-          '#default_value' => $field_data[$field_id]['options']['placeholder'] ?? '',
+          '#default_value' => $field_data[$field_id]['options']['placeholder'] ?? $this->t('Select %label', ['%label' => strtolower($field_label)]),
           '#weight' => $weight++,
           '#states' => [
             'visible' => [
@@ -1345,6 +1361,18 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             ],
           ];
         }
+        // Weight used to sort filters on FE.
+        $element['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_weight'] = [
+          '#title' => $this->t('Weight'),
+          '#type' => 'textfield',
+          '#default_value' => isset($field_data[$field_id]) ? $sort_weight++ : 0,
+          '#weight' => $weight++,
+          '#states' => [
+            'visible' => [
+              ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|advanced_filters|' . $field_id . '|allow', $items, $delta, $element) . '"]' => ['checked' => TRUE],
+            ],
+          ],
+        ];
       }
     }
   }
@@ -1742,6 +1770,12 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters'])) {
           $advanced_filters = array_keys($value['tabs']['filters']['interface_filters']['advanced_filters']);
           if (!empty($advanced_filters)) {
+            $sorted_advanced_filters = [];
+            foreach ($advanced_filters as $field_id) {
+              $sorted_advanced_filters[$field_id] = $value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id][$field_id . '_weight'] ?? 0;
+            }
+            asort($sorted_advanced_filters);
+            $sorted_advanced_filters = array_keys($sorted_advanced_filters);
             foreach ($advanced_filters as $field_id) {
               $referenced_field = $this->indexHelper->getEntityReferenceFieldInfo($this->index, $field_id);
               if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id]['allow']) && $value['tabs']['filters']['interface_filters']['advanced_filters'][$field_id]['allow']) {
