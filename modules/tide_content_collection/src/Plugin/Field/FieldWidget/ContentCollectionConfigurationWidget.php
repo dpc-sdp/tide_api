@@ -1321,8 +1321,8 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             'action' => 'order',
             'relationship' => 'sibling',
             'group' => 'group-order-weight',
-          ]
-        ]
+          ],
+        ],
       ];
       foreach ($entity_reference_fields as $field_id => $field_label) {
         $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['#attributes']['class'][] = 'draggable';
