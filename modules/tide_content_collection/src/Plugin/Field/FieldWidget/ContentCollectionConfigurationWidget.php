@@ -501,10 +501,9 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     ];
 
     $element['description'] = [
-      '#title' => $this->t('Description'),
+      '#title' => $this->t('Description (optional)'),
       '#type' => 'text_format',
       '#base_type' => 'textarea',
-      '#description' => $this->t('You can add a plain text description above your card collection (optional).'),
       '#default_value' => $json_object['description'] ?? '',
       '#weight' => 2,
     ];
@@ -725,7 +724,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#default_value' => $json_object['internal']['contentTypes'] ?? [],
         '#weight' => 1,
         '#required' => TRUE,
-        '#description' => $this->t('Tick the content types you want to display. You can choose more than 1.'),
       ];
     }
 
@@ -740,7 +738,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           '#collapsible' => TRUE,
           '#group_name' => 'tabs_content_filters_field_topic_wrapper',
           '#weight' => 2,
-          '#description' => $this->t('Add your choice of topics for this content collection. You can choose more than 1. Start typing to choose a topic. Type a comma between topics.'),
+          '#description' => $this->t('Add your choice of topics for this content collection. You can choose more than 1. Start typing to choose a topic. Type a comma between topics. If you leave this field blank, ALL topics will be included.'),
         ];
         $element['tabs']['content']['field_topic_wrapper']['field_topic'] = $field_filter;
         $element['tabs']['content']['field_topic_wrapper']['field_topic']['#title'] = $this->t('Select topics');
@@ -764,7 +762,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           '#collapsible' => TRUE,
           '#group_name' => 'tabs_content_filters_field_tags_wrapper',
           '#weight' => 3,
-          '#description' => $this->t('Add your choice of tags for this content collection. You can choose more than 1. Start typing to choose a topic. Type a comma between tags.'),
+          '#description' => $this->t('Add your choice of tags for this content collection. You can choose more than 1. Start typing to choose a tag. Type a comma between tags.'),
         ];
         $element['tabs']['content']['field_tags_wrapper']['field_tags'] = $field_filter;
         $element['tabs']['content']['field_tags_wrapper']['field_tags']['#title'] = $this->t('Select tags');
@@ -1003,7 +1001,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#title' => $this->t('Start field selection/s'),
         '#default_value' => $default_filter_today_start_date,
         '#options' => ['' => $this->t('- No mapping -')] + $date_fields,
-        '#description' => $this->t('Choose the content end field/s that match your content type selection/s above. If you selected more than 1 content type, you should select matching fields'),
+        '#description' => $this->t('Choose the content start field/s that match your content type selection/s above. If you selected more than 1 content type, you should select matching fields'),
       ];
       $element['tabs']['content']['dateFilter']['endDateField'] = [
         '#type' => 'select',
@@ -1270,6 +1268,8 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#default_value' => $json_object['interface']['keyword']['fields'] ?? [
           'title',
           'summary_processed',
+          'field_paragraph_summary',
+          'field_landing_page_summary',
           'body',
         ],
         '#weight' => 4,
@@ -1422,8 +1422,15 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#group_name' => 'advanced',
     ];
 
-    $element['tabs']['advanced']['display']['options']['resultsCountText'] = [
+    $element['tabs']['advanced']['display']['options']['enableResultsCountText'] = [
+      '#type' => 'checkbox',
       '#title' => $this->t('Show total number of results'),
+      '#default_value' => FALSE,
+    ];
+    if (!empty($json_object['interface']['display']['options']['resultsCountText'])) {
+      $element['tabs']['advanced']['display']['options']['enableResultsCountText']['#default_value'] = TRUE;
+    }
+    $element['tabs']['advanced']['display']['options']['resultsCountText'] = [
       '#type' => 'textfield',
       '#description' => $this->t('
         Text to display above the results.<br/>
@@ -1433,19 +1440,24 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         - {count} - The total count of results
       '),
       '#default_value' => $json_object['interface']['display']['options']['resultsCountText'] ?? $this->t('Displaying {range} of {count} results.'),
+      '#states' => [
+        'visible' => [
+          ':input[name="' . $this->getFormStatesElementName('tabs|advanced|display|options|enableResultsCountText', $items, $delta, $element) . '"]' => ['checked' => TRUE],
+        ],
+      ],
     ];
 
     $element['tabs']['advanced']['display']['options']['noResultsText'] = [
       '#title' => $this->t('No results message'),
       '#type' => 'textfield',
-      '#description' => $this->t('Text to display when no results were returned.'),
+      '#description' => $this->t('Text that will display when no results were returned.'),
       '#default_value' => $json_object['interface']['display']['options']['noResultsText'] ?? $this->t("Sorry! We couldn't find any matches."),
     ];
 
     $element['tabs']['advanced']['display']['options']['loadingText'] = [
       '#title' => $this->t('Loading message'),
       '#type' => 'textfield',
-      '#description' => $this->t('Text to display when search results are loading.'),
+      '#description' => $this->t('Text that will display when search results are loading.'),
       '#default_value' => $json_object['interface']['display']['options']['loadingText'] ?? $this->t('Loading'),
     ];
 
@@ -1867,7 +1879,9 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       }
 
       // Advanced Layout.
-      $config['interface']['display']['options']['resultsCountText'] = $value['tabs']['advanced']['display']['options']['resultsCountText'] ?? '';
+      if (!empty($value['tabs']['advanced']['display']['options']['enableResultsCountText']) && $value['tabs']['advanced']['display']['options']['enableResultsCountText']) {
+        $config['interface']['display']['options']['resultsCountText'] = $value['tabs']['advanced']['display']['options']['resultsCountText'] ?? '';
+      }
       $config['interface']['display']['options']['noResultsText'] = $value['tabs']['advanced']['display']['options']['noResultsText'] ?? '';
       $config['interface']['display']['options']['loadingText'] = $value['tabs']['advanced']['display']['options']['loadingText'] ?? '';
       $config['interface']['display']['options']['errorText'] = $value['tabs']['advanced']['display']['options']['errorText'] ?? '';
