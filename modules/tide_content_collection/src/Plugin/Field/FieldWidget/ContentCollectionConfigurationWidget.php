@@ -305,6 +305,8 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#weight' => 1,
     ];
     $advanced_filters_options = $this->getEntityReferenceFields(NULL, NULL, []);
+    $validated_entity_reference_fields = $this->getValidatedIndexEntityReferenceFields();
+    $advanced_filters_options = array_intersect_key($advanced_filters_options, array_flip((array) array_keys($validated_entity_reference_fields)));
     $element['settings']['filters']['allowed_advanced_filters'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Allowed advanced filters'),
@@ -1291,6 +1293,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#weight' => 2,
     ];
     $entity_reference_fields = $this->getEntityReferenceFields(NULL, NULL, []);
+    $validated_entity_reference_fields = $this->getValidatedIndexEntityReferenceFields();
     if (!empty($entity_reference_fields)) {
       $allowed_reference_fields = array_filter($settings['filters']['allowed_advanced_filters']);
       if (!empty($allowed_reference_fields)) {
@@ -1305,6 +1308,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $sorted_entity_reference_fields = [];
       if (!empty($field_data)) {
         foreach ($field_data as $field_id => $field_value) {
+          $field_id = str_ends_with($field_id, '_name') ? str_replace('_name', '', $field_id) : $field_id;
           if (!in_array($field_id, $entity_reference_fields)) {
             $sorted_entity_reference_fields[$field_id] = $entity_reference_fields[$field_id];
           }
@@ -1325,72 +1329,75 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         ],
       ];
       foreach ($entity_reference_fields as $field_id => $field_label) {
-        $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['#attributes']['class'][] = 'draggable';
-        $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'] = [
-          '#type' => 'fieldset',
-          '#open' => TRUE,
-          '#collapsible' => FALSE,
-        ];
-        $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details']['allow'] = [
-          '#type' => 'checkbox',
-          '#title' => ucfirst(strtolower($field_label)),
-          '#default_value' => isset($field_data[$field_id]) ? TRUE : FALSE,
-          '#weight' => $weight++,
-        ];
-        $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_label'] = [
-          '#title' => $this->t('Label'),
-          '#type' => 'textfield',
-          '#default_value' => $field_data[$field_id]['options']['label'] ?? ucfirst(strtolower($field_label)),
-          '#weight' => $weight++,
-          '#states' => [
-            'visible' => [
-              ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|advanced_filters|items|' . $field_id . '|details|allow', $items, $delta, $element) . '"]' => ['checked' => TRUE],
+        if (!empty($validated_entity_reference_fields[$field_id])) {
+          $field_id = str_ends_with($field_id, '_name') ? str_replace('_name', '', $field_id) : $field_id;
+          $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['#attributes']['class'][] = 'draggable';
+          $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'] = [
+            '#type' => 'fieldset',
+            '#open' => TRUE,
+            '#collapsible' => FALSE,
+          ];
+          $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details']['allow'] = [
+            '#type' => 'checkbox',
+            '#title' => ucfirst(strtolower($field_label)),
+            '#default_value' => isset($field_data[$field_id]) ? TRUE : (isset($field_data[$field_id . '_name']) ? TRUE : FALSE),
+            '#weight' => $weight++,
+          ];
+          $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_label'] = [
+            '#title' => $this->t('Label'),
+            '#type' => 'textfield',
+            '#default_value' => $field_data[$field_id]['options']['label'] ?? $field_data[$field_id . '_name']['options']['label'] ?? ucfirst(strtolower($field_label)),
+            '#weight' => $weight++,
+            '#states' => [
+              'visible' => [
+                ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|advanced_filters|items|' . $field_id . '|details|allow', $items, $delta, $element) . '"]' => ['checked' => TRUE],
+              ],
             ],
-          ],
-        ];
-        $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_placeholder'] = [
-          '#title' => $this->t('Placeholder text'),
-          '#type' => 'textfield',
-          '#default_value' => $field_data[$field_id]['options']['placeholder'] ?? $this->t('Select %label', ['%label' => strtolower($field_label)]),
-          '#weight' => $weight++,
-          '#states' => [
-            'visible' => [
-              ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|advanced_filters|items|' . $field_id . '|details|allow', $items, $delta, $element) . '"]' => ['checked' => TRUE],
+          ];
+          $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_placeholder'] = [
+            '#title' => $this->t('Placeholder text'),
+            '#type' => 'textfield',
+            '#default_value' => $field_data[$field_id]['options']['placeholder'] ?? $field_data[$field_id . '_name']['options']['placeholder'] ?? $this->t('Select %label', ['%label' => strtolower($field_label)]),
+            '#weight' => $weight++,
+            '#states' => [
+              'visible' => [
+                ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|advanced_filters|items|' . $field_id . '|details|allow', $items, $delta, $element) . '"]' => ['checked' => TRUE],
+              ],
             ],
-          ],
-        ];
-        $default_values = [];
-        if (!empty($field_data[$field_id]['options']['values'])) {
-          foreach ($field_data[$field_id]['options']['values'] as $value) {
-            $default_values[] = $value['id'];
+          ];
+          $default_values = [];
+          if (!empty($field_data[$field_id]['options']['values'])) {
+            foreach ($field_data[$field_id]['options']['values'] as $value) {
+              $default_values[] = $value['id'];
+            }
           }
-        }
-        $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, $field_id, $default_values);
-        if ($field_filter) {
-          $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_options'] = $field_filter;
-          $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_options']['#weight'] = $weight++;
-          $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_options']['#title'] = $this->t('Start typing to add and select %label filters. Type a comma and start typing to add more.', ['%label' => strtolower($field_label)]);
-          $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_options']['#description'] = $this->t('You can allow the user to filter by a subset of tags. If no tag is selected, all available tags will be shown.
-          Note this filtering is affected by the tags filtering you set in the Content tab.');
-          $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_options']['#states'] = [
-            'visible' => [
-              ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|advanced_filters|items|' . $field_id . '|details|allow', $items, $delta, $element) . '"]' => ['checked' => TRUE],
+          $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, $field_id, $default_values);
+          if ($field_filter) {
+            $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_options'] = $field_filter;
+            $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_options']['#weight'] = $weight++;
+            $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_options']['#title'] = $this->t('Start typing to add and select %label filters. Type a comma and start typing to add more.', ['%label' => strtolower($field_label)]);
+            $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_options']['#description'] = $this->t('You can allow the user to filter by a subset of tags. If no tag is selected, all available tags will be shown.
+            Note this filtering is affected by the tags filtering you set in the Content tab.');
+            $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_options']['#states'] = [
+              'visible' => [
+                ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|advanced_filters|items|' . $field_id . '|details|allow', $items, $delta, $element) . '"]' => ['checked' => TRUE],
+              ],
+            ];
+          }
+          // Weight used to sort filters on FE.
+          $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id][$field_id . '_weight'] = [
+            '#title' => $this->t('Weight'),
+            '#type' => 'textfield',
+            '#default_value' => isset($field_data[$field_id]) ? $sort_weight++ : (isset($field_data[$field_id . '_name']) ? $sort_weight++ : 0),
+            '#weight' => $weight++,
+            '#attributes' => ['class' => ['group-order-weight']],
+            '#states' => [
+              'visible' => [
+                ':input[name="' . $this->getFormStatesElementName('tabs|filters|show_interface_filters', $items, $delta, $element) . '"]' => ['checked' => TRUE],
+              ],
             ],
           ];
         }
-        // Weight used to sort filters on FE.
-        $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id][$field_id . '_weight'] = [
-          '#title' => $this->t('Weight'),
-          '#type' => 'textfield',
-          '#default_value' => isset($field_data[$field_id]) ? $sort_weight++ : 0,
-          '#weight' => $weight++,
-          '#attributes' => ['class' => ['group-order-weight']],
-          '#states' => [
-            'visible' => [
-              ':input[name="' . $this->getFormStatesElementName('tabs|filters|show_interface_filters', $items, $delta, $element) . '"]' => ['checked' => TRUE],
-            ],
-          ],
-        ];
       }
     }
   }
@@ -1806,38 +1813,43 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             }
             asort($sorted_advanced_filters);
             $sorted_advanced_filters = array_keys($sorted_advanced_filters);
+            $validated_entity_reference_fields = $this->getValidatedIndexEntityReferenceFields();
             foreach ($advanced_filters as $field_id) {
-              $referenced_field = $this->indexHelper->getEntityReferenceFieldInfo($this->index, $field_id);
-              if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details']['allow']) && $value['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details']['allow']) {
-                $field = [];
-                // Required field Type.
-                $field['type'] = "basic";
-                $field['elasticsearch-field'] = $field_id;
-                // Required field VFG: Model.
-                $field['options']['model'] = $field_id;
-                // Required field VFG: Type.
-                $field['options']['type'] = 'rplselect';
-                $field['options']['label'] = $value['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_label'] ?? '';
-                $field['options']['placeholder'] = $value['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_placeholder'] ?? '';
-                if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_options'])) {
-                  foreach ($value['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_options'] as $index => $reference) {
-                    if (!empty($reference['target_id'])) {
-                      $target_id = (int) $reference['target_id'];
-                      $entity = $this->entityTypeManager->getStorage($referenced_field['target_type'])->load($target_id);
-                      if (!empty($entity)) {
-                        $field['options']['values'][] = [
-                          'id' => $target_id,
-                          'name' => $entity->label(),
-                        ];
+              if (!empty($validated_entity_reference_fields[$field_id])) {
+                $referenced_field = $this->indexHelper->getEntityReferenceFieldInfo($this->index, $field_id);
+                if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details']['allow']) && $value['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details']['allow']) {
+                  $field = [];
+                  // Required field Type.
+                  $field['type'] = "basic";
+                  $field['elasticsearch-field'] = $field_id;
+                  // Required field VFG: Model.
+                  $field['options']['model'] = $field_id;
+                  // Required field VFG: Type.
+                  $field['options']['type'] = 'rplselect';
+                  $field['options']['label'] = $value['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_label'] ?? '';
+                  $field['options']['placeholder'] = $value['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_placeholder'] ?? '';
+                  if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_options'])) {
+                    foreach ($value['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_options'] as $index => $reference) {
+                      if (!empty($reference['target_id'])) {
+                        $target_id = (int) $reference['target_id'];
+                        $entity = $this->entityTypeManager->getStorage($referenced_field['target_type'])->load($target_id);
+                        if (!empty($entity)) {
+                          $field['options']['values'][] = [
+                            'id' => $target_id,
+                            'name' => $entity->label(),
+                          ];
+                        }
                       }
                     }
                   }
+                  else {
+                    // No options set use ES Aggregation to show all options.
+                    $field['elasticsearch-aggregation'] = TRUE;
+                    $field['elasticsearch-field'] = $field_id . '_name';
+                    $field['options']['model'] = $field_id . '_name';
+                  }
+                  $config['interface']['filters']['fields'][] = $field;
                 }
-                else {
-                  // No options set use ES Aggregation to show all options.
-                  $field['elasticsearch-aggregation'] = TRUE;
-                }
-                $config['interface']['filters']['fields'][] = $field;
               }
             }
             if (!empty($config['interface']['filters']['fields']) || !empty($config['interface']['keyword'])) {
@@ -1937,6 +1949,29 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       }
     }
     return $errors;
+  }
+
+  /**
+   * Get all index entity reference fields along with associated name value fields.
+   *
+   * @return array|null
+   *   The entity reference fields array, or NULL if the none have a name value.
+   */
+  public function getValidatedIndexEntityReferenceFields() : array {
+    $string_fields = $this->indexHelper->getIndexStringFields($this->index);
+    $entity_reference_fields = $this->indexHelper->getIndexEntityReferenceFields($this->index);
+    if (!empty($entity_reference_fields) && !empty($string_fields)) {
+      foreach ($entity_reference_fields as $field_id => $value) {
+        if (!empty($string_fields[$field_id . '_name'])) {
+          $field_property_path = $this->indexHelper->getIndexStringFieldPropertyPath($this->index, $field_id . '_name');
+          if ($field_property_path && strpos($field_property_path, $field_id . ':entity:') !== FALSE) {
+            $validated_entity_reference_fields[$field_id] = $string_fields[$field_id . '_name'];
+          }
+        }
+      }
+    }
+    return $validated_entity_reference_fields ?? [];
+
   }
 
 }

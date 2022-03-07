@@ -309,4 +309,17 @@ interface SearchApiIndexHelperInterface {
    */
   public function getServerIndexId($index) : ?string;
 
+  /**
+   * Retrieve the index field property path.
+   *
+   * @param \Drupal\search_api\IndexInterface $index
+   *   The index.
+   * @param string $field_id
+   *   The index field ID.
+   *
+   * @return string|null
+   *   The index field property path, NULL upon failure.
+   */
+  public function getIndexStringFieldPropertyPath(IndexInterface $index, string $field_id) : ?string;
+
 }
