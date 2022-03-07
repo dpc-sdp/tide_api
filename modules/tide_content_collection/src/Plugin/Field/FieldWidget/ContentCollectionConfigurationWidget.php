@@ -1952,7 +1952,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
   }
 
   /**
-   * Get all index entity reference fields along with associated name value fields.
+   * Get all index entity reference fields along with name value fields.
    *
    * @return array|null
    *   The entity reference fields array, or NULL if the none have a name value.
@@ -1960,6 +1960,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
   public function getValidatedIndexEntityReferenceFields() : array {
     $string_fields = $this->indexHelper->getIndexStringFields($this->index);
     $entity_reference_fields = $this->indexHelper->getIndexEntityReferenceFields($this->index);
+    $validated_entity_reference_fields = [];
     if (!empty($entity_reference_fields) && !empty($string_fields)) {
       foreach ($entity_reference_fields as $field_id => $value) {
         if (!empty($string_fields[$field_id . '_name'])) {
@@ -1970,7 +1971,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         }
       }
     }
-    return $validated_entity_reference_fields ?? [];
+    return $validated_entity_reference_fields;
 
   }
 
