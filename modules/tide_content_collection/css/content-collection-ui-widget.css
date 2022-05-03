@@ -8,3 +8,12 @@
   max-width: 1em;
   padding: 10px 12px;
 }
+
+.js .field--widget-paragraphs .advanced-filters-drag .draggable .tabledrag-handle {
+  margin: 0;
+}
+
+.advanced-filters-drag tr.odd.draggable .form-item,
+.advanced-filters-drag tr.even.draggable .form-item{
+  margin: 0;
+}

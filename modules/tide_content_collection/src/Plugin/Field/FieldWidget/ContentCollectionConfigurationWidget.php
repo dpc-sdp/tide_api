@@ -1320,6 +1320,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $element['tabs']['filters']['interface_filters']['advanced_filters']['items'] = [
         '#type' => 'table',
         '#tableselect' => FALSE,
+        '#attributes'=>['class' => ['advanced-filters-drag']],
         '#tabledrag' => [
           [
             'action' => 'order',
@@ -1332,38 +1333,33 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         if (!empty($validated_entity_reference_fields[$field_id])) {
           $field_id = str_ends_with($field_id, '_name') ? str_replace('_name', '', $field_id) : $field_id;
           $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['#attributes']['class'][] = 'draggable';
-          $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'] = [
-            '#type' => 'fieldset',
-            '#open' => TRUE,
-            '#collapsible' => FALSE,
-          ];
-          $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details']['allow'] = [
+          $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['allow'] = [
             '#type' => 'checkbox',
             '#title' => ucfirst(strtolower($field_label)),
             '#default_value' => isset($field_data[$field_id]) ? TRUE : (isset($field_data[$field_id . '_name']) ? TRUE : FALSE),
             '#weight' => $weight++,
           ];
+          $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'] = [
+            '#type' => 'fieldset',
+            '#open' => TRUE,
+            '#collapsible' => FALSE,
+            '#states' => [
+              'visible' => [
+                ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|advanced_filters|items|' . $field_id . '|allow', $items, $delta, $element) . '"]' => ['checked' => TRUE],
+              ],
+            ],
+          ];
           $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_label'] = [
             '#title' => $this->t('Label'),
             '#type' => 'textfield',
             '#default_value' => $field_data[$field_id]['options']['label'] ?? $field_data[$field_id . '_name']['options']['label'] ?? ucfirst(strtolower($field_label)),
-            '#weight' => $weight++,
-            '#states' => [
-              'visible' => [
-                ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|advanced_filters|items|' . $field_id . '|details|allow', $items, $delta, $element) . '"]' => ['checked' => TRUE],
-              ],
-            ],
+            '#weight' => $weight++
           ];
           $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_placeholder'] = [
             '#title' => $this->t('Placeholder text'),
             '#type' => 'textfield',
             '#default_value' => $field_data[$field_id]['options']['placeholder'] ?? $field_data[$field_id . '_name']['options']['placeholder'] ?? $this->t('Select %label', ['%label' => strtolower($field_label)]),
-            '#weight' => $weight++,
-            '#states' => [
-              'visible' => [
-                ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|advanced_filters|items|' . $field_id . '|details|allow', $items, $delta, $element) . '"]' => ['checked' => TRUE],
-              ],
-            ],
+            '#weight' => $weight++
           ];
           $default_values = [];
           if (!empty($field_data[$field_id]['options']['values'])) {
@@ -1378,11 +1374,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_options']['#title'] = $this->t('Start typing to add and select %label filters. Type a comma and start typing to add more.', ['%label' => strtolower($field_label)]);
             $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_options']['#description'] = $this->t('You can allow the user to filter by a subset of tags. If no tag is selected, all available tags will be shown.
             Note this filtering is affected by the tags filtering you set in the Content tab.');
-            $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_options']['#states'] = [
-              'visible' => [
-                ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|advanced_filters|items|' . $field_id . '|details|allow', $items, $delta, $element) . '"]' => ['checked' => TRUE],
-              ],
-            ];
           }
           // Weight used to sort filters on FE.
           $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id][$field_id . '_weight'] = [
@@ -1730,7 +1721,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
 
       if (!empty($entity_reference_fields)) {
         foreach ($entity_reference_fields as $field_id => $field_label) {
-          if (!$settings['content']['internal'][$field_id]['enabled'] && !empty($settings['content']['internal'][$field_id]['default_values'])) {
+          if (!empty($settings['content']['internal'][$field_id]['enabled']) && !empty($settings['content']['internal'][$field_id]['default_values'])) {
             foreach ($settings['content']['internal'][$field_id]['default_values'] as $reference) {
               if (!empty($reference['target_id'])) {
                 $config['internal']['contentFields'][$field_id]['values'][] = (int) $reference['target_id'];
@@ -1817,7 +1808,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             foreach ($advanced_filters as $field_id) {
               if (!empty($validated_entity_reference_fields[$field_id])) {
                 $referenced_field = $this->indexHelper->getEntityReferenceFieldInfo($this->index, $field_id);
-                if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details']['allow']) && $value['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details']['allow']) {
+                if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['allow']) && $value['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['allow']) {
                   $field = [];
                   // Required field Type.
                   $field['type'] = "basic";
