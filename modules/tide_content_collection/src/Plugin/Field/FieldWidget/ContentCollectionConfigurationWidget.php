@@ -1320,7 +1320,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $element['tabs']['filters']['interface_filters']['advanced_filters']['items'] = [
         '#type' => 'table',
         '#tableselect' => FALSE,
-        '#attributes'=>['class' => ['advanced-filters-drag']],
+        '#attributes' => ['class' => ['advanced-filters-drag']],
         '#tabledrag' => [
           [
             'action' => 'order',
@@ -1353,13 +1353,13 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             '#title' => $this->t('Label'),
             '#type' => 'textfield',
             '#default_value' => $field_data[$field_id]['options']['label'] ?? $field_data[$field_id . '_name']['options']['label'] ?? ucfirst(strtolower($field_label)),
-            '#weight' => $weight++
+            '#weight' => $weight++,
           ];
           $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'][$field_id . '_placeholder'] = [
             '#title' => $this->t('Placeholder text'),
             '#type' => 'textfield',
             '#default_value' => $field_data[$field_id]['options']['placeholder'] ?? $field_data[$field_id . '_name']['options']['placeholder'] ?? $this->t('Select %label', ['%label' => strtolower($field_label)]),
-            '#weight' => $weight++
+            '#weight' => $weight++,
           ];
           $default_values = [];
           if (!empty($field_data[$field_id]['options']['values'])) {
