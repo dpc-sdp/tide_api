@@ -9,11 +9,8 @@
   padding: 10px 12px;
 }
 
+.advanced-filters-drag tr.odd.draggable div[class$=-details-allow],
+.advanced-filters-drag tr.even.draggable div[class$=-details-allow],
 .js .field--widget-paragraphs .advanced-filters-drag .draggable .tabledrag-handle {
-  margin: 0;
-}
-
-.advanced-filters-drag tr.odd.draggable .form-item,
-.advanced-filters-drag tr.even.draggable .form-item{
   margin: 0;
 }
