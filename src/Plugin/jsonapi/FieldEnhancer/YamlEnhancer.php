@@ -23,8 +23,8 @@ class YamlEnhancer extends ResourceFieldEnhancerBase {
    */
   protected function doUndoTransform($data, Context $context) {
     $data = Yaml::decode($data);
-    $markup_text = $data['markup']['#markup'];
-    $processed_text = $data['processed_text']['#text'];
+    $markup_text = $data['markup']['#markup'] ?? '';
+    $processed_text = $data['processed_text']['#text'] ?? '';
 
     if (!empty($processed_text)) {
       $data['processed_text']['#text'] = $this->processText($processed_text);
