@@ -821,7 +821,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#access' => FALSE,
       '#group_name' => 'tabs_content_advanced_filters',
       '#weight' => 5,
-      // this part below here visible Advanced Filters dropdown list
       '#states' => [
         'visible' => [
           ':input[name="' . $this->getFormStatesElementName('tabs|content|show_advanced_filters', $items, $delta, $element) . '"]' => ['checked' => TRUE],
@@ -976,7 +975,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           'visible' => [
             ':input[name="' . $this->getFormStatesElementName('tabs|content|show_dateFilter', $items, $delta, $element) . '"]' => ['checked' => TRUE],
           ],
-      ],
+        ],
       ];
       if (!empty($json_object['internal']['dateFilter']['startDateField']) || !empty($json_object['internal']['dateFilter']['endDateField'])) {
         $element['tabs']['content']['dateFilter']['#open'] = TRUE;
