@@ -807,9 +807,10 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#type' => 'checkbox',
       '#title' => $this->t('Show advanced filters.'),
       '#description' => $this->t('Show/hide additional tags to filter the content displayed.'),
-      '#default_value' => FALSE,
+      '#default_value' => TRUE,
       '#access' => FALSE,
       '#weight' => 4,
+      '#required' => TRUE,
     ];
 
     $element['tabs']['content']['advanced_filters'] = [
@@ -820,6 +821,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#access' => FALSE,
       '#group_name' => 'tabs_content_advanced_filters',
       '#weight' => 5,
+      // this part below here visible Advanced Filters dropdown list
       '#states' => [
         'visible' => [
           ':input[name="' . $this->getFormStatesElementName('tabs|content|show_advanced_filters', $items, $delta, $element) . '"]' => ['checked' => TRUE],
@@ -847,6 +849,10 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             ];
             $field_filter['#title'] = $this->t('Add @label filters', ['@label' => strtolower($field_label)]);
             $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper'][$field_id] = $field_filter;
+            if ($field_id === 'field_node_site') {
+              $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['#open'] = TRUE;
+              $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper'][$field_id]['#required'] = TRUE;
+            }
             if ($settings['content']['internal'][$field_id]['show_filter_operator']) {
               $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['operator'] = $this->buildFilterOperatorSelect($json_object['internal']['contentFields'][$field_id]['operator'] ?? 'OR', $this->t('This filter operator is used to combined all the selected values together.'));
             }
@@ -955,6 +961,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#title' => $this->t('Show date filter.'),
         '#default_value' => FALSE,
         '#weight' => 6,
+        '#access' => FALSE,
       ];
 
       $element['tabs']['content']['dateFilter'] = [
@@ -964,11 +971,12 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#collapsible' => TRUE,
         '#group_name' => 'tabs_content_dateFilter',
         '#weight' => 7,
+        '#access' => FALSE,
         '#states' => [
           'visible' => [
             ':input[name="' . $this->getFormStatesElementName('tabs|content|show_dateFilter', $items, $delta, $element) . '"]' => ['checked' => TRUE],
           ],
-        ],
+      ],
       ];
       if (!empty($json_object['internal']['dateFilter']['startDateField']) || !empty($json_object['internal']['dateFilter']['endDateField'])) {
         $element['tabs']['content']['dateFilter']['#open'] = TRUE;
@@ -1118,6 +1126,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         'card' => $this->t('Grid view'),
         'search-result' => $this->t('List view'),
       ],
+      '#required' => TRUE,
     ];
 
     $element['tabs']['layout']['display']['resultComponent']['style'] = [
@@ -1127,15 +1136,16 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#options' => [
         'noImage' => $this->t('No image'),
         'thumbnail' => $this->t('Thumbnail'),
-        'profile' => $this->t('Circle image'),
+        // 'profile' => $this->t('Circle image'), Hidden.
       ],
+      '#required' => TRUE,
       '#states' => [
         'visible' => [
           ':input[name="' . $this->getFormStatesElementName('tabs|layout|display|type', $items, $delta, $element) . '"]' => ['value' => 'card'],
         ],
       ],
     ];
-    $internal_sort_options = [NULL => $this->t('Relevance')];
+    $internal_sort_options = [NULL => $this->t('Authored on')];
     $date_fields = $this->indexHelper->getIndexDateFields($this->index);
     if (!empty($date_fields)) {
       $internal_sort_options += $date_fields;
@@ -1149,6 +1159,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#title' => $this->t('Sort content collection by'),
       '#default_value' => $json_object['internal']['sort'][0]['field'] ?? 'title',
       '#options' => $internal_sort_options,
+      '#access' => FALSE,
     ];
 
     $element['tabs']['layout']['internal']['sort']['direction'] = [
@@ -1159,6 +1170,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         'asc' => $this->t('Ascending (asc)'),
         'desc' => $this->t('Descending (desc)'),
       ],
+      '#access' => FALSE,
     ];
 
   }
@@ -1196,7 +1208,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     $element['tabs']['filters']['show_interface_filters'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enable filtering'),
-      '#default_value' => FALSE,
+      '#default_value' => TRUE,
       '#weight' => 1,
     ];
     if (!empty($json_object['interface']['keyword']) || !empty($json_object['interface']['filters'])) {
@@ -1228,14 +1240,16 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     $element['tabs']['filters']['interface_filters']['keyword']['allow_keyword_search'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Allow keyword search'),
-      '#default_value' => !empty($json_object['interface']['keyword']) ? TRUE : FALSE,
+      '#default_value' => TRUE,
       '#weight' => 1,
+      '#required' => TRUE,
     ];
     $element['tabs']['filters']['interface_filters']['keyword']['label'] = [
       '#title' => $this->t('Label'),
       '#type' => 'textfield',
       '#default_value' => $json_object['interface']['keyword']['label'] ?? $this->t("Search by keywords"),
       '#weight' => 2,
+      '#access' => FALSE,
       '#states' => [
         'visible' => [
           ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|keyword|allow_keyword_search', $items, $delta, $element) . '"]' => ['checked' => TRUE],
@@ -1247,6 +1261,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#type' => 'textfield',
       '#default_value' => $json_object['interface']['keyword']['placeholder'] ?? $this->t("Enter keyword(s)"),
       '#weight' => 3,
+      '#access' => FALSE,
       '#states' => [
         'visible' => [
           ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|keyword|allow_keyword_search', $items, $delta, $element) . '"]' => ['checked' => TRUE],
@@ -1269,15 +1284,13 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#options' => $keyword_fields_options,
         '#default_value' => $json_object['interface']['keyword']['fields'] ?? [
           'title',
-          'summary_processed',
-          'field_paragraph_summary',
           'field_landing_page_summary',
-          'body',
         ],
         '#weight' => 4,
+        '#access' => FALSE,
         '#states' => [
           'visible' => [
-            ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|keyword|allow_keyword_search', $items, $delta, $element) . '"]' => ['checked' => TRUE],
+            ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|keyword|allow_keyword_search', $items, $delta, $element) . '"]' => ['checked' => FALSE],
           ],
         ],
       ];
@@ -1291,6 +1304,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#group_name' => 'tabs_filters_interface_filters_advanced_filters',
       '#description' => $this->t('Select additional fields to use as filters.'),
       '#weight' => 2,
+      '#access' => FALSE,
     ];
     $entity_reference_fields = $this->getEntityReferenceFields(NULL, NULL, []);
     $validated_entity_reference_fields = $this->getValidatedIndexEntityReferenceFields();
@@ -1434,7 +1448,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     $element['tabs']['advanced']['display']['options']['enableResultsCountText'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show total number of results'),
-      '#default_value' => FALSE,
+      '#default_value' => TRUE,
     ];
     if (!empty($json_object['interface']['display']['options']['resultsCountText'])) {
       $element['tabs']['advanced']['display']['options']['enableResultsCountText']['#default_value'] = TRUE;
@@ -1449,6 +1463,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         - {count} - The total count of results
       '),
       '#default_value' => $json_object['interface']['display']['options']['resultsCountText'] ?? $this->t('Displaying {range} of {count} results.'),
+      '#access' => FALSE,
       '#states' => [
         'visible' => [
           ':input[name="' . $this->getFormStatesElementName('tabs|advanced|display|options|enableResultsCountText', $items, $delta, $element) . '"]' => ['checked' => TRUE],
@@ -1461,6 +1476,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#type' => 'textfield',
       '#description' => $this->t('Text that will display when no results were returned.'),
       '#default_value' => $json_object['interface']['display']['options']['noResultsText'] ?? $this->t("Sorry! We couldn't find any matches."),
+      '#access' => FALSE,
     ];
 
     $element['tabs']['advanced']['display']['options']['loadingText'] = [
@@ -1468,6 +1484,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#type' => 'textfield',
       '#description' => $this->t('Text that will display when search results are loading.'),
       '#default_value' => $json_object['interface']['display']['options']['loadingText'] ?? $this->t('Loading'),
+      '#access' => FALSE,
     ];
 
     $element['tabs']['advanced']['display']['options']['errorText'] = [
@@ -1475,6 +1492,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#type' => 'textfield',
       '#description' => $this->t('Text to display when a search error occurs.'),
       '#default_value' => $json_object['interface']['display']['options']['errorText'] ?? $this->t("Search isn't working right now. Try again later."),
+      '#access' => FALSE,
     ];
 
     $element['tabs']['advanced']['display']['sort'] = [
@@ -1482,6 +1500,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#title' => $this->t('Exposed sort options'),
       '#open' => FALSE,
       '#collapsible' => TRUE,
+      '#access' => FALSE,
     ];
 
     $internal_sort_options = [NULL => $this->t('Relevance')];
