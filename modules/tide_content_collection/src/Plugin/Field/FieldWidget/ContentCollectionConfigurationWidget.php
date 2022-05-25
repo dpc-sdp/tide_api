@@ -503,7 +503,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     ];
 
     $element['description'] = [
-      '#title' => $this->t('Description (optional)'),
+      '#title' => $this->t('Description'),
       '#type' => 'text_format',
       '#base_type' => 'textarea',
       '#default_value' => $json_object['description'] ?? '',
