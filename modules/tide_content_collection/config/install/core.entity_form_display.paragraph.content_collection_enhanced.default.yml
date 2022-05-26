@@ -28,7 +28,10 @@ content:
             enabled: true
             show_filter_operator: false
           field_node_primary_site:
-            enabled: false
+            enabled: true
+            show_filter_operator: false
+          field_node_site:
+            enabled: true
             show_filter_operator: false
       filters:
         enable_keyword_selection: false
