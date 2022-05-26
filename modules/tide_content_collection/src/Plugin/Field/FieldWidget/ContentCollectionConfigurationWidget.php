@@ -808,7 +808,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#title' => $this->t('Show advanced filters.'),
       '#description' => $this->t('Show/hide additional tags to filter the content displayed.'),
       '#default_value' => TRUE,
-      '#access' => FALSE,
+      '#access' => TRUE,
       '#weight' => 4,
       '#required' => TRUE,
     ];
@@ -818,7 +818,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#title' => $this->t('Advanced filters'),
       '#open' => TRUE,
       '#collapsible' => TRUE,
-      '#access' => FALSE,
+      '#access' => TRUE,
       '#group_name' => 'tabs_content_advanced_filters',
       '#weight' => 5,
       '#states' => [
