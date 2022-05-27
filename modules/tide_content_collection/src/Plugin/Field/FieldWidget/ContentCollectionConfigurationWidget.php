@@ -1282,8 +1282,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#title' => $this->t('Keyword fields'),
         '#options' => $keyword_fields_options,
         '#default_value' => $json_object['interface']['keyword']['fields'] ?? [
-          'title',
-          'field_landing_page_summary',
+          'title'
         ],
         '#weight' => 4,
         '#access' => FALSE,
