@@ -35,6 +35,7 @@ function tide_content_collection_update_8001() {
   $paragraph_type = ParagraphsType::load('content_collection');
   if ($paragraph_type) {
     $paragraph_type->set('label', 'Custom collection');
+    $paragraph_type->set('description', "A flexible version of the 'content collection' component.  Customise a collection of cards and other content with filters and settings.");
     $paragraph_type->save();
   }
 
