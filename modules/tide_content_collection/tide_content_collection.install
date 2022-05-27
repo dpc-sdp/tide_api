@@ -34,7 +34,7 @@ function tide_content_collection_update_8001() {
   /** @var \Drupal\paragraphs\Entity\ParagraphsType $paragraph_type */
   $paragraph_type = ParagraphsType::load('content_collection');
   if ($paragraph_type) {
-    $paragraph_type->set('label', 'Content Collection (Raw JSON)');
+    $paragraph_type->set('label', 'Custom collection');
     $paragraph_type->save();
   }
 
