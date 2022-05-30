@@ -1241,7 +1241,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#title' => $this->t('Allow keyword search'),
       '#default_value' => TRUE,
       '#weight' => 1,
-      '#required' => TRUE,
     ];
     $element['tabs']['filters']['interface_filters']['keyword']['label'] = [
       '#title' => $this->t('Label'),
