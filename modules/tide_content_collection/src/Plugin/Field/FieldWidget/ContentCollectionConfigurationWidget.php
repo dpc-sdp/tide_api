@@ -1277,7 +1277,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         $keyword_fields_options += $text_fields;
       }
       $element['tabs']['filters']['interface_filters']['keyword']['fields'] = [
-        '#type' => 'checkboxes',
+        '#type' => 'hidden',
         '#title' => $this->t('Keyword fields'),
         '#options' => $keyword_fields_options,
         '#default_value' => $json_object['interface']['keyword']['fields'] ?? [
@@ -1285,7 +1285,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           'field_landing_page_summary',
         ],
         '#weight' => 4,
-        '#access' => FALSE,
         '#states' => [
           'visible' => [
             ':input[name="' . $this->getFormStatesElementName('tabs|filters|interface_filters|keyword|allow_keyword_search', $items, $delta, $element) . '"]' => ['checked' => FALSE],
