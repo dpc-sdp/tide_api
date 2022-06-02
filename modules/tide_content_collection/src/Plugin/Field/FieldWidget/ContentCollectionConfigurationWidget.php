@@ -1282,7 +1282,10 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#options' => $keyword_fields_options,
         '#default_value' => $json_object['interface']['keyword']['fields'] ?? [
           'title',
+          'summary_processed',
+          'field_paragraph_summary',
           'field_landing_page_summary',
+          'body',
         ],
         '#weight' => 4,
         '#access' => FALSE,
@@ -1819,7 +1822,10 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             ;
           }
           else {
-            $config['interface']['keyword']['fields'] = ['title'];
+            $config['interface']['keyword']['fields'] = [
+              'title',
+              'field_landing_page_summary',
+            ];
           }
         }
 
