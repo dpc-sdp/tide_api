@@ -25,7 +25,7 @@ content:
             enabled: true
             show_filter_operator: false
           field_tags:
-            enabled: true
+            enabled: false
             show_filter_operator: false
           field_node_primary_site:
             enabled: true
@@ -36,7 +36,6 @@ content:
       filters:
         enable_keyword_selection: false
         allowed_advanced_filters:
-          - field_tags
           - field_topic
     third_party_settings: {  }
     type: content_collection_configuration_ui
