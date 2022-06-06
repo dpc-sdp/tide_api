@@ -848,9 +848,12 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             ];
             $field_filter['#title'] = $this->t('Add @label filters', ['@label' => strtolower($field_label)]);
             $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper'][$field_id] = $field_filter;
-            if ($field_id === 'field_node_site') {
-              $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['#open'] = TRUE;
-              $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper'][$field_id]['#required'] = TRUE;
+            $module_handler = \Drupal::service('module_handler');
+            if ($module_handler->moduleExists('tide_site')) {
+              if ($field_id === 'field_node_site') {
+                $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['#open'] = TRUE;
+                $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper'][$field_id]['#required'] = TRUE;
+              }
             }
             if ($settings['content']['internal'][$field_id]['show_filter_operator']) {
               $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['operator'] = $this->buildFilterOperatorSelect($json_object['internal']['contentFields'][$field_id]['operator'] ?? 'OR', $this->t('This filter operator is used to combined all the selected values together.'));
@@ -1135,7 +1138,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#options' => [
         'noImage' => $this->t('No image'),
         'thumbnail' => $this->t('Thumbnail'),
-        // 'profile' => $this->t('Circle image'), Hidden.
       ],
       '#required' => TRUE,
       '#states' => [
@@ -1207,7 +1209,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     $element['tabs']['filters']['show_interface_filters'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enable filtering'),
-      '#default_value' => TRUE,
+      '#default_value' => empty($json_object) ? TRUE : FALSE,
       '#weight' => 1,
     ];
     if (!empty($json_object['interface']['keyword']) || !empty($json_object['interface']['filters'])) {
@@ -1239,9 +1241,12 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     $element['tabs']['filters']['interface_filters']['keyword']['allow_keyword_search'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Allow keyword search'),
-      '#default_value' => TRUE,
+      '#default_value' => !empty($json_object['interface']['keyword']) ? TRUE : FALSE,
       '#weight' => 1,
     ];
+    if (empty($json_object)) {
+      $element['tabs']['filters']['interface_filters']['keyword']['allow_keyword_search']['#default_value'] = TRUE;
+    }
     $element['tabs']['filters']['interface_filters']['keyword']['label'] = [
       '#title' => $this->t('Label'),
       '#type' => 'textfield',
@@ -1449,7 +1454,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     $element['tabs']['advanced']['display']['options']['enableResultsCountText'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show total number of results'),
-      '#default_value' => TRUE,
+      '#default_value' => empty($json_object) ? TRUE : FALSE,
     ];
     if (!empty($json_object['interface']['display']['options']['resultsCountText'])) {
       $element['tabs']['advanced']['display']['options']['enableResultsCountText']['#default_value'] = TRUE;
