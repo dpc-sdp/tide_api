@@ -360,6 +360,18 @@ class SearchApiIndexHelper implements SearchApiIndexHelperInterface {
   /**
    * {@inheritdoc}
    */
+  public function getIndexedFieldPropertyPath(IndexInterface $index, string $field_id) : ?string {
+    $field = $index->getField($field_id);
+    if (!empty($field)) {
+      return $field->getPropertyPath();
+    }
+
+    return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getIndexStringFields(IndexInterface $index, array $excludes = []) : array {
     $fields = [];
     foreach ($index->getFields() as $field_id => $field) {
