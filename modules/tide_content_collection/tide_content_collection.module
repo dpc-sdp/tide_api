@@ -15,11 +15,11 @@ use Drupal\paragraphs\ParagraphInterface;
 function tide_content_collection_paragraph_access(ParagraphInterface $entity, $operation, AccountInterface $account) {
   $type = $entity->getType();
   if ($type === 'content_collection') {
-    if (in_array($operation, ['update', 'delete'])) {
-      return AccessResult::allowedIfHasPermission($account, 'access content_collection paragraph');
+    if (in_array($operation, ['update', 'delete']) && !$account->hasPermission('access content_collection paragraph')) {
+      return AccessResult::forbidden()->cachePerPermissions();
     }
   }
-  return AccessResult::neutral();
+  return AccessResult::neutral()->cachePerPermissions();
 }
 
 /**
@@ -27,8 +27,8 @@ function tide_content_collection_paragraph_access(ParagraphInterface $entity, $o
  */
 function tide_content_collection_paragraph_create_access(AccountInterface $account = NULL, array $context = [], $entity_bundle = NULL) {
   $type = $entity_bundle;
-  if ($type === 'content_collection') {
-    return AccessResult::allowedIfHasPermission($account, 'access content_collection paragraph');
+  if ($type === 'content_collection' && !$account->hasPermission('access content_collection paragraph')) {
+    return AccessResult::forbidden()->cachePerPermissions();
   }
-  return AccessResult::neutral();
+  return AccessResult::neutral()->cachePerPermissions();
 }
