@@ -1308,7 +1308,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $sorted_entity_reference_fields = [];
       if (!empty($field_data)) {
         foreach ($field_data as $field_id => $field_value) {
-          $field_id = (substr_compare($field_id, '_name', -strlen('_name')) === 0) ? str_replace('_name', '', $field_id) : $field_id;
+          $field_id = preg_match('/\_name$/', $field_id) ? preg_replace('/\_name$/', '', $field_id) : $field_id;
           if (!in_array($field_id, $entity_reference_fields)) {
             $sorted_entity_reference_fields[$field_id] = $entity_reference_fields[$field_id];
           }
@@ -1331,7 +1331,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       ];
       foreach ($entity_reference_fields as $field_id => $field_label) {
         if (!empty($validated_entity_reference_fields[$field_id])) {
-          $field_id = (substr_compare($field_id, '_name', -strlen('_name')) === 0) ? str_replace('_name', '', $field_id) : $field_id;
+          $field_id = preg_match('/\_name$/', $field_id) ? preg_replace('/\_name$/', '', $field_id) : $field_id;
           $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['#attributes']['class'][] = 'draggable';
           $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'] = [
             '#type' => 'container',
