@@ -1798,6 +1798,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           $config['interface']['keyword']['label'] = $value['tabs']['filters']['interface_filters']['keyword']['label'] ?? '';
           $config['interface']['keyword']['placeholder'] = $value['tabs']['filters']['interface_filters']['keyword']['placeholder'] ?? '';
           if (!empty($settings['filters']['enable_keyword_selection']) && $settings['filters']['enable_keyword_selection']) {
+            // Retrieve only the enabled values and keys from checkboxes.
             $config['interface']['keyword']['fields'] = $value['tabs']['filters']['interface_filters']['keyword']['fields'] ? array_values(array_filter($value['tabs']['filters']['interface_filters']['keyword']['fields'])) : [];
             ;
           }
@@ -1923,7 +1924,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
    * @return array
    *   The error array list if exists.
    */
-  public function validateJson(string $json) {
+  protected function validateJson(string $json) {
     $errors = [];
     if (!empty($json)) {
       $json_object = json_decode($json);
@@ -1956,17 +1957,24 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
   /**
    * Get all index entity reference fields along with name value fields.
    *
+   * A UI helper function that populates the choose list with actual
+   * names/titles instead of the referenced fields' ids.
+   *
    * @return array|null
    *   The entity reference fields array, or NULL if the none have a name value.
    */
-  public function getValidatedIndexEntityReferenceFields() : array {
+  protected function getValidatedIndexEntityReferenceFields() : array {
+    // Retrieves all indexed string fields.
     $string_fields = $this->indexHelper->getIndexStringFields($this->index);
+    // Retrieves all indexed entity referenced fields.
     $entity_reference_fields = $this->indexHelper->getIndexEntityReferenceFields($this->index);
     $validated_entity_reference_fields = [];
     if (!empty($entity_reference_fields) && !empty($string_fields)) {
+      // Loop through the referenced fields and try to map to the associated string field.
       foreach ($entity_reference_fields as $field_id => $value) {
         if (!empty($string_fields[$field_id . '_name'])) {
-          $field_property_path = $this->indexHelper->getIndexStringFieldPropertyPath($this->index, $field_id . '_name');
+          // Used to retrieve the indexed field property path.
+          $field_property_path = $this->indexHelper->getIndexedFieldPropertyPath($this->index, $field_id . '_name');
           if ($field_property_path && strpos($field_property_path, $field_id . ':entity:') !== FALSE) {
             $validated_entity_reference_fields[$field_id] = $string_fields[$field_id . '_name'];
           }
@@ -1974,7 +1982,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       }
     }
     return $validated_entity_reference_fields;
-
   }
 
 }
