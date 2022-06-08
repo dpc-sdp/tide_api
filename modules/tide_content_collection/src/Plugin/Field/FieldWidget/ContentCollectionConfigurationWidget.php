@@ -1308,7 +1308,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $sorted_entity_reference_fields = [];
       if (!empty($field_data)) {
         foreach ($field_data as $field_id => $field_value) {
-          $field_id = str_ends_with($field_id, '_name') ? str_replace('_name', '', $field_id) : $field_id;
+          $field_id = (substr_compare($field_id, '_name', -strlen('_name')) === 0) ? str_replace('_name', '', $field_id) : $field_id;
           if (!in_array($field_id, $entity_reference_fields)) {
             $sorted_entity_reference_fields[$field_id] = $entity_reference_fields[$field_id];
           }
@@ -1331,7 +1331,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       ];
       foreach ($entity_reference_fields as $field_id => $field_label) {
         if (!empty($validated_entity_reference_fields[$field_id])) {
-          $field_id = str_ends_with($field_id, '_name') ? str_replace('_name', '', $field_id) : $field_id;
+          $field_id = (substr_compare($field_id, '_name', -strlen('_name')) === 0) ? str_replace('_name', '', $field_id) : $field_id;
           $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['#attributes']['class'][] = 'draggable';
           $element['tabs']['filters']['interface_filters']['advanced_filters']['items'][$field_id]['details'] = [
             '#type' => 'container',
@@ -1748,13 +1748,13 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           if (!empty($value['tabs']['content']['dateFilter']['startDateField']) || !empty($value['tabs']['content']['dateFilter']['endDateField'])) {
             $config['internal']['dateFilter']['criteria'] = $value['tabs']['content']['dateFilter']['criteria'] ?? '';
             if ($value['tabs']['content']['dateFilter']['criteria'] == 'range') {
-              $dateRangeStart = $value['tabs']['content']['dateFilter']['dateRange']['dateRangeStart'] ?? '';
-              if ($dateRangeStart instanceof DrupalDateTime) {
-                $config['internal']['dateFilter']['dateRangeStart'] = $dateRangeStart->format('c');
+              $date_range_start = $value['tabs']['content']['dateFilter']['dateRange']['dateRangeStart'] ?? '';
+              if ($date_range_start instanceof DrupalDateTime) {
+                $config['internal']['dateFilter']['dateRangeStart'] = $date_range_start->format('c');
               }
-              $dateRangeEnd = $value['tabs']['content']['dateFilter']['dateRange']['dateRangeEnd'] ?? '';
-              if ($dateRangeEnd instanceof DrupalDateTime) {
-                $config['internal']['dateFilter']['dateRangeEnd'] = $dateRangeEnd->format('c');
+              $date_range_end = $value['tabs']['content']['dateFilter']['dateRange']['dateRangeEnd'] ?? '';
+              if ($date_range_end instanceof DrupalDateTime) {
+                $config['internal']['dateFilter']['dateRangeEnd'] = $date_range_end->format('c');
               }
             }
           }
@@ -1800,7 +1800,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           if (!empty($settings['filters']['enable_keyword_selection']) && $settings['filters']['enable_keyword_selection']) {
             // Retrieve only the enabled values and keys from checkboxes.
             $config['interface']['keyword']['fields'] = $value['tabs']['filters']['interface_filters']['keyword']['fields'] ? array_values(array_filter($value['tabs']['filters']['interface_filters']['keyword']['fields'])) : [];
-            ;
           }
           else {
             $config['interface']['keyword']['fields'] = ['title'];
@@ -1924,7 +1923,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
    * @return array
    *   The error array list if exists.
    */
-  protected function validateJson(string $json) {
+  protected function validateJson(string $json) : array {
     $errors = [];
     if (!empty($json)) {
       $json_object = json_decode($json);
@@ -1963,14 +1962,15 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
    * @return array|null
    *   The entity reference fields array, or NULL if the none have a name value.
    */
-  protected function getValidatedIndexEntityReferenceFields() : array {
+  protected function getValidatedIndexEntityReferenceFields() : ?array {
     // Retrieves all indexed string fields.
     $string_fields = $this->indexHelper->getIndexStringFields($this->index);
     // Retrieves all indexed entity referenced fields.
     $entity_reference_fields = $this->indexHelper->getIndexEntityReferenceFields($this->index);
     $validated_entity_reference_fields = [];
     if (!empty($entity_reference_fields) && !empty($string_fields)) {
-      // Loop through the referenced fields and try to map to the associated string field.
+      // Attempt to map to the associated string field,
+      // by looping through the referenced fields.
       foreach ($entity_reference_fields as $field_id => $value) {
         if (!empty($string_fields[$field_id . '_name'])) {
           // Used to retrieve the indexed field property path.
