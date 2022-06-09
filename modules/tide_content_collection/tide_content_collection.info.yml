@@ -14,6 +14,10 @@ config_devel:
     - core.entity_view_display.paragraph.content_collection.default
     - core.entity_view_display.paragraph.content_collection.preview
     - field.field.paragraph.content_collection.field_content_collection_config
+    - field.field.paragraph.content_collection_enhanced.field_cc_enhanced_description
+    - field.field.paragraph.content_collection_enhanced.field_cc_enhanced_title
+    - field.storage.paragraph.field_cc_enhanced_description
+    - field.storage.paragraph.field_cc_enhanced_title
     - field.storage.paragraph.field_content_collection_config
     - jsonapi_extras.jsonapi_resource_config.paragraph--content_collection
     - paragraphs.paragraphs_type.content_collection
