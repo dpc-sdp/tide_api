@@ -848,7 +848,8 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             ];
             $field_filter['#title'] = $this->t('Add @label filters', ['@label' => strtolower($field_label)]);
             $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper'][$field_id] = $field_filter;
-            if ($this->module_handler->moduleExists('tide_site')) {
+            $module_handler = \Drupal::service('module_handler');
+            if ($module_handler->moduleExists('tide_site')) {
               if ($field_id === 'field_node_site') {
                 $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['#open'] = TRUE;
                 $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper'][$field_id]['#required'] = TRUE;
