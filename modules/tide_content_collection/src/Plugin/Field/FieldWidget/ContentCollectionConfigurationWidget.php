@@ -494,22 +494,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       }
     }
 
-    $element['title'] = [
-      '#title' => $this->t('Title'),
-      '#type' => 'textfield',
-      '#description' => $this->t('You can add a Heading 2 above your card collection (optional).'),
-      '#default_value' => $json_object['title'] ?? '',
-      '#weight' => 1,
-    ];
-
-    $element['description'] = [
-      '#title' => $this->t('Description'),
-      '#type' => 'text_format',
-      '#base_type' => 'textarea',
-      '#default_value' => $json_object['description'] ?? '',
-      '#weight' => 2,
-    ];
-
     if (!empty($settings['content']['enable_call_to_action']) && $settings['content']['enable_call_to_action']) {
       $element['callToAction'] = [
         '#type' => 'details',

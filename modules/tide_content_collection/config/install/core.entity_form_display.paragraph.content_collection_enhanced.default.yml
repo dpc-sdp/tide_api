@@ -2,17 +2,36 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.paragraph.content_collection_enhanced.field_cc_enhanced_description
+    - field.field.paragraph.content_collection_enhanced.field_cc_enhanced_title
     - field.field.paragraph.content_collection_enhanced.field_content_collection_config
     - paragraphs.paragraphs_type.content_collection_enhanced
   module:
+    - text
     - tide_content_collection
 id: paragraph.content_collection_enhanced.default
 targetEntityType: paragraph
 bundle: content_collection_enhanced
 mode: default
 content:
-  field_content_collection_config:
+  field_cc_enhanced_description:
+    weight: 1
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+    type: text_textarea
+    region: content
+  field_cc_enhanced_title:
     weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_content_collection_config:
+    weight: 2
     settings:
       content:
         enable_call_to_action: false

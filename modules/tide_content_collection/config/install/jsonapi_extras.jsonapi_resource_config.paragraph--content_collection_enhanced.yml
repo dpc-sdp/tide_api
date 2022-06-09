@@ -92,6 +92,18 @@ resourceFields:
     enhancer:
       id: ''
     disabled: false
+  field_cc_enhanced_description:
+    fieldName: field_cc_enhanced_description
+    publicName: field_cc_enhanced_description
+    enhancer:
+      id: ''
+    disabled: false
+  field_cc_enhanced_title:
+    fieldName: field_cc_enhanced_title
+    publicName: field_cc_enhanced_title
+    enhancer:
+      id: ''
+    disabled: false
   field_content_collection_config:
     fieldName: field_content_collection_config
     publicName: field_content_collection_config
