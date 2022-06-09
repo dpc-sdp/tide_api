@@ -503,7 +503,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     ];
 
     $element['description'] = [
-      '#title' => $this->t('Description (optional)'),
+      '#title' => $this->t('Description'),
       '#type' => 'text_format',
       '#base_type' => 'textarea',
       '#default_value' => $json_object['description'] ?? '',
@@ -1826,10 +1826,12 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             $config['interface']['keyword']['fields'] = $value['tabs']['filters']['interface_filters']['keyword']['fields'] ? array_values(array_filter($value['tabs']['filters']['interface_filters']['keyword']['fields'])) : [];
           }
           else {
-            $config['interface']['keyword']['fields'] = ['title'];
+            $config['interface']['keyword']['fields'] = [
+              'title',
+              'field_landing_page_summary',
+            ];
           }
         }
-
         if (!empty($value['tabs']['filters']['interface_filters']['advanced_filters']['items'])) {
           $advanced_filters = array_keys($value['tabs']['filters']['interface_filters']['advanced_filters']['items']);
           if (!empty($advanced_filters)) {
