@@ -1,0 +1,24 @@
+name: Tide Content Collection
+type: module
+description: 'Provides automated content collection component for Tide Drupal 8 distribution.'
+package: Tide
+core_version_requirement: ^8.9 || ^9
+dependencies:
+  - dpc-sdp:tide_core
+  - dpc-sdp:tide_api
+  - dpc-sdp:tide_search
+  - jsonapi_extras:jsonapi_extras
+config_devel:
+  install:
+    - core.entity_form_display.paragraph.content_collection.default
+    - core.entity_view_display.paragraph.content_collection.default
+    - core.entity_view_display.paragraph.content_collection.preview
+    - field.field.paragraph.content_collection.field_content_collection_config
+    - field.field.paragraph.content_collection_enhanced.field_cc_enhanced_description
+    - field.field.paragraph.content_collection_enhanced.field_cc_enhanced_title
+    - field.storage.paragraph.field_cc_enhanced_description
+    - field.storage.paragraph.field_cc_enhanced_title
+    - field.storage.paragraph.field_content_collection_config
+    - jsonapi_extras.jsonapi_resource_config.paragraph--content_collection
+    - paragraphs.paragraphs_type.content_collection
+  optional: { }

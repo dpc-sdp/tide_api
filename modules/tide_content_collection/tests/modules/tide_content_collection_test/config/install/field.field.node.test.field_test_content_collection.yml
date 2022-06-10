@@ -1,0 +1,36 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - paragraphs.paragraphs_type.content_collection
+  module:
+    - entity_reference_revisions
+  enforced:
+    config:
+      - field.storage.node.field_test_content_collection
+      - node.type.test
+    module:
+      - tide_test
+      - tide_content_collection
+      - tide_content_collection_test
+id: node.test.field_test_content_collection
+field_name: field_test_content_collection
+entity_type: node
+bundle: test
+label: 'Content Collection Paragraphs'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:paragraph'
+  handler_settings:
+    negate: 0
+    target_bundles:
+      content_collection: content_collection
+    target_bundles_drag_drop:
+      content_collection:
+        enabled: true
+        weight: 0
+field_type: entity_reference_revisions

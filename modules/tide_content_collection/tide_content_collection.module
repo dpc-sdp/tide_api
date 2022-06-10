@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * @file
+ * Contains tide_content_collection.module.
+ */
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\paragraphs\ParagraphInterface;
+
+/**
+ * Implements hook_ENTITY_TYPE_access().
+ */
+function tide_content_collection_paragraph_access(ParagraphInterface $entity, $operation, AccountInterface $account) {
+  $type = $entity->getType();
+  if ($type === 'content_collection') {
+    if (in_array($operation, ['update', 'delete']) && !$account->hasPermission('access content_collection paragraph')) {
+      return AccessResult::forbidden()->cachePerPermissions();
+    }
+  }
+  return AccessResult::neutral()->cachePerPermissions();
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_create_access().
+ */
+function tide_content_collection_paragraph_create_access(AccountInterface $account = NULL, array $context = [], $entity_bundle = NULL) {
+  $type = $entity_bundle;
+  if ($type === 'content_collection' && !$account->hasPermission('access content_collection paragraph')) {
+    return AccessResult::forbidden()->cachePerPermissions();
+  }
+  return AccessResult::neutral()->cachePerPermissions();
+}

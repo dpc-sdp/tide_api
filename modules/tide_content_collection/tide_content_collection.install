@@ -1,0 +1,87 @@
+<?php
+
+/**
+ * @file
+ * Tide content collection install file.
+ */
+
+use Drupal\paragraphs\Entity\ParagraphsType;
+use Drupal\user\Entity\Role;
+
+/**
+ * Implements hook_install().
+ */
+function tide_content_collection_install($is_syncing) {
+  module_load_include('inc', 'tide_core', 'includes/helpers');
+  // Get icons.
+  $icon_dir = drupal_get_path('module', 'tide_content_collection') . DIRECTORY_SEPARATOR . 'icons';
+  // Changing icons.
+  $icon_filename = $icon_dir . DIRECTORY_SEPARATOR . 'content_collection.svg';
+  _tide_set_paragraph_type_icon('content_collection', $icon_filename);
+
+  // Set content_collection permission to site_admin.
+  _assign_content_collection_perm_site_admin();
+}
+
+/**
+ * Updates to content_collection.
+ *
+ * Update content_collection paragraph label.
+ * Installs new content_collection_enhanced paragraph type.
+ * Assign access content_collection permission to site_admin.
+ */
+function tide_content_collection_update_8001() {
+  /** @var \Drupal\paragraphs\Entity\ParagraphsType $paragraph_type */
+  $paragraph_type = ParagraphsType::load('content_collection');
+  if ($paragraph_type) {
+    $paragraph_type->set('label', 'Custom collection');
+    $paragraph_type->set('description', 'A flexible version of the ’content collection’ component.  Customise a collection of cards and other content with filters and settings.');
+    $paragraph_type->save();
+  }
+
+  $configs = [
+    'paragraphs.paragraphs_type.content_collection_enhanced' => 'paragraphs_type',
+    'field.field.paragraph.content_collection_enhanced.field_content_collection_config' => 'field_config',
+    'field.field.paragraph.content_collection_enhanced.field_cc_enhanced_description' => 'field_config',
+    'field.field.paragraph.content_collection_enhanced.field_cc_enhanced_title' => 'field_config',
+    'field.storage.paragraph.field_cc_enhanced_description' => 'field_storage_config',
+    'field.storage.paragraph.field_cc_enhanced_title' => 'field_storage_config',
+    'core.entity_view_display.paragraph.content_collection_enhanced.default' => 'entity_view_display',
+    'core.entity_form_display.paragraph.content_collection_enhanced.default' => 'entity_form_display',
+  ];
+
+  module_load_include('inc', 'tide_core', 'includes/helpers');
+  $config_location = [drupal_get_path('module', 'tide_content_collection') . '/config/install'];
+  // Check if field already exported to config/sync.
+  foreach ($configs as $config => $type) {
+    $config_read = _tide_read_config($config, $config_location, TRUE);
+    $storage = \Drupal::entityTypeManager()->getStorage($type);
+    $id = $storage->getIDFromConfigName($config, $storage->getEntityType()->getConfigPrefix());
+    if ($storage->load($id) == NULL) {
+      $config_entity = $storage->createFromStorageRecord($config_read);
+      $config_entity->save();
+    }
+  }
+
+  // Add paragraph type to JSON.
+  $json_field = 'jsonapi_extras.jsonapi_resource_config.paragraph--content_collection_enhanced';
+  $config_storage = \Drupal::service('config.storage');
+  $config_read = _tide_read_config($json_field, $config_location, TRUE);
+  $config_storage->write($json_field, $config_read);
+
+  // Set content_collection permission to site_admin.
+  _assign_content_collection_perm_site_admin();
+}
+
+/**
+ * Assign access content_collection permission to site_admin.
+ */
+function _assign_content_collection_perm_site_admin() {
+  $permission = 'access content_collection paragraph';
+  /** @var \Drupal\user\RoleInterface $role */
+  $role = Role::load('site_admin');
+  if ($role) {
+    $role->grantPermission($permission);
+    $role->save();
+  }
+}
