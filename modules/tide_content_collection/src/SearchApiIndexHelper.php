@@ -98,10 +98,6 @@ class SearchApiIndexHelper implements SearchApiIndexHelperInterface {
       return FALSE;
     }
     $entity_types = $index->getEntityTypes();
-    if (count($entity_types) > 1) {
-      return FALSE;
-    }
-
     $entity_type = reset($entity_types);
     return !($entity_type !== 'node');
   }
