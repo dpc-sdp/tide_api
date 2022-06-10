@@ -1,0 +1,25 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.content_collection.field_content_collection_config
+    - paragraphs.paragraphs_type.content_collection
+  module:
+    - tide_content_collection
+id: paragraph.content_collection.default
+targetEntityType: paragraph
+bundle: content_collection
+mode: default
+content:
+  field_content_collection_config:
+    type: content_collection_configuration_raw
+    weight: 0
+    region: content
+    settings:
+      rows: '5'
+      placeholder: ''
+      schema_validation: '1'
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true
