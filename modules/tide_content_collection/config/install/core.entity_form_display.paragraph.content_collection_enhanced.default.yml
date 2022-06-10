@@ -1,0 +1,64 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.content_collection_enhanced.field_cc_enhanced_description
+    - field.field.paragraph.content_collection_enhanced.field_cc_enhanced_title
+    - field.field.paragraph.content_collection_enhanced.field_content_collection_config
+    - paragraphs.paragraphs_type.content_collection_enhanced
+  module:
+    - text
+    - tide_content_collection
+id: paragraph.content_collection_enhanced.default
+targetEntityType: paragraph
+bundle: content_collection_enhanced
+mode: default
+content:
+  field_cc_enhanced_description:
+    weight: 1
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+    type: text_textarea
+    region: content
+  field_cc_enhanced_title:
+    weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_content_collection_config:
+    weight: 2
+    settings:
+      content:
+        enable_call_to_action: false
+        internal:
+          contentTypes:
+            enabled: true
+            allowed_values: {  }
+            default_values: {  }
+          field_topic:
+            enabled: true
+            show_filter_operator: false
+          field_tags:
+            enabled: false
+            show_filter_operator: false
+          field_node_primary_site:
+            enabled: true
+            show_filter_operator: false
+          field_node_site:
+            enabled: true
+            show_filter_operator: false
+      filters:
+        enable_keyword_selection: false
+        allowed_advanced_filters:
+          - field_topic
+    third_party_settings: {  }
+    type: content_collection_configuration_ui
+    region: content
+hidden:
+  created: true
+  status: true

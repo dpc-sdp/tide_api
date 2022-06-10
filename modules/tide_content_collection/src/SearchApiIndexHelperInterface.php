@@ -169,6 +169,19 @@ interface SearchApiIndexHelperInterface {
   public function buildEntityReferenceFieldFilter(IndexInterface $index, string $field_id, array $default_values = []) : ?array;
 
   /**
+   * Get the entity reference field information.
+   *
+   * @param \Drupal\search_api\IndexInterface $index
+   *   The search api index.
+   * @param string $field_id
+   *   The index field id.
+   *
+   * @return array|null
+   *   The entity reference field, or NULL if the field does not exist.
+   */
+  public function getEntityReferenceFieldInfo(IndexInterface $index, string $field_id) : ?array;
+
+  /**
    * Get the SAPI Index field ID of a node field.
    *
    * @param \Drupal\search_api\IndexInterface $index
@@ -221,6 +234,32 @@ interface SearchApiIndexHelperInterface {
   public function getIndexIntegerFields(IndexInterface $index, array $excludes = []) : array;
 
   /**
+   * Get all index string fields.
+   *
+   * @param \Drupal\search_api\IndexInterface $index
+   *   The search index.
+   * @param string[] $excludes
+   *   The field IDs to exclude.
+   *
+   * @return array
+   *   The list of string fields.
+   */
+  public function getIndexStringFields(IndexInterface $index, array $excludes = []) : array;
+
+  /**
+   * Get all index text fields.
+   *
+   * @param \Drupal\search_api\IndexInterface $index
+   *   The search index.
+   * @param string[] $excludes
+   *   The field IDs to exclude.
+   *
+   * @return array
+   *   The list of text fields.
+   */
+  public function getIndexTextFields(IndexInterface $index, array $excludes = []) : array;
+
+  /**
    * Returns an array without the excluded keys.
    *
    * @param array $array
@@ -269,5 +308,18 @@ interface SearchApiIndexHelperInterface {
    *   The index ID on the server, NULL upon failure.
    */
   public function getServerIndexId($index) : ?string;
+
+  /**
+   * Retrieve the indexed field property path.
+   *
+   * @param \Drupal\search_api\IndexInterface $index
+   *   The index.
+   * @param string $field_id
+   *   The index field ID.
+   *
+   * @return string|null
+   *   The index field property path, NULL upon failure.
+   */
+  public function getIndexedFieldPropertyPath(IndexInterface $index, string $field_id) : ?string;
 
 }
