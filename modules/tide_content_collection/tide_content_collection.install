@@ -41,11 +41,11 @@ function tide_content_collection_update_8001() {
 
   $configs = [
     'paragraphs.paragraphs_type.content_collection_enhanced' => 'paragraphs_type',
+    'field.storage.paragraph.field_cc_enhanced_description' => 'field_storage_config',
+    'field.storage.paragraph.field_cc_enhanced_title' => 'field_storage_config',
     'field.field.paragraph.content_collection_enhanced.field_content_collection_config' => 'field_config',
     'field.field.paragraph.content_collection_enhanced.field_cc_enhanced_description' => 'field_config',
     'field.field.paragraph.content_collection_enhanced.field_cc_enhanced_title' => 'field_config',
-    'field.storage.paragraph.field_cc_enhanced_description' => 'field_storage_config',
-    'field.storage.paragraph.field_cc_enhanced_title' => 'field_storage_config',
     'core.entity_view_display.paragraph.content_collection_enhanced.default' => 'entity_view_display',
     'core.entity_form_display.paragraph.content_collection_enhanced.default' => 'entity_form_display',
   ];
