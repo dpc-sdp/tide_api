@@ -836,7 +836,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             if ($module_handler->moduleExists('tide_site')) {
               if ($field_id === 'field_node_site') {
                 $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['#open'] = TRUE;
-                $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper'][$field_id]['#required'] = TRUE;
+                $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['#description'] = $this->t('Add your choice of @label for this content collection. You can choose more than 1. Start typing to choose a topic. Type a comma between topics. If you leave this field blank, ALL topics will be included.', ['@label' => strtolower($field_label)]);
               }
             }
             if ($settings['content']['internal'][$field_id]['show_filter_operator']) {
