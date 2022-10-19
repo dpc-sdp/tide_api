@@ -14,7 +14,7 @@ use Drupal\user\Entity\Role;
 function tide_content_collection_install($is_syncing) {
   module_load_include('inc', 'tide_core', 'includes/helpers');
   // Get icons.
-  $icon_dir = drupal_get_path('module', 'tide_content_collection') . DIRECTORY_SEPARATOR . 'icons';
+  $icon_dir = \Drupal::service('extension.list.module')->getPath('tide_content_collection') . DIRECTORY_SEPARATOR . 'icons';
   // Changing icons.
   $icon_filename = $icon_dir . DIRECTORY_SEPARATOR . 'content_collection.svg';
   _tide_set_paragraph_type_icon('content_collection', $icon_filename);
@@ -51,7 +51,7 @@ function tide_content_collection_update_8001() {
   ];
 
   module_load_include('inc', 'tide_core', 'includes/helpers');
-  $config_location = [drupal_get_path('module', 'tide_content_collection') . '/config/install'];
+  $config_location = [\Drupal::service('extension.list.module')->getPath('tide_content_collection') . '/config/install'];
   // Check if field already exported to config/sync.
   foreach ($configs as $config => $type) {
     $config_read = _tide_read_config($config, $config_location, TRUE);

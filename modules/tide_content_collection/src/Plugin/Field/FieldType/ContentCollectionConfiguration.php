@@ -88,7 +88,7 @@ class ContentCollectionConfiguration extends StringLongItem {
       }
     }
     if (!$schema_data) {
-      $schema_file = drupal_get_path('module', 'tide_content_collection') . DIRECTORY_SEPARATOR . 'json' . DIRECTORY_SEPARATOR . 'schema.json';
+      $schema_file = \Drupal::service('extension.list.module')->getPath('tide_content_collection') . DIRECTORY_SEPARATOR . 'json' . DIRECTORY_SEPARATOR . 'schema.json';
       if (@file_exists($schema_file)) {
         $schema_data = file_get_contents($schema_file);
         if ($schema_data === FALSE) {
