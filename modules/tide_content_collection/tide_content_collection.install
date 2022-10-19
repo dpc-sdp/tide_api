@@ -85,3 +85,15 @@ function _assign_content_collection_perm_site_admin() {
     $role->save();
   }
 }
+
+/**
+ * Hide JSON raw data from dislaying from content.
+ */
+function tide_content_collection_update_8002() {
+  $config = \Drupal::configFactory()
+    ->getEditable('core.entity_view_display.paragraph.content_collection.default');
+  if ($config) {
+    $config->set('content.field_content_collection_config.settings.raw_json', '0');
+    $config->save();
+  }
+}
