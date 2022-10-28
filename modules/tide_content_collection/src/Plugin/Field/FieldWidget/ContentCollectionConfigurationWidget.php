@@ -838,9 +838,8 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
                 $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['#open'] = TRUE;
                 $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['#description'] =
                   $this->t(
-                    'Add your choice of @label for this content collection. You can choose more than 1. Start typing to choose a @label. Type a comma between @labels. If you leave this field blank, ALL @labels will be included.', [
+                    'Add @label section filters to display ONLY content from specific @label sections. Start typing to choose a @label section. Type a comma between @label sections. If you leave this field blank, ALL @label sections will be included.', [
                       '@label' => strtolower($field_label),
-                      '@labels' => strtolower($field_label . 's'),
                     ]);
               }
             }
