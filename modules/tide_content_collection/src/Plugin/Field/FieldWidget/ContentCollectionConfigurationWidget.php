@@ -836,7 +836,11 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             if ($module_handler->moduleExists('tide_site')) {
               if ($field_id === 'field_node_site') {
                 $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['#open'] = TRUE;
-                $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper'][$field_id]['#required'] = TRUE;
+                $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['#description'] =
+                  $this->t(
+                    'Add @label section filters to display ONLY content from specific @label sections. Start typing to choose a @label section. Type a comma between @label sections. If you leave this field blank, ALL @label sections will be included.', [
+                      '@label' => strtolower($field_label),
+                    ]);
               }
             }
             if ($settings['content']['internal'][$field_id]['show_filter_operator']) {
