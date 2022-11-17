@@ -33,7 +33,7 @@ content:
     weight: 0
     label: above
     settings:
-      raw_json: '1'
+      raw_json: '0'
     third_party_settings: {  }
     type: content_collection_configuration_raw
     region: content
