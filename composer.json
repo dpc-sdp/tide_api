@@ -1,29 +1,29 @@
 {
-    "name": "dpc-sdp/tide_api",
-    "description": "Content API for Tide distribution.",
-    "type": "drupal-module",
-    "license": "GPL-2.0-or-later",
-    "require": {
-        "dpc-sdp/tide_core": "^3.1.12",
-        "drupal/jsonapi_extras": "^3.8",
-        "drupal/schemata": "^1.0-alpha2"
-    },
-    "extra": {
-        "enable-patching": true,
-        "composer-exit-on-patch-failure": true,
-        "patches": {
-            "drupal/core": {
-                "Menu content is not accessible via jsonapi - https://www.drupal.org/node/2915792": "https://www.drupal.org/files/issues/menu_link_content-view-permissions-2915792.patch"
-            },
-            "drupal/jsonapi_extras": {
-              "Make max value of page[limit] configurable per entity/bundle - https://www.drupal.org/project/jsonapi_extras/issues/2884292#comment-14794882": "https://www.drupal.org/files/issues/2022-11-21/max_page_limit_configuration-2884292-33.patch"
-            }
-        }
-    },
-    "repositories": {
-        "drupal": {
-            "type": "composer",
-            "url": "https://packages.drupal.org/8"
-        }
+  "description": "Content API for Tide distribution.",
+  "extra": {
+    "composer-exit-on-patch-failure": true,
+    "enable-patching": true,
+    "patches": {
+      "drupal/core": {
+        "Menu content is not accessible via jsonapi - https://www.drupal.org/node/2915792": "https://www.drupal.org/files/issues/menu_link_content-view-permissions-2915792.patch"
+      },
+      "drupal/jsonapi_extras": {
+        "Make max value of page[limit] configurable per entity/bundle - https://www.drupal.org/project/jsonapi_extras/issues/2884292#comment-14794882": "https://www.drupal.org/files/issues/2022-11-21/max_page_limit_configuration-2884292-33.patch"
+      }
     }
+  },
+  "license": "GPL-2.0-or-later",
+  "name": "dpc-sdp/tide_api",
+  "repositories": {
+    "drupal": {
+      "type": "composer",
+      "url": "https://packages.drupal.org/8"
+    }
+  },
+  "require": {
+    "dpc-sdp/tide_core": "dev-reference",
+    "drupal/jsonapi_extras": "^3.8",
+    "drupal/schemata": "^1.0-alpha2"
+  },
+  "type": "drupal-module"
 }
