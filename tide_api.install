@@ -44,3 +44,12 @@ function tide_api_update_8001() {
   $jsonapi_settings->set('read_only', FALSE)
     ->save(TRUE);
 }
+
+/**
+ * Activate jsonapi_menu_items
+ */
+function tide_api_update_8002() {
+  \Drupal::service('module_installer')->install([
+    'jsonapi_menu_items'
+  ], TRUE);
+}
