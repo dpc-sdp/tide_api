@@ -46,10 +46,10 @@ function tide_api_update_8001() {
 }
 
 /**
- * Activate jsonapi_menu_items
+ * Activate jsonapi_menu_items.
  */
 function tide_api_update_8002() {
   \Drupal::service('module_installer')->install([
-    'jsonapi_menu_items'
+    'jsonapi_menu_items',
   ], TRUE);
 }
