@@ -1,0 +1,112 @@
+<?php
+
+/**
+ * @file
+ * Install file.
+ */
+
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
+
+/**
+ * Implements hook_install().
+ */
+function tide_content_collection_test_install() {
+  $field_name = 'field_test_content_collection';
+
+  // Add the field to form display of test content type.
+  /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $form_display */
+  $form_display = EntityFormDisplay::load('node.test.default');
+  if ($form_display) {
+    $component = [
+      'type' => 'entity_reference_paragraphs',
+      'weight' => 139,
+      'settings' => [
+        'title' => t('Content collection'),
+        'title_plural' => t('Content collections'),
+        'edit_mode' => 'open',
+        'add_mode' => 'dropdown',
+        'form_display_mode' => 'default',
+        'default_paragraph_type' => 'content_collection',
+      ],
+      'third_party_settings' => [],
+      'region' => 'content',
+    ];
+    $form_display->setComponent($field_name, $component);
+    $form_display->save();
+  }
+
+  // Add the field to node view display of test content type.
+  /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $view_display */
+  $view_display = EntityViewDisplay::load('node.test.default');
+  if ($view_display) {
+    $component = [
+      'type' => 'entity_reference_revisions_entity_view',
+      'weight' => 106,
+      'label' => 'above',
+      'settings' => [
+        'view_mode' => 'default',
+        'link' => '',
+      ],
+      'third_party_settings' => [],
+      'region' => 'content',
+    ];
+    $view_display->setComponent($field_name, $component);
+    $view_display->save();
+  }
+
+  // Add the field to JSON:API resource of test content type.
+  $config_factory = \Drupal::configFactory();
+  $json_config = $config_factory->getEditable('jsonapi_extras.jsonapi_resource_config.node--test');
+  if (!$json_config->isNew()) {
+    $json_resource_fields = $json_config->get('resourceFields');
+    if (!isset($json_resource_fields[$field_name])) {
+      $json_resource_fields[$field_name] = [
+        'fieldName' => $field_name,
+        'publicName' => $field_name,
+        'enhancer' => [
+          'id' => '',
+        ],
+        'disabled' => FALSE,
+      ];
+
+      $json_config->set('resourceFields', $json_resource_fields);
+      $json_config->save();
+    }
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function tide_content_collection_test_uninstall() {
+  $field_name = 'field_test_content_collection';
+
+  // Remove the field from form display of test content type.
+  /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $form_display */
+  $form_display = EntityFormDisplay::load('node.test.default');
+  if ($form_display && $form_display->getComponent($field_name) !== NULL) {
+    $form_display->removeComponent($field_name);
+    $form_display->save();
+  }
+
+  // Remove the field from node view display of test content type.
+  /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $view_display */
+  $view_display = EntityViewDisplay::load('node.test.default');
+  if ($view_display && $view_display->getComponent($field_name) !== NULL) {
+    $view_display->removeComponent($field_name);
+    $view_display->save();
+  }
+
+  // Remove the field from JSON:API resource of test content type.
+  $config_factory = \Drupal::configFactory();
+  $json_config = $config_factory->getEditable('jsonapi_extras.jsonapi_resource_config.node--test');
+  if (!$json_config->isNew()) {
+    $json_resource_fields = $json_config->get('resourceFields');
+    if (isset($json_resource_fields[$field_name])) {
+      unset($json_resource_fields[$field_name]);
+      $json_config->set('resourceFields', $json_resource_fields);
+      $json_config->save();
+    }
+  }
+}
