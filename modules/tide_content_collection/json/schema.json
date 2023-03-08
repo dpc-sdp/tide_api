@@ -50,6 +50,10 @@
       "oneOf": [
         {
           "properties": {
+            "managedSort": {
+              "type": "boolean",
+              "description": "Enable sort to be manually configured."
+            },
             "contentIds": {
               "type": "array",
               "description": "Array of node ids for content",
@@ -127,12 +131,12 @@
                 "dateRangeStart": {
                   "type": "string",
                   "description": "Start and end dates to test against. Formatted as ISO 8601",
-                  "pattern": "\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)"
+                  "pattern": "\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+([+-][0-2]\\d:[0-5]\\d|Z)"
                 },
                 "dateRangeEnd": {
                   "type": "string",
                   "description": "Start and end dates to test against. Formatted as ISO 8601",
-                  "pattern": "\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)"
+                  "pattern": "\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+([+-][0-2]\\d:[0-5]\\d|Z)"
                 }
               },
               "additionalProperties": false
