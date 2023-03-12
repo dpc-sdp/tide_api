@@ -130,7 +130,7 @@ class ShareLinkTokenController extends ControllerBase {
 
     if ($node && $node instanceof NodeInterface) {
       // Attempt to retrieve the node revision.
-      $vid = $this->routeMatch->getParameter('node_revision');
+      $vid = $this->routeMatch->getRawParameter('node_revision');
       if ($vid) {
         $revision = $this->entityTypeManager()->getStorage('node')->loadRevision($vid);
         if ($revision && $revision->id() === $node->id()) {
