@@ -130,14 +130,12 @@ class ShareLinkTokenController extends ControllerBase {
 
     if ($node && $node instanceof NodeInterface) {
       // Attempt to retrieve the node revision.
-      $vid = $this->routeMatch->getParameter('node_revision');
-      if ($vid) {
-        $revision = $this->entityTypeManager()->getStorage('node')->loadRevision($vid);
-        if ($revision && $revision->id() === $node->id()) {
-          return AccessResult::allowedIf($revision->access('view', $account))
-            ->addCacheableDependency($revision)
-            ->addCacheableDependency($account);
-        }
+      // This should return the id directly.
+      $revision = $this->routeMatch->getParameter('node_revision');
+      if ($revision && $revision === $node->id()) {
+        return AccessResult::allowedIf($revision->access('view', $account))
+          ->addCacheableDependency($revision)
+          ->addCacheableDependency($account);
       }
       else {
         return AccessResult::allowedIf($node->access('view', $account))
