@@ -1,6 +1,6 @@
 # To ignore OS temporary files use global .gitignore
 # https://help.github.com/articles/ignoring-files/#create-a-global-gitignore
-
+.idea
 /composer.lock
 /composer.build.json
 /composer.build.lock
