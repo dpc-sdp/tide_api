@@ -787,16 +787,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
    *   The settings of the listing.
    */
   protected function buildContentTabAdvancedFilters(FieldItemListInterface $items, $delta, array &$element, array &$form, FormStateInterface $form_state, array $configuration = NULL, array $json_object = NULL, array $settings = []) {
-    $element['tabs']['content']['show_advanced_filters'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Show advanced filters.'),
-      '#description' => $this->t('Show/hide additional tags to filter the content displayed.'),
-      '#default_value' => TRUE,
-      '#access' => TRUE,
-      '#weight' => 4,
-      '#required' => TRUE,
-    ];
-
     $element['tabs']['content']['advanced_filters'] = [
       '#type' => 'details',
       '#title' => $this->t('Advanced filters'),
@@ -805,11 +795,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#access' => TRUE,
       '#group_name' => 'tabs_content_advanced_filters',
       '#weight' => 5,
-      '#states' => [
-        'visible' => [
-          ':input[name="' . $this->getFormStatesElementName('tabs|content|show_advanced_filters', $items, $delta, $element) . '"]' => ['checked' => TRUE],
-        ],
-      ],
     ];
 
     // Generate all entity reference filters.
@@ -821,7 +806,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           $default_values = $json_object['internal']['contentFields'][$field_id]['values'] ?? [];
           $field_filter = $this->indexHelper->buildEntityReferenceFieldFilter($this->index, $field_id, $default_values);
           if ($field_filter) {
-            $element['tabs']['content']['show_advanced_filters']['#access'] = TRUE;
             $element['tabs']['content']['advanced_filters']['#access'] = TRUE;
             $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper'] = [
               '#type' => 'details',
@@ -848,7 +832,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
             }
             if (isset($json_object['internal']['contentFields'][$field_id]['values'])) {
               $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['#open'] = TRUE;
-              $element['tabs']['content']['show_advanced_filters']['#default_value'] = TRUE;
             }
           }
         }
@@ -900,7 +883,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         }
         $index_field = $this->index->getField($field_id);
         if ($index_field) {
-          $element['tabs']['content']['show_advanced_filters']['#access'] = TRUE;
           $element['tabs']['content']['advanced_filters']['#access'] = TRUE;
           $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper'] = [
             '#type' => 'details',
@@ -916,7 +898,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
           unset($field_filter['#disable_filter_operator']);
           if (isset($json_object['internal']['contentFields'][$field_id]['values'])) {
             $element['tabs']['content']['advanced_filters'][$field_id . '_wrapper']['#open'] = TRUE;
-            $element['tabs']['content']['show_advanced_filters']['#default_value'] = TRUE;
           }
         }
       }
