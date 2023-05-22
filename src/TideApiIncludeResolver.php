@@ -4,33 +4,26 @@ namespace Drupal\tide_api;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\jsonapi\Access\EntityAccessChecker;
+use Drupal\jsonapi\IncludeResolver;
 use Drupal\jsonapi\JsonApiResource\IncludedData;
 use Drupal\jsonapi\JsonApiResource\ResourceObject;
 use Drupal\jsonapi\JsonApiResource\ResourceObjectData;
 use Drupal\jsonapi\ResourceType\ResourceType;
 
 /**
- * Resolves included resources for an entity or collection of entities.
- *
- * @internal JSON:API maintains no PHP API since its API is the HTTP API. This
- *   class may change at any time and this will break any dependencies on it.
- *
- * @see https://www.drupal.org/project/drupal/issues/3032787
- * @see jsonapi.api.php
+ * {@inheritdoc}
  */
 class TideApiIncludeResolver extends IncludeResolver {
 
   /**
    * Original service object.
-   *
-   * @var \Drupal\jsonapi\IncludeResolver
    */
-  protected $innerService;
+  protected IncludeResolver $innerService;
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(\Drupal\jsonapi\IncludeResolver $original_include_resolver, EntityTypeManagerInterface $entity_type_manager, EntityAccessChecker $entity_access_checker) {
+  public function __construct(IncludeResolver $original_include_resolver, EntityTypeManagerInterface $entity_type_manager, EntityAccessChecker $entity_access_checker) {
     $this->innerService = $original_include_resolver;
     parent::__construct($entity_type_manager, $entity_access_checker);
   }
@@ -93,4 +86,5 @@ class TideApiIncludeResolver extends IncludeResolver {
     $flattened_paths = array_reduce($internal_paths, 'array_merge', []);
     return $flattened_paths;
   }
+
 }

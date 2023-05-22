@@ -13,14 +13,15 @@ use Drupal\jsonapi\Context\FieldResolver;
 use Drupal\jsonapi\ResourceType\ResourceType;
 use Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface;
 
+/**
+ * {@inheritdoc}
+ */
 class TideApiFieldResolver extends FieldResolver {
 
   /**
    * Original service object.
-   *
-   * @var \Drupal\jsonapi\Context\FieldResolver
    */
-  protected $innerService;
+  protected FieldResolver $innerService;
 
   /**
    * {@inheritdoc}
@@ -77,4 +78,5 @@ class TideApiFieldResolver extends FieldResolver {
       return array_merge([$internal_field_name], explode('.', $possibility));
     }, $resolved_as_strings);
   }
+
 }
