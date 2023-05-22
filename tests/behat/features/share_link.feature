@@ -37,6 +37,14 @@ Feature: Share Link
     And the JSON node "data.relationships.shared_node.data.type" should be equal to "node--test"
     And the JSON node "data.relationships.shared_node.data.id" should be equal to "99999999-aaaa-bbbb-ccc-000000000000"
 
+    # Fetch the relationship of the node using include
+    When I send a GET request to "api/v1/share_link/99999999-aaaa-bbbb-ccc-000000000001/999999?include=node"
+    Then the response code should be 200
+    And the response should be in JSON
+    And the JSON node "data" should exist
+    And the JSON node "data.type" should be equal to "share_link_token--share_link_token"
+    And the JSON node "data.id" should be equal to "99999999-aaaa-bbbb-ccc-000000000001"
+
     # Retrieve the draft with Share Link token header.
     When I set "X-Share-Link-Token" header equal to "99999999-aaaa-bbbb-ccc-000000000001"
     And I send a GET request to "api/v1/node/test/99999999-aaaa-bbbb-ccc-000000000000"
