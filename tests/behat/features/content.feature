@@ -31,7 +31,7 @@ Feature: Page
     And the JSON node "data.id" should be equal to "99999999-aaaa-bbbb-ccc-000000000000"
 
     # Validate that a rubbish include request returns 200 OK
-    When I send a GET request to "api/v1/node/test/99999999-aaaa-bbbb-ccc-000000000000?include=node,abcd1234"
+    When I send a GET request to "api/v1/node/test/99999999-aaaa-bbbb-ccc-000000000000?include=abcd1234"
     Then the response code should be 200
     And the response should be in JSON
     And the JSON node "links.self" should exist
@@ -39,6 +39,7 @@ Feature: Page
     And the JSON node "data" should exist
     And the JSON node "data.type" should be equal to "node--test"
     And the JSON node "data.id" should be equal to "99999999-aaaa-bbbb-ccc-000000000000"
+    And the JSON node "included" should not exist
 
     When I send a GET request to "api/v1/node/test?sort=-created"
     Then the response code should be 200
