@@ -16,7 +16,7 @@ Please follow these rules:
 No need to remove these lines - they are comments.
 -->
 
-**JIRA issue:** https://digital-vic.atlassian.net/browse/SUPSSP-
+**JIRA issue:** https://digital-vic.atlassian.net/browse/SDPAP-
 
 ### Changed
 
