@@ -53,3 +53,13 @@ function tide_api_update_8002() {
     'jsonapi_menu_items',
   ], TRUE);
 }
+
+/**
+ * Disable jsonapi file resource.
+ */
+function tide_api_update_8003() {
+  $config_factory = \Drupal::configFactory();
+  $jsonapi_settings = $config_factory->getEditable('jsonapi_extras.jsonapi_resource_config.file--file');
+  $jsonapi_settings->set('disabled', TRUE)
+    ->save(TRUE);
+}
