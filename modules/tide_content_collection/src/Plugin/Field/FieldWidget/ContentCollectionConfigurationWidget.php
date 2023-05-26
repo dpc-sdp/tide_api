@@ -1115,6 +1115,25 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         ],
       ],
     ];
+
+    $element['tabs']['layout']['display']['card_number'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Number of results'),
+      '#description' => $this->t('Select the maximum number of cards to be shown in this collection.'),
+      '#default_value' => $json_object['interface']['display']['resultComponent']['card_number'] ?? '3',
+      '#options' => [
+        '3' => $this->t('3'),
+        '6' => $this->t('6'),
+        '9' => $this->t('9'),
+      ],
+      '#required' => TRUE,
+      '#states' => [
+        'visible' => [
+          ':input[name="' . $this->getFormStatesElementName('tabs|layout|display|type', $items, $delta, $element) . '"]' => ['value' => 'card'],
+        ],
+      ],
+    ];
+
     $internal_sort_options = [NULL => $this->t('Authored on')];
     $date_fields = $this->indexHelper->getIndexDateFields($this->index);
     if (!empty($date_fields)) {
@@ -1769,6 +1788,10 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $config['interface']['display']['resultComponent']['type'] = $value['tabs']['layout']['display']['type'] ?? 'card';
       if ($config['interface']['display']['resultComponent']['type'] == 'card') {
         $config['interface']['display']['resultComponent']['style'] = $value['tabs']['layout']['display']['resultComponent']['style'] ?? 'thumbnail';
+        $config['interface']['display']['options']['itemsToLoad']['values'] = [
+          'name' => $value['tabs']['layout']['display']['card_number'] ?? '3',
+          'value' => (int) $value['tabs']['layout']['display']['card_number'] ?? 3,
+        ];
       }
 
       $internal_sort = [];
