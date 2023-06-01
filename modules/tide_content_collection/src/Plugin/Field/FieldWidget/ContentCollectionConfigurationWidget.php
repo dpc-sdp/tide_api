@@ -1119,7 +1119,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
     $element['tabs']['layout']['display']['card_number'] = [
       '#type' => 'radios',
       '#title' => $this->t('Number of results'),
-      '#description' => $this->t('Select the maximum number of cards to be shown in this collection.'),
+      '#description' => $this->t('Select the maximum number of results to be shown in this collection.'),
       '#default_value' => $json_object['interface']['display']['options']['itemsToLoad']['values'][0]['value'] ?? '3',
       '#options' => [
         '3' => $this->t('3'),
@@ -1127,11 +1127,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '9' => $this->t('9'),
       ],
       '#required' => TRUE,
-      '#states' => [
-        'visible' => [
-          ':input[name="' . $this->getFormStatesElementName('tabs|layout|display|type', $items, $delta, $element) . '"]' => ['value' => 'card'],
-        ],
-      ],
     ];
 
     $internal_sort_options = [NULL => $this->t('Authored on')];
