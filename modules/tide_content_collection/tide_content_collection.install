@@ -97,3 +97,15 @@ function tide_content_collection_update_8002() {
     $config->save();
   }
 }
+
+/**
+ * Enable CTA url field [SDPAP-7475].
+ */
+function tide_content_collection_update_8003() {
+  $config = \Drupal::configFactory()
+    ->getEditable('core.entity_form_display.paragraph.content_collection_enhanced.default');
+  if ($config) {
+    $config->set('content.field_content_collection_config.settings.content.enable_call_to_action', TRUE);
+    $config->save();
+  }
+}
