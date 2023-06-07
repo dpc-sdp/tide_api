@@ -1785,11 +1785,13 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         $config['interface']['display']['resultComponent']['style'] = $value['tabs']['layout']['display']['resultComponent']['style'] ?? 'thumbnail';
       }
 
-      $config['interface']['display']['options']['itemsToLoad']['type'] = 'field';
+      /*$config['interface']['display']['options']['itemsToLoad']['type'] = 'field';
       $config['interface']['display']['options']['itemsToLoad']['values'][] = [
         'name' => $value['tabs']['layout']['display']['card_number'] ?? '3',
         'value' => (int) $value['tabs']['layout']['display']['card_number'] ?? 3,
-      ];
+      ];*/
+      $config['internal']['itemsToLoad']['type'] = 'number';
+      $config['internal']['itemsToLoad']['minimum'] = 3;
 
       $internal_sort = [];
       if (!empty($value['tabs']['layout']['internal']['sort']['field'])) {
