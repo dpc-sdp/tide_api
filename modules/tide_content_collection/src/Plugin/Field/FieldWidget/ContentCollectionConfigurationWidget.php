@@ -1126,7 +1126,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       '#type' => 'radios',
       '#title' => $this->t('Number of results'),
       '#description' => $this->t('Select the maximum number of results to be shown in this collection.'),
-      '#default_value' => $json_object['internal']['itemsToLoad'] ??  '3',
+      '#default_value' => $json_object['internal']['itemsToLoad'] ?? '3',
       '#options' => [
         '3' => $this->t('3'),
         '6' => $this->t('6'),
