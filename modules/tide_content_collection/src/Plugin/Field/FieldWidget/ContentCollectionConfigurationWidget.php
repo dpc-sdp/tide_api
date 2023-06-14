@@ -516,6 +516,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $element['callToAction']['url'] = [
         '#type' => 'url',
         '#title'  => $this->t('URL'),
+        '#maxlength' => 255,
         '#type' => 'entity_autocomplete',
         '#link_type' => LinkItemInterface::LINK_GENERIC,
         '#target_type' => 'node',
