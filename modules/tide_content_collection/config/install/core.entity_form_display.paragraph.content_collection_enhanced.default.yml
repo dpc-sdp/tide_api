@@ -34,7 +34,7 @@ content:
     weight: 2
     settings:
       content:
-        enable_call_to_action: false
+        enable_call_to_action: true
         internal:
           contentTypes:
             enabled: true
