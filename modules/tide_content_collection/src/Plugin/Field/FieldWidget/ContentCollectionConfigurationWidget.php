@@ -2,22 +2,22 @@
 
 namespace Drupal\tide_content_collection\Plugin\Field\FieldWidget;
 
+use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\Entity\Element\EntityAutocomplete;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\StringTextareaWidget;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\tide_content_collection\SearchApiIndexHelperInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Datetime\DrupalDateTime;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Component\Utility\NestedArray;
-use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\link\LinkItemInterface;
+use Drupal\tide_content_collection\SearchApiIndexHelperInterface;
 use JsonSchema\Constraints\Factory;
 use JsonSchema\SchemaStorage;
 use JsonSchema\Validator;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Implementation of the content collection configuration widget.

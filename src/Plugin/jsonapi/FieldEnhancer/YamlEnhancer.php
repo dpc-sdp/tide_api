@@ -2,10 +2,10 @@
 
 namespace Drupal\tide_api\Plugin\jsonapi\FieldEnhancer;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Serialization\Yaml;
 use Drupal\jsonapi_extras\Plugin\ResourceFieldEnhancerBase;
 use Shaper\Util\Context;
-use Drupal\Component\Utility\Html;
 
 /**
  * Decode YAML content.
