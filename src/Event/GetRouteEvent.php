@@ -4,7 +4,7 @@ namespace Drupal\tide_api\Event;
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -145,7 +145,7 @@ class GetRouteEvent extends Event {
   /**
    * {@inheritdoc}
    */
-  public function isPropagationStopped() {
+  public function isPropagationStopped(): bool {
     return !$this->isOk() || parent::isPropagationStopped();
   }
 
