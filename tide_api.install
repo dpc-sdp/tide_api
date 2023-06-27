@@ -18,10 +18,6 @@ function tide_api_install() {
   // Update jsonpai.settings['read_only'] to FALSE.
   $config_factory->getEditable('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
 
-  // Allow users with Anonymous and Authenticated roles to access API.
-  Role::load('anonymous')->grantPermission('access jsonapi resource list')->save();
-  Role::load('authenticated')->grantPermission('access jsonapi resource list')->save();
-
 }
 
 /**
