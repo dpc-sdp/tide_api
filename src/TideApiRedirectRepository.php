@@ -2,9 +2,9 @@
 
 namespace Drupal\tide_api;
 
-use Drupal\redirect\RedirectRepository;
 use Drupal\Core\Language\Language;
 use Drupal\redirect\Exception\RedirectLoopException;
+use Drupal\redirect\RedirectRepository;
 
 /**
  * Class TideApi Redirect Repository.

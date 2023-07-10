@@ -14,7 +14,8 @@
         "composer-exit-on-patch-failure": true,
         "patches": {
             "drupal/core": {
-                "Menu content is not accessible via jsonapi - https://www.drupal.org/node/2915792": "https://www.drupal.org/files/issues/menu_link_content-view-permissions-2915792.patch"
+              "Menu content is not accessible via jsonapi - https://www.drupal.org/node/2915792": "https://www.drupal.org/files/issues/menu_link_content-view-permissions-2915792.patch",
+              "Revisions on relations are not loaded correctly resulting in wrong data in includes - https://www.drupal.org/project/drupal/issues/3088239": "https://www.drupal.org/files/issues/2022-09-27/3088239-33.patch"
             },
             "drupal/jsonapi_extras": {
               "Make max value of page[limit] configurable per entity/bundle - https://www.drupal.org/project/jsonapi_extras/issues/2884292#comment-14794882": "https://www.drupal.org/files/issues/2022-11-21/max_page_limit_configuration-2884292-33.patch"
