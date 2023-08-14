@@ -49,3 +49,11 @@ function tide_share_link_install() {
     }
   }
 }
+
+/**
+ * Changes token role to administrator to avoid 404 response in page previewing.
+ */
+function tide_share_link_update_9001() {
+  $shared_link_config = \Drupal::configFactory()->getEditable('tide_share_link.settings');
+  $shared_link_config->set('token_role', 'administrator')->save();
+}
