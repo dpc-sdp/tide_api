@@ -505,7 +505,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $element['callToAction']['text'] = [
         '#type'  => 'textfield',
         '#title'  => $this->t('Text'),
-        '#default_value' => $json_object['callToAction']['text'] ?? 'View all',
+        '#default_value' => $json_object['callToAction']['text'] ?? '',
         '#description' => $this->t('Display text of the link.'),
         '#states' => [
           'required' => [
