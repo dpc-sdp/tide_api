@@ -1942,7 +1942,10 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
    *   The error array list if exists.
    */
   protected function validateJson(string $json) : array {
+    $env_vars = getenv();
     $errors = [];
+    $cc_json_validation = ($env_vars && $env_vars['CONTENT_COLLECTION_JSON_VALIDATION']) ? $env_vars['CONTENT_COLLECTION_JSON_VALIDATION'] : FALSE;
+
     if (!empty($json)) {
       $json_object = json_decode($json);
       if ($json_object === NULL) {
@@ -1951,7 +1954,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       else {
         // Validate against the JSON Schema.
         $json_schema = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('schema');
-        if (!empty($json_schema)) {
+        if (!empty($json_schema) && $cc_json_validation == TRUE) {
           $json_schema_object = json_decode($json_schema);
           $schema_storage = new SchemaStorage();
           $schema_storage->addSchema('file://content_collection_configuration_schema', $json_schema_object);
