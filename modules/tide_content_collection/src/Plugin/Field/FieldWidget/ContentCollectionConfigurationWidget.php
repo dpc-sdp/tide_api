@@ -507,10 +507,16 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#title'  => $this->t('Text'),
         '#default_value' => $json_object['callToAction']['text'] ?? '',
         '#description' => $this->t('Display text of the link.'),
+        '#states' => [
+          'required' => [
+            ':input[name="' . $this->getFormStatesElementName('callToAction|url', $items, $delta, $element) . '"]' => ['filled' => TRUE],
+          ],
+        ],
       ];
       $element['callToAction']['url'] = [
         '#type' => 'url',
         '#title'  => $this->t('URL'),
+        '#maxlength' => 255,
         '#type' => 'entity_autocomplete',
         '#link_type' => LinkItemInterface::LINK_GENERIC,
         '#target_type' => 'node',
@@ -1115,6 +1121,20 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         ],
       ],
     ];
+
+    $element['tabs']['layout']['display']['card_number'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Number of results'),
+      '#description' => $this->t('Select the maximum number of results to be shown in this collection.'),
+      '#default_value' => $json_object['internal']['itemsToLoad'] ?? '3',
+      '#options' => [
+        '3' => $this->t('3'),
+        '6' => $this->t('6'),
+        '9' => $this->t('9'),
+      ],
+      '#required' => TRUE,
+    ];
+
     $internal_sort_options = [NULL => $this->t('Authored on')];
     $date_fields = $this->indexHelper->getIndexDateFields($this->index);
     if (!empty($date_fields)) {
@@ -1770,6 +1790,8 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       if ($config['interface']['display']['resultComponent']['type'] == 'card') {
         $config['interface']['display']['resultComponent']['style'] = $value['tabs']['layout']['display']['resultComponent']['style'] ?? 'thumbnail';
       }
+
+      $config['internal']['itemsToLoad'] = (int) $value['tabs']['layout']['display']['card_number'] ?? 3;
 
       $internal_sort = [];
       if (!empty($value['tabs']['layout']['internal']['sort']['field'])) {
