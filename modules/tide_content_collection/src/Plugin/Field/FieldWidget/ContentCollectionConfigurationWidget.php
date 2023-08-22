@@ -1944,7 +1944,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
   protected function validateJson(string $json) : array {
     $env_vars = getenv();
     $errors = [];
-    $cc_json_validation = ($env_vars && $env_vars['CONTENT_COLLECTION_JSON_VALIDATION']) ? $env_vars['CONTENT_COLLECTION_JSON_VALIDATION'] : FALSE;
+    $cc_json_validation = (isset(getenv()['CONTENT_COLLECTION_JSON_VALIDATION'])) ? getenv()['CONTENT_COLLECTION_JSON_VALIDATION'] : FALSE;
 
     if (!empty($json)) {
       $json_object = json_decode($json);
