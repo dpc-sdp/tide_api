@@ -1942,7 +1942,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
    *   The error array list if exists.
    */
   protected function validateJson(string $json) : array {
-    $env_vars = getenv();
     $errors = [];
     $cc_json_validation = (isset(getenv()['CONTENT_COLLECTION_JSON_VALIDATION'])) ? getenv()['CONTENT_COLLECTION_JSON_VALIDATION'] : FALSE;
 
