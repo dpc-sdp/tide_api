@@ -119,13 +119,14 @@ class ContentCollectionConfigurationWidgetRaw extends StringTextareaWidget {
    *   The form state.
    */
   public function validateJson(array $element, FormStateInterface $form_state) {
+    $cc_json_validation = (isset(getenv()['CONTENT_COLLECTION_JSON_VALIDATION'])) ? getenv()['CONTENT_COLLECTION_JSON_VALIDATION'] : FALSE;
     $json = $element['#value'];
     if (!empty($json)) {
       $json_object = json_decode($json);
       if ($json_object === NULL) {
         $form_state->setError($element, t('Invalid JSON.'));
       }
-      elseif ($this->getSetting('schema_validation')) {
+      elseif ($this->getSetting('schema_validation') && $cc_json_validation == TRUE) {
         // Validate against the JSON Schema.
         $json_schema = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('schema');
         if (!empty($json_schema)) {
