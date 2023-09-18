@@ -505,7 +505,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $element['callToAction']['text'] = [
         '#type'  => 'textfield',
         '#title'  => $this->t('Text'),
-        '#default_value' => $json_object['callToAction']['text'] ?? 'View all',
+        '#default_value' => $json_object['callToAction']['text'] ?? '',
         '#description' => $this->t('Display text of the link.'),
         '#states' => [
           'required' => [
@@ -1943,6 +1943,8 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
    */
   protected function validateJson(string $json) : array {
     $errors = [];
+    $cc_json_validation = (isset(getenv()['CONTENT_COLLECTION_JSON_VALIDATION'])) ? getenv()['CONTENT_COLLECTION_JSON_VALIDATION'] : FALSE;
+
     if (!empty($json)) {
       $json_object = json_decode($json);
       if ($json_object === NULL) {
@@ -1951,7 +1953,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       else {
         // Validate against the JSON Schema.
         $json_schema = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('schema');
-        if (!empty($json_schema)) {
+        if (!empty($json_schema) && $cc_json_validation == TRUE) {
           $json_schema_object = json_decode($json_schema);
           $schema_storage = new SchemaStorage();
           $schema_storage->addSchema('file://content_collection_configuration_schema', $json_schema_object);
