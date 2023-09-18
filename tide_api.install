@@ -17,33 +17,3 @@ function tide_api_install() {
   $config_factory->getEditable('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
 
 }
-
-/**
- * Implements hook_update_dependencies().
- */
-function tide_api_update_dependencies() {
-  return [
-    'tide_api' => [
-      8001 => ['jsonapi' => 8701],
-    ],
-  ];
-}
-
-/**
- * Disable jsonapi read_only setting.
- */
-function tide_api_update_8001() {
-  $config_factory = \Drupal::configFactory();
-  $jsonapi_settings = $config_factory->getEditable('jsonapi.settings');
-  $jsonapi_settings->set('read_only', FALSE)
-    ->save(TRUE);
-}
-
-/**
- * Activate jsonapi_menu_items.
- */
-function tide_api_update_8002() {
-  \Drupal::service('module_installer')->install([
-    'jsonapi_menu_items',
-  ], TRUE);
-}
