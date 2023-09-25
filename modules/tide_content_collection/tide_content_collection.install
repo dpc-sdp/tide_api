@@ -11,7 +11,7 @@ use Drupal\user\Entity\Role;
  * Implements hook_install().
  */
 function tide_content_collection_install($is_syncing) {
-  module_load_include('inc', 'tide_core', 'includes/helpers');
+  \Drupal::moduleHandler()->loadInclude('tide_core', 'inc', 'includes/helpers');
   // Get icons.
   $icon_dir = \Drupal::service('extension.list.module')->getPath('tide_content_collection') . DIRECTORY_SEPARATOR . 'icons';
   // Changing icons.
