@@ -10,7 +10,7 @@ use Drupal\tide_share_link\Authentication\ShareLinkTokenAuthUserInterface;
 use Drupal\tide_share_link\PageCache\ShareLinkTokenPageCachePolicyInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -73,10 +73,10 @@ class ShareLinkTokenValidation implements EventSubscriberInterface {
   /**
    * Validate the requested node from JSON:API against the requested token.
    *
-   * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
+   * @param \Symfony\Component\HttpKernel\Event\RequestEvent $event
    *   The event.
    */
-  public function validateJsonapiRequestedNode(GetResponseEvent $event) {
+  public function validateJsonapiRequestedNode(RequestEvent $event) {
     // Only works Share Link Token authorization requests.
     if (!$this->requestPolicy->isShareLinkTokenAuthorizationRequest($event->getRequest())) {
       return;

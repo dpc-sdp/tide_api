@@ -5,8 +5,6 @@
  * Install file for Tide API module.
  */
 
-use Drupal\user\Entity\Role;
-
 /**
  * Implements hook_install().
  */
@@ -18,38 +16,14 @@ function tide_api_install() {
   // Update jsonpai.settings['read_only'] to FALSE.
   $config_factory->getEditable('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
 
-  // Allow users with Anonymous and Authenticated roles to access API.
-  Role::load('anonymous')->grantPermission('access jsonapi resource list')->save();
-  Role::load('authenticated')->grantPermission('access jsonapi resource list')->save();
-
 }
 
 /**
- * Implements hook_update_dependencies().
+ * Disable jsonapi file resource.
  */
-function tide_api_update_dependencies() {
-  return [
-    'tide_api' => [
-      8001 => ['jsonapi' => 8701],
-    ],
-  ];
-}
-
-/**
- * Disable jsonapi read_only setting.
- */
-function tide_api_update_8001() {
+function tide_api_update_10001() {
   $config_factory = \Drupal::configFactory();
-  $jsonapi_settings = $config_factory->getEditable('jsonapi.settings');
-  $jsonapi_settings->set('read_only', FALSE)
+  $jsonapi_settings = $config_factory->getEditable('jsonapi_extras.jsonapi_resource_config.file--file');
+  $jsonapi_settings->set('disabled', TRUE)
     ->save(TRUE);
-}
-
-/**
- * Activate jsonapi_menu_items.
- */
-function tide_api_update_8002() {
-  \Drupal::service('module_installer')->install([
-    'jsonapi_menu_items',
-  ], TRUE);
 }

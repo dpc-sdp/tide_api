@@ -26,9 +26,10 @@
   },
   "require": {
     "dpc-sdp/tide_core": "dev-reference",
-    "drupal/jsonapi_extras": "^3.8",
+    "drupal/jsonapi_extras": "^3.23",
     "drupal/jsonapi_menu_items": "^1.2",
-    "drupal/schemata": "^1.0-alpha2"
+    "drupal/jsonapi_resources": "^1.0.0-beta5@beta",
+    "drupal/schemata": "^1.0@beta"
   },
   "type": "drupal-module"
 }

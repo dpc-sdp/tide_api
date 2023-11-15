@@ -2,8 +2,8 @@
 
 namespace Drupal\tide_api\Event;
 
-use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Class Get Cache Id Event.

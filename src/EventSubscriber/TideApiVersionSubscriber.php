@@ -3,7 +3,7 @@
 namespace Drupal\tide_api\EventSubscriber;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -36,7 +36,7 @@ class TideApiVersionSubscriber implements EventSubscriberInterface {
    * @see \Drupal\jsonapi\Controller\EntryPoint::index()
    * @see http://jsonapi.org/format/
    */
-  public function setApiVersion(FilterResponseEvent $event) {
+  public function setApiVersion(ResponseEvent $event) {
     if ($event->getRequest()->getRequestUri() == '/api/v1') {
       $response = $event->getResponse();
       $content = json_decode($response->getContent());

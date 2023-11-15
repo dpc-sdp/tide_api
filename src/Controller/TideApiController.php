@@ -228,7 +228,7 @@ class TideApiController extends ControllerBase {
     if ($code != Response::HTTP_BAD_REQUEST) {
       $entity = $this->routeEntity ? clone $this->routeEntity : NULL;
       $event = new GetRouteEvent(clone $request, $json_response, $entity, $code, clone $this->cacheMetadata);
-      $this->eventDispatcher->dispatch(TideApiEvents::GET_ROUTE, $event);
+      $this->eventDispatcher->dispatch($event, TideApiEvents::GET_ROUTE);
       // Update the response.
       $code = $event->getCode();
       $json_response = $event->getJsonResponse();
@@ -381,7 +381,7 @@ class TideApiController extends ControllerBase {
     $event = new GetCacheIdEvent($request, 'tide_api:route:path:' . substr($path, 0, 128) . hash('sha256', $path));
     // Dispatching GetCacheIdEvent event to give other modules an opportunity to
     // alter it.
-    $event = $this->eventDispatcher->dispatch(TideApiEvents::GET_CACHE_ID, $event);
+    $event = $this->eventDispatcher->dispatch($event, TideApiEvents::GET_CACHE_ID);
     $this->cacheId = $event->getCacheId();
   }
 
