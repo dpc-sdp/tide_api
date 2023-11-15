@@ -12,7 +12,7 @@ use Drupal\user\Entity\Role;
  * Implements hook_install().
  */
 function tide_content_collection_install($is_syncing) {
-  module_load_include('inc', 'tide_core', 'includes/helpers');
+  \Drupal::moduleHandler()->loadInclude('tide_core', 'inc', 'includes/helpers');
   // Get icons.
   $icon_dir = \Drupal::service('extension.list.module')->getPath('tide_content_collection') . DIRECTORY_SEPARATOR . 'icons';
   // Changing icons.
@@ -50,7 +50,7 @@ function tide_content_collection_update_8001() {
     'core.entity_form_display.paragraph.content_collection_enhanced.default' => 'entity_form_display',
   ];
 
-  module_load_include('inc', 'tide_core', 'includes/helpers');
+  \Drupal::moduleHandler()->loadInclude('tide_core', 'inc', 'includes/helpers');
   $config_location = [\Drupal::service('extension.list.module')->getPath('tide_content_collection') . '/config/install'];
   // Check if field already exported to config/sync.
   foreach ($configs as $config => $type) {
@@ -94,6 +94,18 @@ function tide_content_collection_update_8002() {
     ->getEditable('core.entity_view_display.paragraph.content_collection_enhanced.default');
   if ($config) {
     $config->set('content.field_content_collection_config.settings.raw_json', 0);
+    $config->save();
+  }
+}
+
+/**
+ * Enable CTA url field [SDPAP-7475].
+ */
+function tide_content_collection_update_8003() {
+  $config = \Drupal::configFactory()
+    ->getEditable('core.entity_form_display.paragraph.content_collection_enhanced.default');
+  if ($config) {
+    $config->set('content.field_content_collection_config.settings.content.enable_call_to_action', TRUE);
     $config->save();
   }
 }

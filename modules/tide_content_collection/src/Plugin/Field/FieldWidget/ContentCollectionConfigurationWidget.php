@@ -2,22 +2,22 @@
 
 namespace Drupal\tide_content_collection\Plugin\Field\FieldWidget;
 
+use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\Entity\Element\EntityAutocomplete;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\StringTextareaWidget;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\tide_content_collection\SearchApiIndexHelperInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Datetime\DrupalDateTime;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Component\Utility\NestedArray;
-use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\link\LinkItemInterface;
+use Drupal\tide_content_collection\SearchApiIndexHelperInterface;
 use JsonSchema\Constraints\Factory;
 use JsonSchema\SchemaStorage;
 use JsonSchema\Validator;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Implementation of the content collection configuration widget.
@@ -507,10 +507,16 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#title'  => $this->t('Text'),
         '#default_value' => $json_object['callToAction']['text'] ?? '',
         '#description' => $this->t('Display text of the link.'),
+        '#states' => [
+          'required' => [
+            ':input[name="' . $this->getFormStatesElementName('callToAction|url', $items, $delta, $element) . '"]' => ['filled' => TRUE],
+          ],
+        ],
       ];
       $element['callToAction']['url'] = [
         '#type' => 'url',
         '#title'  => $this->t('URL'),
+        '#maxlength' => 255,
         '#type' => 'entity_autocomplete',
         '#link_type' => LinkItemInterface::LINK_GENERIC,
         '#target_type' => 'node',
@@ -1115,6 +1121,20 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         ],
       ],
     ];
+
+    $element['tabs']['layout']['display']['card_number'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Number of results'),
+      '#description' => $this->t('Select the maximum number of results to be shown in this collection.'),
+      '#default_value' => $json_object['internal']['itemsToLoad'] ?? '3',
+      '#options' => [
+        '3' => $this->t('3'),
+        '6' => $this->t('6'),
+        '9' => $this->t('9'),
+      ],
+      '#required' => TRUE,
+    ];
+
     $internal_sort_options = [NULL => $this->t('Authored on')];
     $date_fields = $this->indexHelper->getIndexDateFields($this->index);
     if (!empty($date_fields)) {
@@ -1771,6 +1791,8 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         $config['interface']['display']['resultComponent']['style'] = $value['tabs']['layout']['display']['resultComponent']['style'] ?? 'thumbnail';
       }
 
+      $config['internal']['itemsToLoad'] = (int) $value['tabs']['layout']['display']['card_number'] ?? 3;
+
       $internal_sort = [];
       if (!empty($value['tabs']['layout']['internal']['sort']['field'])) {
         $internal_sort['field'] = $value['tabs']['layout']['internal']['sort']['field'] ?? '';
@@ -1921,6 +1943,8 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
    */
   protected function validateJson(string $json) : array {
     $errors = [];
+    $cc_json_validation = (isset(getenv()['CONTENT_COLLECTION_JSON_VALIDATION'])) ? getenv()['CONTENT_COLLECTION_JSON_VALIDATION'] : FALSE;
+
     if (!empty($json)) {
       $json_object = json_decode($json);
       if ($json_object === NULL) {
@@ -1929,7 +1953,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       else {
         // Validate against the JSON Schema.
         $json_schema = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('schema');
-        if (!empty($json_schema)) {
+        if (!empty($json_schema) && $cc_json_validation == TRUE) {
           $json_schema_object = json_decode($json_schema);
           $schema_storage = new SchemaStorage();
           $schema_storage->addSchema('file://content_collection_configuration_schema', $json_schema_object);
