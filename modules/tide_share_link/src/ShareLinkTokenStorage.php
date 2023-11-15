@@ -38,7 +38,7 @@ class ShareLinkTokenStorage extends SqlContentEntityStorage implements ShareLink
   public function deleteExpiredTokens() : void {
     $now = time();
     $query = $this->getQuery();
-    $ids = $query->condition('expiry', $now, '<')->execute();
+    $ids = $query->condition('expiry', $now, '<')->accessCheck(TRUE)->execute();
     foreach ($ids as $id) {
       try {
         $token = $this->load($id);
