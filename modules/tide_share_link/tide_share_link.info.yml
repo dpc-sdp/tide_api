@@ -2,7 +2,7 @@ name: Tide Share Link
 description: Provides functionality to share non-published content to anyone.
 type: module
 package: Tide
-core_version_requirement: ^8.9 || ^9
+core_version_requirement: ^9 || ^10
 dependencies:
   - drupal:node
   - entity_reference_revisions:entity_reference_revisions

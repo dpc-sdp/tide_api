@@ -143,17 +143,17 @@ class ShareLinkTokenListBuilder extends EntityListBuilder {
 
     $node = $this->getNodeFromCurrentRoute();
     if ($node) {
-      $query->condition('nid', $node instanceof NodeInterface ? $node->id() : (int) $node);
+      $query->condition('nid', $node instanceof NodeInterface ? $node->id() : (int) $node)->accessCheck(TRUE);
     }
 
     $node_revision = $this->getNodeRevisionFromRoute();
     if ($node_revision) {
-      $query->condition('vid', (int) $node_revision);
+      $query->condition('vid', (int) $node_revision)->accessCheck(TRUE);
     }
 
     // Only add the pager if a limit is specified.
     if ($this->limit) {
-      $query->pager($this->limit);
+      $query->pager($this->limit)->accessCheck(TRUE);
     }
     return $query->execute();
   }
