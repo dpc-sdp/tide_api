@@ -17,13 +17,3 @@ function tide_api_install() {
   $config_factory->getEditable('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
 
 }
-
-/**
- * Disable jsonapi file resource.
- */
-function tide_api_update_10001() {
-  $config_factory = \Drupal::configFactory();
-  $jsonapi_settings = $config_factory->getEditable('jsonapi_extras.jsonapi_resource_config.file--file');
-  $jsonapi_settings->set('disabled', TRUE)
-    ->save(TRUE);
-}
