@@ -177,6 +177,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#title' => $this->t('Allowed content types'),
         '#description' => $this->t('When no content type is selected in the widget settings, the widget will show all available content types in the Select content type filter.'),
         '#options' => $content_type_options,
+        "#sort_options" => TRUE,
         '#default_value' => $settings['content']['internal']['contentTypes']['allowed_values'] ?? [],
         '#weight' => 1,
       ];
@@ -185,6 +186,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#title' => $this->t('Default content types'),
         '#description' => $this->t('When no content type is selected in the widget settings, the widget will show all available content types in the Select content type filter.'),
         '#options' => $content_type_options,
+        "#sort_options" => TRUE,
         '#default_value' => $settings['content']['internal']['contentTypes']['default_values'] ?? [],
         '#weight' => 1,
         '#states' => [
