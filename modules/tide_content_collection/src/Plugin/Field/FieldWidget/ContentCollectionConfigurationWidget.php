@@ -177,7 +177,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#title' => $this->t('Allowed content types'),
         '#description' => $this->t('When no content type is selected in the widget settings, the widget will show all available content types in the Select content type filter.'),
         '#options' => $content_type_options,
-        "#sort_options" => TRUE,
         '#default_value' => $settings['content']['internal']['contentTypes']['allowed_values'] ?? [],
         '#weight' => 1,
       ];
@@ -186,7 +185,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         '#title' => $this->t('Default content types'),
         '#description' => $this->t('When no content type is selected in the widget settings, the widget will show all available content types in the Select content type filter.'),
         '#options' => $content_type_options,
-        "#sort_options" => TRUE,
         '#default_value' => $settings['content']['internal']['contentTypes']['default_values'] ?? [],
         '#weight' => 1,
         '#states' => [
@@ -710,6 +708,16 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       if (!empty($allowed_content_types)) {
         $content_types_options = array_intersect_key($content_types_options,
           array_flip($allowed_content_types));
+      }
+      $temp = [];
+      $content_types_options = array_reverse($content_types_options, TRUE);
+      if (array_key_exists('landing_page', $content_types_options)) {
+        $temp = ['landing_page' => $content_types_options['landing_page']];
+        unset($content_types_options['landing_page']);
+      }
+
+      if (!empty($temp)) {
+        $content_types_options = $temp + $content_types_options;
       }
       $element['tabs']['content']['contentTypes'] = [
         '#type' => 'checkboxes',
