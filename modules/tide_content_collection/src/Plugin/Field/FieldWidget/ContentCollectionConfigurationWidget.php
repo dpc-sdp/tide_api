@@ -709,6 +709,16 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
         $content_types_options = array_intersect_key($content_types_options,
           array_flip($allowed_content_types));
       }
+      $temp = [];
+      $content_types_options = array_reverse($content_types_options, TRUE);
+      if (array_key_exists('landing_page', $content_types_options)) {
+        $temp = ['landing_page' => $content_types_options['landing_page']];
+        unset($content_types_options['landing_page']);
+      }
+
+      if (!empty($temp)) {
+        $content_types_options = $temp + $content_types_options;
+      }
       $element['tabs']['content']['contentTypes'] = [
         '#type' => 'checkboxes',
         '#title' => $this->t('Select content types'),
