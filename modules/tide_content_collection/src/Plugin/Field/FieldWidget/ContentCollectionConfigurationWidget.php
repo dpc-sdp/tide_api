@@ -706,8 +706,7 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
       $content_types_options = $this->indexHelper->getNodeTypes();
       $allowed_content_types = $settings['content']['internal']['contentTypes']['allowed_values'];
       if (!empty($allowed_content_types)) {
-        $content_types_options = array_intersect_key($content_types_options,
-          array_flip($allowed_content_types));
+        $content_types_options = array_intersect_key($allowed_content_types, $content_types_options);
       }
       $element['tabs']['content']['contentTypes'] = [
         '#type' => 'checkboxes',
