@@ -34,3 +34,21 @@ function _assign_content_collection_perm_site_admin() {
     $role->save();
   }
 }
+
+/**
+ * Add event and publication to content collection.
+ */
+function tide_content_collection_update_10000() {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('core.entity_form_display.paragraph.content_collection_enhanced.default');
+  $allowed_content_types = [
+    'landing_page' => 'Landing Page',
+    'publication' => 'Publication',
+    'news' => 'News',
+    'event' => 'Events',
+  ];
+  if ($config) {
+    $config->set('content.field_content_collection_config.settings.content.internal.contentTypes.allowed_values', $allowed_content_types);
+    $config->save();
+  }
+}
