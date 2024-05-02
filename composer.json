@@ -22,7 +22,7 @@
               "Make max value of page[limit] configurable per entity/bundle - https://www.drupal.org/project/jsonapi_extras/issues/2884292#comment-14794882": "https://www.drupal.org/files/issues/2022-11-21/max_page_limit_configuration-2884292-33.patch"
             },
             "drupal/jsonapi_menu_items": {
-                "Allow filtering of response payload - https://www.drupal.org/project/jsonapi_menu_items/issues/3350524": "https://www.drupal.org/files/issues/2023-03-31/filter_fields.patch"
+                "Allow filtering of response payload - https://www.drupal.org/project/jsonapi_menu_items/issues/3350524#comment-15577964": "https://www.drupal.org/files/issues/2024-05-02/3350524-filter_fields-6.patch"
             }
         }
     },
