@@ -547,8 +547,6 @@ class ContentCollectionConfigurationWidget extends StringTextareaWidget implemen
 
     $this->buildContentTab($items, $delta, $element, $form, $form_state, $configuration, $json_object);
     $this->buildLayoutTab($items, $delta, $element, $form, $form_state, $configuration, $json_object);
-    $this->buildFiltersTab($items, $delta, $element, $form, $form_state, $configuration, $json_object);
-    $this->buildAdvancedTab($items, $delta, $element, $form, $form_state, $configuration, $json_object);
 
     return $element;
   }
