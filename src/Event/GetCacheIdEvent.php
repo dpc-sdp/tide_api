@@ -36,7 +36,7 @@ class GetCacheIdEvent extends Event {
    */
   public function __construct(Request $request, string $cache_id) {
     $this->request = $request;
-    $this->cache_id = $cache_id;
+    $this->cacheId = $cache_id;
   }
 
   /**
@@ -46,7 +46,7 @@ class GetCacheIdEvent extends Event {
    *   Cache id
    */
   public function getCacheId(): string {
-    return $this->cache_id;
+    return $this->cacheId;
   }
 
   /**
@@ -56,7 +56,7 @@ class GetCacheIdEvent extends Event {
    *   The new cache id.
    */
   public function setCacheId(string $cache_id) {
-    $this->cache_id = $cache_id;
+    $this->cacheId = $cache_id;
   }
 
   /**
